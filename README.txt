@@ -1,5 +1,6 @@
 Welcome to a Barclamp for the Crowbar Framework project
 =======================================================
+_Copyright 2011, Dell, Inc._
 
 The code and documentation is distributed under the Apache 2 license (http://www.apache.org/licenses/LICENSE-2.0.html). Contributions back to the source are encouraged.
 
@@ -8,7 +9,18 @@ A Barclamp is a module component that implements functionality for Crowbar.  Cor
 
 * This functonality of this barclamp DOES NOT stand alone, the Crowbar Framework is required * 
 
-About this barclamp
--------------------
+About this Barclamp-swift
+-------------------------------------
 
 Information for this barclamp is maintained on the Crowbar Framework Wiki: https://github.com/dellcloudedge/crowbar/wiki
+
+This is based on OpenStack.org distribution
+
+
+Legals
+-------------------------------------
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
