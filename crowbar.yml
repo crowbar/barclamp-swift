@@ -1,3 +1,6 @@
+barclamp:
+  requires:
+    - crowbar
 
 debs:
   pkgs:
