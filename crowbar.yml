@@ -22,7 +22,6 @@ barclamp:
   requires:
     - crowbar
 
-
 crowbar:
   layout: 1
   order: 100
@@ -46,6 +45,8 @@ locale_additions:
           deployment: Deployment
 
 debs:
+  repos:
+    - deb http://ops.rcb.me/packages maverick diablo-d5
   pkgs:
     - curl
     - python-software-properties
@@ -59,5 +60,3 @@ debs:
     - xfsprogs
     - libmemcache-dev
     - python-swift
-  ppas:
-    - openstack-release/2011.2
