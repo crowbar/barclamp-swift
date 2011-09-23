@@ -33,6 +33,15 @@ locale_additions:
       swift:
         edit_attributes: 
           attributes: Attributes
+          zones: Zones
+          partitions: Partitions
+          min_part_hours: Minimum Partitions per Hour
+          replicas: Replicas
+          cluster_hash: Cluster Hash
+          cluster_admin_pw: Cluster Admin Password
+          user: User
+          group: Group
+          debug: Debug
         edit_deployment: 
           deployment: Deployment
 
