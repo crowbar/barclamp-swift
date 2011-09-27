@@ -45,8 +45,10 @@ locale_additions:
           deployment: Deployment
 
 debs:
-  repos:
-    - deb http://ops.rcb.me/packages maverick diablo-d5
+  ppas:
+    - swift-core/release
+#  repos:
+#    - deb http://ops.rcb.me/packages maverick diablo-d5
   pkgs:
     - curl
     - python-software-properties
