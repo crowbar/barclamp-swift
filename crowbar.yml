@@ -20,7 +20,7 @@ barclamp:
   display: Swift
   version: 0
   member:
-    - openstack
+    - swift
 
 crowbar:
   layout: 1
