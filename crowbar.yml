@@ -65,4 +65,3 @@ debs:
     - python-swift
     - python-swauth
     - python-keystone
-    - swauth
