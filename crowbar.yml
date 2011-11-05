@@ -19,6 +19,8 @@ barclamp:
   name: swift
   display: Swift
   version: 0
+  requires:
+    - @crowbar
   member:
     - openstack
 
