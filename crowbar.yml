@@ -65,3 +65,4 @@ debs:
     - xfsprogs
     - libmemcache-dev
     - python-swift
+#    - pyhton-swauth
