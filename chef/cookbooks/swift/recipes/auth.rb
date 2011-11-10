@@ -21,6 +21,3 @@ execute "get swift-account" do
   command "apt-get install --allow-unauthenticated swift-account" # This will fail, but it gets the image local
 #  returns 100 
 end
-execute "force install" do
-  command 'dpkg --force-overwrite -i "/var/cache/apt/archives/swift-account_1.3-rc+bzr266-0ubuntu0ppa1~maverick1_all.deb"' 
-end

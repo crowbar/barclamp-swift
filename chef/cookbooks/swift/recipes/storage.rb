@@ -18,10 +18,10 @@
 
 include_recipe 'apt'
 include_recipe 'swift::disks'
-include_recipe 'swift::auth' 
+#include_recipe 'swift::auth' 
 include_recipe 'swift::rsync'
 
-%w{swift-container swift-object sqlite }.each do |pkg|
+%w{swift-container swift-object swift-account sqlite }.each do |pkg|
   package pkg
 end
 

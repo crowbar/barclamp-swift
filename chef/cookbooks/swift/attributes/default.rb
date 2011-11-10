@@ -3,9 +3,9 @@
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# You may obtain a copy of the License atxf
 # 
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0cyt
 # 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,8 +39,10 @@ default[:swift][:config][:environment] = "default"
 
 ### where to find IP for admin use
 default[:swift][:admin_ip_expr] = "node[:ipaddress]" 
-### where to find IP for admin use
+### where to find IP for storage network use
 default[:swift][:storage_ip_expr] = "node[:ipaddress]" 
+### where to find IP for public network use (for clients to contact proxies)
+default[:swift][:public_ip_expr] = "node[:ipaddress]" 
 
 # expression to find a hash of possible disks to be used.
 default[:swift][:disk_enum_expr]= 'node[:block_device]'
@@ -60,3 +62,20 @@ default[:swift][:disk_test_expr]= 'k =~/sd[^a]/ or k=~/hd[^a]/'
 #   :ring=> one of "object", "account" or "container"
 #   :disk=> disk partition information as created in disks.rb,contains: :name (e.g sdb) :size either :remaining (= all the disk) or an actual byte count.           
 default[:swift][:disk_zone_assign_expr] = '$DISK_CNT||=0; $DISK_CNT= $DISK_CNT+1 ;[ $DISK_CNT % node[:swift][:zones] , 99]'
+
+
+# should proxy server account management be enabled
+default[:swift][:account_management] = "true"
+
+#### 
+# new parameters for diablo
+
+
+#
+# the authentication method to use. possible values:
+# keystone - use keystone (reuqired for swfit/dashboard integration
+# swauth - Swifth authentication
+# tempauth - use only for testing
+default[:swift][:auth_method] = "keystone"
+default[:swift][:keystone_instance] = "proposal"
+default[:swift][:reseller_prefix] = "AUTH"

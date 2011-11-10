@@ -15,12 +15,18 @@
 #
 # Author: andi abes
 #
+
+#
+#  This file managed by Crowbar/chef - do not edit
+
+
 [DEFAULT]
 cert_file = /etc/swift/cert.crt
 key_file = /etc/swift/cert.key
 bind_port = 8080
 workers = 1
 user = <%= @user %>
+group = <%= @group %>
 
 log_facility = LOG_LOCAL0
 log_level = DEBUG
@@ -29,13 +35,28 @@ log_requests = true
 setup_console_handler = true
 
 [pipeline:main]
-pipeline = healthcheck cache swauth proxy-server
+<% 
+ @swauth= @tempauth= @keystone = false
+ auth=""
+ case @auth_method
+   when "swauth"
+   	auth= "swauth"
+	@swauth=true
+   when "keystone"
+        auth="keystone"
+	@keystone = true
+   when "tempauth"
+      auth="tempauth"
+      @tempauth=true
+ end
+%>
+pipeline = healthcheck cache <%= auth %> proxy-server
+
 
 [app:proxy-server]
 use = egg:swift#proxy
-<% if @account_management == "true" %>
-allow_account_management = true
-<% end %>
+<% if @account_management == "true" %>allow_account_management = true<% end %>
+<% if @keystone %>account_autocreate = true<% end %>
 
 set log_name = proxy-server
 set log_facility = LOG_LOCAL0
@@ -45,11 +66,32 @@ set access_log_facility = LOG_LOCAL0
 set access_log_level = INFO
 set log_requests = true
 
+<%if @swauth %>
 [filter:swauth]
 use = egg:swift#swauth
 set default_swift_cluster = local#https://<%= @localip %>:8080/v1
 super_admin_key = <%= @admin_key %>
 log_level = DEBUG
+<% end %>
+
+<% if @keystone %>
+[filter:keystone]
+use = egg:keystone#swiftauth 
+keystone_admin_token = <%= @keystone_admin_token %>
+keystone_url = http://<%= @keystone_vip %>:5001
+reseller_prefix=<%= @reseller_prefix %>
+
+<% end %>
+
+<% if @tempauth %>
+[filter:tempauth]
+use = egg:swift#tempauth
+user_admin_admin = admin .admin .reseller_admin
+user_test_tester = testing .admin
+user_test2_tester2 = testing2 .admin
+user_test_tester3 = testing3
+<% end %>
+
 
 [filter:healthcheck]
 use = egg:swift#healthcheck

@@ -43,6 +43,8 @@ locale_additions:
           user: User
           group: Group
           debug: Debug
+	  auth_method: Authentication method
+	  keystone_instance: Keystone instance
         edit_deployment: 
           deployment: Deployment
 
