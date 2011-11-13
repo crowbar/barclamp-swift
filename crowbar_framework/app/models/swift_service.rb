@@ -20,6 +20,10 @@ class SwiftService < ServiceObject
     @logger = thelogger
   end
 
+  def self.allow_multiple_proposals?
+    true
+  end
+
   def create_proposal
     base = super
 
