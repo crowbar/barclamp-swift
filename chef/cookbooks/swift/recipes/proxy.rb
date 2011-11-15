@@ -64,15 +64,15 @@ case proxy_config[:auth_method]
      end
 
      keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
-     keystone_token = keystone[:keystone][:admin]['token']
+     keystone_token = keystone["keystone"]["admin"]['token']
      Chef::Log.info("Keystone server found at #{keystone_address}")
-     proxy_config[:keystone_admin_token]  = keystone[:keystone][:admin]['token']
+     proxy_config[:keystone_admin_token]  = keystone_token
      proxy_config[:keystone_vip] = keystone_address
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
 
      keystone_register "register swift service" do
        host keystone_address
-       token node[:keystone][:admin][:token]
+       token keystone_token
        service_name "swift"
        service_description "Openstack Swift Object Store Service"
        action :add_service
@@ -80,7 +80,7 @@ case proxy_config[:auth_method]
 
      keystone_register "register swift-proxy endpoint" do
          host keystone_address
-         token node[:keystone][:admin][:token]
+         token keystone_token
          endpoint_service "swift"
          endpoint_region "RegionOne"
          endpoint_adminURL "http://#{local_ip}:8080/v1.0/AUTH_%tenant_id%"
