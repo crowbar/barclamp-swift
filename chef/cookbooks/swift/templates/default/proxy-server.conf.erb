@@ -68,8 +68,8 @@ set log_requests = true
 
 <%if @swauth %>
 [filter:swauth]
-use = egg:swift#swauth
-set default_swift_cluster = local#https://<%= @localip %>:8080/v1
+use = egg:swauth#swauth
+set default_swift_cluster = local#https://<%= @local_ip %>:8080/v1
 super_admin_key = <%= @admin_key %>
 log_level = DEBUG
 <% end %>
