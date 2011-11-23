@@ -41,13 +41,13 @@ setup_console_handler = true
  case @auth_method
    when "swauth"
    	auth= "swauth"
-	@swauth=true
+	@swauth=true and !@hide_auth
    when "keystone"
         auth="keystone"
-	@keystone = true
+	@keystone = true and !@hide_auth
    when "tempauth"
       auth="tempauth"
-      @tempauth=true
+      @tempauth=true and !@hide_auth
  end
 %>
 pipeline = healthcheck cache <%= auth %> proxy-server
@@ -58,13 +58,13 @@ use = egg:swift#proxy
 <% if @account_management == "true" %>allow_account_management = true<% end %>
 <% if @keystone %>account_autocreate = true<% end %>
 
-set log_name = proxy-server
-set log_facility = LOG_LOCAL0
-set log_level = DEBUG
-set access_log_name = proxy-server
-set access_log_facility = LOG_LOCAL0
-set access_log_level = INFO
-set log_requests = true
+log_name = proxy-server
+log_facility = LOG_LOCAL1
+log_level = DEBUG
+access_log_name = proxy-server
+access_log_facility = LOG_LOCAL1
+access_log_level = INFO
+log_requests = true
 
 <%if @swauth %>
 [filter:swauth]

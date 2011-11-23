@@ -24,12 +24,16 @@
             "user": { "type": "str", "required": true },
             "group": { "type": "str", "required": true },
             "debug": { "type": "bool", "required": false},
+            "use_slog": { "type": "bool", "required": false},
+            "swift_account": { "type": "str", "required": false},
+            "swift_user": { "type": "str", "required": false},
+            "swift_passwd": { "type": "str", "required": false},
             "admin_ip_expr": { "type": "str", "required": true},
             "storage_ip_expr": { "type": "str", "required": true},
             "public_ip_expr": { "type": "str", "required": true},
             "disk_enum_expr": { "type": "str", "required": true},
             "disk_test_expr": { "type": "str", "required": true},
-            "disk_zone_assign_expr": { "type": "str", "required": false} 			
+            "disk_zone_assign_expr": { "type": "str", "required": false}                        
            }
         }
       }

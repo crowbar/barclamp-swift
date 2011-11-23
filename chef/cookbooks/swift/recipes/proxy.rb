@@ -33,6 +33,7 @@ proxy_config[:group] = node[:swift][:group]
 proxy_config[:user] = node[:swift][:user]
 proxy_config[:local_ip] = local_ip
 proxy_config[:public_ip] = public_ip
+proxy_config[:hide_auth] = false
 
 
 %w{curl python-software-properties memcached swift-proxy}.each do |pkg|
@@ -121,8 +122,8 @@ if !result.nil? and (result.length > 0)
     s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)     
     s += ":11211 "   
   }
-  log("memcached servers" + memcached_servers.join(":")) {level :debug}
-  servers = memcached_servers.join(":")
+  log("memcached servers" + memcached_servers.join(",")) {level :debug}
+  servers = memcached_servers.join(",")
 else 
   log("found no swift-proxy nodes") {level :warn}
 end
@@ -169,3 +170,8 @@ node[:swift][:monitor] = {}
 node[:swift][:monitor][:svcs] = ["swift-proxy", "memcached" ]
 node[:swift][:monitor][:ports] = {:proxy =>8080}
 node.save
+
+if node["swift"]["use_slog"]
+  log ("installing slogging") {level :info}
+  include_recipe "swift::slog"
+end
