@@ -1,0 +1,12 @@
+
+0 * * * * <%= @os_user_account %> /usr/local/bin/swift-account-stats-logger /etc/swift/log-processor.conf
+
+5 * * * * <%= @os_user_account %> /usr/local/bin/swift-container-stats-logger /etc/swift/log-processor.conf
+
+10 * * * * <%= @os_user_account %> /usr/local/bin/swift-log-uploader /etc/swift/log-processor.conf stats
+
+15 * * * * <%= @os_user_account %> /usr/local/bin/swift-log-uploader /etc/swift/log-processor.conf container-stats
+
+15 * * * * <%= @os_user_account %> /usr/local/bin/swift-log-uploader /etc/swift/log-processor.conf container-stats
+
+30 * * * * <your-user-name> /usr/local/bin/swift-log-stats-collector /etc/swift/log-processor.conf

@@ -1,0 +1,10 @@
+<% if @storage  %>
+0 * * * * <%= @os_user %> /usr/local/bin/swift-account-stats-logger /etc/swift/log-processor.conf
+5 * * * * <%= @os_user %> /usr/local/bin/swift-container-stats-logger /etc/swift/log-processor.conf
+10 * * * * <%= @os_user %> /usr/local/bin/swift-log-uploader /etc/swift/log-processor.conf stats
+15 * * * * <%= @os_user %> /usr/local/bin/swift-log-uploader /etc/swift/log-processor.conf container-stats
+<% end %>
+<% if @proxy  %>
+5 * * * * <%= @os_user %>  /usr/local/bin/swift-log-uploader /etc/swift/log-processor.conf access
+30 * * * * <%= @os_user %> /usr/local/bin/swift-log-stats-collector /etc/swift/log-processor.conf
+<% end %>
