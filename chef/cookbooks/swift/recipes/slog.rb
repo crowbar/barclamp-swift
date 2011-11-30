@@ -17,20 +17,26 @@
 #
 
 
-slog_ver = "slogging-1.1.3.dev"
-slog_pkg = "#{slog_ver}.tar.gz"
-cookbook_file "/opt/#{slog_pkg}" do 
-  source "slogging-1.1.3.dev.tar.gz"
-  not_if { File.exists?("/opt/#{slog_pkg}") }
-end
-
-execute "extract slogging" do
-   cwd "/opt"
-   command <<-EOH
-   tar -xzvf #{slog_pkg}
-   easy_install #{slog_ver}
-   EOH
-   not_if { File.exists?("/usr/local/bin/swift-access-log-delivery") }
+if node["swift"]["install_slog_from_dev"] or true
+   slog_ver = "slogging-1.1.3.dev"
+   slog_pkg = "#{slog_ver}.tar.gz"
+   cookbook_file "/opt/#{slog_pkg}" do 
+     source "slogging-1.1.3.dev.tar.gz"
+     not_if { File.exists?("/opt/#{slog_pkg}") }
+   end
+   
+   execute "extract slogging" do
+      cwd "/opt"
+      command <<-EOH
+      tar -xzvf #{slog_pkg}
+      easy_install #{slog_ver}
+      EOH
+      not_if { File.exists?("/usr/local/bin/swift-access-log-delivery") }
+   end
+else
+   package "python-slogging" do
+     action :install
+   end 
 end
 
 
@@ -72,7 +78,7 @@ case node["swift"]["auth_method"]
         command <<-EOH
           /usr/bin/swauth-prep -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth
         EOH
-        not_if { `/usr/bin/swauth-list -K swauth -U '.super_admin' -A https://127.0.0.1:8080/auth/` } 
+        not_if { `/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A https://127.0.0.1:8080/auth/` } 
       end
 
       execute "prep stats accountswaut" do
@@ -84,6 +90,29 @@ case node["swift"]["auth_method"]
           /usr/bin/swauth-add-user -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/ -a #{config['swift_account']}  #{config['swift_user']} #{config['swift_passwd']}
         EOH
       end
+
+      %w{log_data container-stats account-stats}.each { |x|
+         x = "log_data"
+        execute "create container for #{x} " do
+            cwd "/etc/swift"
+            group node[:swift][:group]
+            user node[:swift][:user]
+            command <<-EOH
+                swift -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/v1.0 -U #{config['swift_account']}:#{config['swift_user']} -K #{config['swift_passwd']} post #{x}
+           EOH
+        end
+      }
+
+     ruby_block "Collect acct info" do 
+      block do
+        acct_info=`/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A https://127.0.0.1:8080/auth/` 
+#        log "Account info: #{acct_info}"  do
+#           level :warn
+#        end
+        parsed_account =JSON.parse(acct_info)
+        config["account_hash"]= parsed_account["account_id"]
+      end
+     end
 
    when "keystone" 
 end  if config["proxy"] == true
@@ -129,12 +158,13 @@ template "/etc/cron.d/slog.conf" do
   variables   config
 end
 
-## Create the proxy server configuraiton file
+## Create the proxy server configuraiton file on storage nodes
+## (the uploader needs it)
 template "/etc/swift/proxy-server.conf" do
   source     "proxy-server.conf.erb"
   mode       "0644"
   group       node[:swift][:group]
   owner       node[:swift][:user]
   variables   config
-end
+end unless config["proxy"]
 

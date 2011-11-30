@@ -79,3 +79,7 @@ default[:swift][:account_management] = "true"
 default[:swift][:auth_method] = "keystone"
 default[:swift][:keystone_instance] = "proposal"
 default[:swift][:reseller_prefix] = "AUTH"
+
+
+default[:swift][:install_slog_from_dev] = false
+
