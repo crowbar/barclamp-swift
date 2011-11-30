@@ -50,6 +50,9 @@ config["os_group"] = node["swift"]["group"]
 config["swift_user"] = node["swift"]["swift_user"]
 config["swift_passwd"] = node["swift"]["swift_passwd"]
 config["swift_account"] = node["swift"]["swift_account"]
+# set the account hash to match the account (double check it works w/ keystone)
+config["swift_account_hash"] = node["swift"]["reseller_prefix"]+ "_" +  node["swift"]["swift_account"]
+
 roles = node['roles']
 config["proxy"] =  (roles.include?("swift-proxy") or roles.include?("swift-proxy-acct"))
 config["storage"] = true if roles.include?("swift-storage")
@@ -86,7 +89,7 @@ case node["swift"]["auth_method"]
         group node[:swift][:group]
         user node[:swift][:user]
         command <<-EOH
-          /usr/bin/swauth-add-account -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/ #{config['swift_account']}
+          /usr/bin/swauth-add-account -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/  #{config['swift_account']}
           /usr/bin/swauth-add-user -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/ -a #{config['swift_account']}  #{config['swift_user']} #{config['swift_passwd']}
         EOH
       end
@@ -98,22 +101,20 @@ case node["swift"]["auth_method"]
             group node[:swift][:group]
             user node[:swift][:user]
             command <<-EOH
-                swift -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/v1.0 -U #{config['swift_account']}:#{config['swift_user']} -K #{config['swift_passwd']} post #{x}
+              swift -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/v1.0 -U #{config['swift_account']}:#{config['swift_user']} -K #{config['swift_passwd']} post #{x}
            EOH
         end
       }
 
-     ruby_block "Collect acct info" do 
-      block do
-        acct_info=`/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A https://127.0.0.1:8080/auth/` 
-#        log "Account info: #{acct_info}"  do
-#           level :warn
-#        end
-        parsed_account =JSON.parse(acct_info)
-        config["account_hash"]= parsed_account["account_id"]
-      end
-     end
-
+       ruby_block "Collect acct info" do 
+        block do
+          acct_info=`/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A https://127.0.0.1:8080/auth/  #{config['swift_account']}` 
+          parsed_account =JSON.parse(acct_info)
+          puts "stats account hash #{parsed_account['account_id']}"
+          config["swift_account_hash"]= parsed_account["account_id"]
+        end
+       end
+  
    when "keystone" 
 end  if config["proxy"] == true
 
