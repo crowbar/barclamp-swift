@@ -10,6 +10,11 @@
     %p
       %label{ :for => :keystone_instance }= t('.keystone_instance')
       = instance_selector("keystone", :keystone_instance, "keystone_instance", @proposal)
+
+    %p
+      %label{ :for => :slogging }= t('.install_slog')
+      = select_tag :slogging, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_slog"].to_s), :onchange => "update_value('use_slog', 'use_slog', 'boolean')"
+
     %p
       %label{ :for => :zones }= t('.zones')
       %input#zones{:type => "text", :name => "zones", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["zones"], :onchange => "update_value('zones', 'zones', 'integer')"}
@@ -41,6 +46,18 @@
     %p
       %label{ :for => :group }= t('.group')
       %input#group{:type => "text", :name => "group", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["group"], :onchange => "update_value('group', 'group', 'string')"}
+
+    %p
+      %label{ :for => :slog_account }= t('.slog_account')
+      %input#slog_account{:type => "text", :name => "slog_account", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_account"], :onchange => "update_value('slog_account', 'slog_account', 'string')"}
+
+    %p
+      %label{ :for => :slog_user }= t('.slog_user')
+      %input#slog_user{:type => "text", :name => "slog_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_user"], :onchange => "update_value('slog_user', 'slog_user', 'string')"}
+
+    %p
+      %label{ :for => :slog_passwd }= t('.slog_passwd')
+      %input#slog_passwd{:type => "text", :name => "slog_passwd", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_passwd"], :onchange => "update_value('slog_passwd', 'slog_passwd', 'string')"}
 
     %p
       %label{ :for => :debug }= t('.debug')

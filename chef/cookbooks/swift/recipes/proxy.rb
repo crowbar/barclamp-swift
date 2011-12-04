@@ -171,7 +171,12 @@ node[:swift][:monitor][:svcs] = ["swift-proxy", "memcached" ]
 node[:swift][:monitor][:ports] = {:proxy =>8080}
 node.save
 
-if node["swift"]["use_slog"]
+##
+# only run slog init code if enabled, and the proxy has been fully setup
+#(after the storage nodes have come up as well)
+if node["swift"]["use_slog"] and node["swift"]["proxy_init_done"]
   log ("installing slogging") {level :info}
   include_recipe "swift::slog"
 end
+
+node["swift"]["proxy_init_done"] = true
