@@ -47,10 +47,10 @@ locale_additions:
           debug: Debug
           auth_method: Authentication method
           keystone_instance: Keystone instance
-	  install_slog: Install sLogging support
-	  slog_account: sLogging swift account
-	  slog_user: sLogging swift user
-	  slog_passwd: sLogging swift user's password
+          install_slog: Install sLogging support
+          slog_account: sLogging swift account
+          slog_user: sLogging swift user
+          slog_passwd: sLogging swift user's password
         edit_deployment: 
           deployment: Deployment
 
