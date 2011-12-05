@@ -55,6 +55,7 @@ debs:
 #    - swift-core/release
   repos:
     - deb http://ops.monkeypuppetlabs.com/packages maverick diablo-d5
+    - deb http://build.monkeypuppetlabs.com/packages maverick diablo-d5 
 #    - deb http://ops.rcb.me/packages maverick diablo-d5
   pkgs:
     - curl
@@ -71,3 +72,4 @@ debs:
     - python-swift
     - python-swauth
     - python-keystone
+    - python-slogging
