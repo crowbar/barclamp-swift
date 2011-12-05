@@ -33,6 +33,22 @@ class SwiftService < ServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
+
+    base["attributes"]["swift"]["keystone_instance"] = ""
+    begin
+      keystoneService = KeystoneService.new(@logger)
+      keystones = keystoneService.list_active[1]
+      if keystones.empty?
+        # No actives, look for proposals
+        keystones = keystoneService.proposals[1]
+      end
+      base["attributes"]["swift"]["keystone_instance"] = keystones[0] unless keystones.empty?
+    rescue
+      base["attributes"]["swift"]["auth_method"] = "swauth"
+      @logger.info("Swift create_proposal: no keystone found - will use swauth")
+    end
+
+
     base["deployment"]["swift"]["elements"] = {
         "swift-proxy" => [  ],
         "swift-ring-compute" => [  ],

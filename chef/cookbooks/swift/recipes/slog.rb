@@ -47,11 +47,11 @@ end
 config = {}
 config["os_user"] = node["swift"]["user"]
 config["os_group"] = node["swift"]["group"]
-config["swift_user"] = node["swift"]["swift_user"]
-config["swift_passwd"] = node["swift"]["swift_passwd"]
-config["swift_account"] = node["swift"]["swift_account"]
+config["slog_user"] = node["swift"]["slog_user"]
+config["slog_passwd"] = node["swift"]["slog_passwd"]
+config["slog_account"] = node["swift"]["slog_account"]
 # set the account hash to match the account (double check it works w/ keystone)
-config["swift_account_hash"] = node["swift"]["reseller_prefix"]+ "_" +  node["swift"]["swift_account"]
+config["swift_account_hash"] = node["swift"]["reseller_prefix"]+ "_" +  node["swift"]["slog_account"]
 
 roles = node['roles']
 config["proxy"] =  (roles.include?("swift-proxy") or roles.include?("swift-proxy-acct"))
@@ -80,6 +80,7 @@ case node["swift"]["auth_method"]
         user node[:swift][:user]
         command <<-EOH
           /usr/bin/swauth-prep -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth
+          sleep 2
         EOH
         not_if { `/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A https://127.0.0.1:8080/auth/` } 
       end
@@ -89,8 +90,9 @@ case node["swift"]["auth_method"]
         group node[:swift][:group]
         user node[:swift][:user]
         command <<-EOH
-          /usr/bin/swauth-add-account -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/  #{config['swift_account']}
-          /usr/bin/swauth-add-user -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/ -a #{config['swift_account']}  #{config['swift_user']} #{config['swift_passwd']}
+          /usr/bin/swauth-add-account -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/  #{config['slog_account']}
+          sleep 2
+          /usr/bin/swauth-add-user -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/ -a #{config['slog_account']}  #{config['slog_user']} #{config['slog_passwd']}
         EOH
       end
 
@@ -101,7 +103,7 @@ case node["swift"]["auth_method"]
             group node[:swift][:group]
             user node[:swift][:user]
             command <<-EOH
-              swift -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/v1.0 -U #{config['swift_account']}:#{config['swift_user']} -K #{config['swift_passwd']} post #{x}
+              swift -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/v1.0 -U #{config['slog_account']}:#{config['slog_user']} -K #{config['slog_passwd']} post #{x}
            EOH
         end
       }
