@@ -65,7 +65,7 @@ case proxy_config[:auth_method]
      end
 
      keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
-     keystone_token = keystone["keystone"]["admin"]['token']
+     keystone_token = keystone["keystone"]["admin"]['token']    rescue nil
      Chef::Log.info("Keystone server found at #{keystone_address}")
      proxy_config[:keystone_admin_token]  = keystone_token
      proxy_config[:keystone_vip] = keystone_address
