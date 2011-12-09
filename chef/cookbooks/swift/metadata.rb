@@ -15,10 +15,11 @@
 #
 # Author: andi abes
 #
-maintainer       "Opscode, Inc."
-maintainer_email "oss@opscode.com"
+maintainer       "Dell, Inc."
+maintainer_email "crowbar@dell.com"
 license          "Apache 2.0"
-description      "Installs/Configures cloudfiles"
+description      "Installs/Configures Openstack Swift"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.rdoc'))
 version          "0.1"
 depends          "memcached"
+depends          "keystone"
