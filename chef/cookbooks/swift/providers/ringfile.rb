@@ -183,7 +183,6 @@ action :apply do
     execute "add disk #{d[:ip]}:#{d[:port]}/#{d[:dev_name]} to #{name}" do
       command "swift-ring-builder #{name} add z#{d[:zone]}-#{d[:ip]}:#{d[:port]}/#{d[:dev_name]} #{d[:weight]}"
       cwd "/etc/swift"
-      returns 1
     end
   }
   
@@ -191,7 +190,6 @@ action :apply do
     execute "remove disk #{d.id} from #{name}" do
       command "swift-ring-builder #{name} remove d#{d.id} "
       cwd "/etc/swift"
-      returns 1
     end   
   }  
 end
