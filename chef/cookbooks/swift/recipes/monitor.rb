@@ -23,6 +23,8 @@ swift_svcs = node[:swift][:monitor][:svcs]
 swift_ports = node[:swift][:monitor][:ports]
 log ("will monitor swift svcs: #{swift_svcs.join(',')} and ports #{swift_ports.values.join(',')}")
 
+include_recipe "nagios::common" if node["roles"].include?("nagios-client")
+
 template "/etc/nagios/nrpe.d/swift_nrpe.cfg" do
   source "swift_nrpe.cfg.erb"
   mode "0644"
@@ -34,7 +36,4 @@ template "/etc/nagios/nrpe.d/swift_nrpe.cfg" do
   })    
    notifies :restart, "service[nagios-nrpe-server]"
 end if node["roles"].include?("nagios-client")    
-    
-service   "nagios-nrpe-server" do
-  action :nothing
-end 
+
