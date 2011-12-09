@@ -80,7 +80,6 @@ case node["swift"]["auth_method"]
         user node[:swift][:user]
         command <<-EOH
           /usr/bin/swauth-prep -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth
-          sleep 2
         EOH
         not_if { `/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A https://127.0.0.1:8080/auth/` } 
       end
@@ -90,8 +89,7 @@ case node["swift"]["auth_method"]
         group node[:swift][:group]
         user node[:swift][:user]
         command <<-EOH
-          /usr/bin/swauth-add-account -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/  #{config['slog_account']}
-          sleep 2
+          /usr/bin/swauth-add-account -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/  #{config['slog_account']} && 
           /usr/bin/swauth-add-user -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth/ -a #{config['slog_account']}  #{config['slog_user']} #{config['slog_passwd']}
         EOH
       end
