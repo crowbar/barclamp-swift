@@ -66,6 +66,9 @@ case proxy_config[:auth_method]
 
      keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
      keystone_token = keystone["keystone"]["admin"]['token']    rescue nil
+     keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
+     keystone_admin_port = keystone["keystone"]["api"]["admin_port"] rescue nil
+
      Chef::Log.info("Keystone server found at #{keystone_address}")
      proxy_config[:keystone_admin_token]  = keystone_token
      proxy_config[:keystone_vip] = keystone_address
@@ -74,6 +77,7 @@ case proxy_config[:auth_method]
      keystone_register "register swift service" do
        host keystone_address
        token keystone_token
+       port keystone_admin_port
        service_name "swift"
        service_type "storage"
        service_description "Openstack Swift Object Store Service"
@@ -83,6 +87,7 @@ case proxy_config[:auth_method]
      keystone_register "register swift-proxy endpoint" do
          host keystone_address
          token keystone_token
+         port keystone_admin_port
          endpoint_service "swift"
          endpoint_region "RegionOne"
          endpoint_adminURL "http://#{local_ip}:8080/v1.0/AUTH_%tenant_id%"
@@ -160,9 +165,6 @@ EOH
   action :run
   notifies :restart, resources(:service => "memcached-swift-proxy")
   notifies :restart, resources(:service => "swift-proxy")
-  subscribes :run, resources(:swift_ringfile =>"account.builder")
-  subscribes :run, resources(:swift_ringfile =>"container.builder")
-  subscribes :run, resources(:swift_ringfile =>"object.builder")
 end
 
 ### 
