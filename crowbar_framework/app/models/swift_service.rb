@@ -24,6 +24,14 @@ class SwiftService < ServiceObject
     true
   end
 
+  def proposal_dependencies(role)
+    answer = []
+    if role.default_attributes["swift"]["auth_method"] == "keystone"
+      answer << { "barclamp" => "keystone", "inst" => role.default_attributes["swift"]["keystone_instance"] }
+    end
+    answer
+  end
+
   def create_proposal
     base = super
 
@@ -35,6 +43,7 @@ class SwiftService < ServiceObject
 
 
     base["attributes"]["swift"]["keystone_instance"] = ""
+    base["attributes"]["swift"]["auth_method"] = "swauth"
     begin
       keystoneService = KeystoneService.new(@logger)
       keystones = keystoneService.list_active[1]
@@ -42,9 +51,11 @@ class SwiftService < ServiceObject
         # No actives, look for proposals
         keystones = keystoneService.proposals[1]
       end
-      base["attributes"]["swift"]["keystone_instance"] = keystones[0] unless keystones.empty?
+      if !keystones.empty?
+	base["attributes"]["swift"]["keystone_instance"] = keystones[0]
+        base["attributes"]["swift"]["auth_method"] = "keystone"
+      end
     rescue
-      base["attributes"]["swift"]["auth_method"] = "swauth"
       @logger.info("Swift create_proposal: no keystone found - will use swauth")
     end
 
