@@ -80,7 +80,7 @@ case proxy_config[:auth_method]
        token keystone_token
        port keystone_admin_port
        service_name "swift"
-       service_type "storage"
+       service_type "object-store"
        service_description "Openstack Swift Object Store Service"
        action :add_service
      end                                                 
