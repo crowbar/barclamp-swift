@@ -92,7 +92,7 @@ case proxy_config[:auth_method]
          endpoint_service "swift"
          endpoint_region "RegionOne"
          endpoint_adminURL "https://#{local_ip}:8080/v1/AUTH_%tenant_id%"
-         endpoint_internalURL "https://#{local_ip}:/v1/AUTH_%tenant_id%"
+         endpoint_internalURL "https://#{local_ip}:8080/v1/AUTH_%tenant_id%"
          endpoint_publicURL "https://#{public_ip}:8080/v1/AUTH_%tenant_id%"
          #  endpoint_global true
          #  endpoint_enabled true
