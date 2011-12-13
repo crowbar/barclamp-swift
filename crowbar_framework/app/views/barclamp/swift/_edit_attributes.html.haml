@@ -47,15 +47,15 @@
       %label{ :for => :group }= t('.group')
       %input#group{:type => "text", :name => "group", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["group"], :onchange => "update_value('group', 'group', 'string')"}
 
-    %p
+    -# %p
       %label{ :for => :slog_account }= t('.slog_account')
       %input#slog_account{:type => "text", :name => "slog_account", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_account"], :onchange => "update_value('slog_account', 'slog_account', 'string')"}
 
-    %p
+    -# %p
       %label{ :for => :slog_user }= t('.slog_user')
       %input#slog_user{:type => "text", :name => "slog_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_user"], :onchange => "update_value('slog_user', 'slog_user', 'string')"}
 
-    %p
+    -# %p
       %label{ :for => :slog_passwd }= t('.slog_passwd')
       %input#slog_passwd{:type => "text", :name => "slog_passwd", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_passwd"], :onchange => "update_value('slog_passwd', 'slog_passwd', 'string')"}
 
