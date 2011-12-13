@@ -59,7 +59,7 @@ config["storage"] = true if roles.include?("swift-storage")
 config["hide_auth"] = false #true unless config["proxy"]
 
 
-log("node role is #{config['storage'] ?'storage' : 'not store'} is #{config['proxy'] ? 'proxy': 'not proxy'}") { level :warn }
+log("node role is #{config['storage'] ? 'storage' : 'not store'} is #{config['proxy'] ? 'proxy': 'not proxy'}") { level :warn }
 
 case node["swift"]["auth_method"]
    when "swauth"
@@ -81,7 +81,7 @@ case node["swift"]["auth_method"]
         command <<-EOH
           /usr/bin/swauth-prep -K #{cluster_pwd} -U '.super_admin' -A https://127.0.0.1:8080/auth
         EOH
-        not_if { `/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A https://127.0.0.1:8080/auth/` } 
+        #not_if { `/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A https://127.0.0.1:8080/auth/` } 
       end
 
       execute "prep stats accountswaut" do
@@ -95,7 +95,6 @@ case node["swift"]["auth_method"]
       end
 
       %w{log_data container-stats account-stats}.each { |x|
-         x = "log_data"
         execute "create container for #{x} " do
             cwd "/etc/swift"
             group node[:swift][:group]
