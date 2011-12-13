@@ -75,11 +75,12 @@ log_level = DEBUG
 <% end %>
 
 <% if @keystone %>
+
 [filter:keystone]
 use = egg:keystone#swiftauth 
-keystone_admin_token = <%= @keystone_admin_token %>
-keystone_url = http://<%= @keystone_vip %>:5001
+keystone_url = http://<%= @keystone_vip %>:<%= @keystone_port %>/
 reseller_prefix=<%= @reseller_prefix %>
+keystone_admin_token = <%= @keystone_admin_token %>
 
 <% end %>
 

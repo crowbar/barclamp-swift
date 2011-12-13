@@ -72,6 +72,7 @@ case proxy_config[:auth_method]
      Chef::Log.info("Keystone server found at #{keystone_address}")
      proxy_config[:keystone_admin_token]  = keystone_token
      proxy_config[:keystone_vip] = keystone_address
+     proxy_config[:keystone_port] = keystone_admin_port
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
 
      keystone_register "register swift service" do
@@ -90,9 +91,9 @@ case proxy_config[:auth_method]
          port keystone_admin_port
          endpoint_service "swift"
          endpoint_region "RegionOne"
-         endpoint_adminURL "http://#{local_ip}:8080/v1.0/AUTH_%tenant_id%"
-         endpoint_internalURL "http://#{local_ip}:/v1.0/AUTH_%tenant_id%"
-         endpoint_publicURL "http://#{public_ip}:8080/v1.1/AUTH_%tenant_id%"
+         endpoint_adminURL "https://#{local_ip}:8080/v1.0/AUTH_%tenant_id%"
+         endpoint_internalURL "https://#{local_ip}:/v1.0/AUTH_%tenant_id%"
+         endpoint_publicURL "https://#{public_ip}:8080/v1.1/AUTH_%tenant_id%"
          #  endpoint_global true
          #  endpoint_enabled true
         action :add_endpoint_template
