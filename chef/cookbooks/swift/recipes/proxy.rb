@@ -16,7 +16,6 @@
 # Author: andi abes
 #
 
-include_recipe 'apt'
 include_recipe 'utils'
 include_recipe 'swift::auth'
 

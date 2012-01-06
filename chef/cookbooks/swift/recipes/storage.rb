@@ -16,7 +16,6 @@
 # Author: andi abes
 #
 
-include_recipe 'apt'
 include_recipe 'swift::disks'
 #include_recipe 'swift::auth' 
 include_recipe 'swift::rsync'

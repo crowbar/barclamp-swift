@@ -16,8 +16,6 @@
 # Author: andi abes
 #
 
-include_recipe 'apt'
-
 %w{curl python-software-properties swift}.each do |pkg|
   package pkg
 end
