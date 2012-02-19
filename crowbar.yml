@@ -55,8 +55,6 @@ locale_additions:
           deployment: Deployment
 
 debs:
-#  ppas:
-#    - swift-core/release
   ubuntu-10.10:
     repos:
       - deb http://ops.rcb.me/packages maverick diablo-final
@@ -68,7 +66,6 @@ debs:
       - deb http://ops.rcb.me/packages oneiric diablo-final
   pkgs:
     - curl
-    - python-software-properties
     - swift
     - swift-container
     - swift-object
@@ -81,4 +78,3 @@ debs:
     - python-swift
     - python-swauth
     - python-keystone
-    - python-slogging
