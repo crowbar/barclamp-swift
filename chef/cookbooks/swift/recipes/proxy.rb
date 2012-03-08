@@ -64,9 +64,13 @@ case proxy_config[:auth_method]
      end
 
      keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
-     keystone_token = keystone["keystone"]["admin"]['token']    rescue nil
+     keystone_token = keystone["keystone"]["service"]["token"] rescue nil
      keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
      keystone_admin_port = keystone["keystone"]["api"]["admin_port"] rescue nil
+     keystone_service_tenant = keystone["keystone"]["service"]["tenant"] rescue nil
+     keystone_service_user = "nova" # GREG: Fix this
+     keystone_service_password = "fredfred" # GREG: Fix this
+
 
      Chef::Log.info("Keystone server found at #{keystone_address}")
      proxy_config[:keystone_admin_token]  = keystone_token
@@ -90,9 +94,9 @@ case proxy_config[:auth_method]
          port keystone_admin_port
          endpoint_service "swift"
          endpoint_region "RegionOne"
-         endpoint_adminURL "https://#{local_ip}:8080/v1/AUTH_%tenant_id%"
-         endpoint_internalURL "https://#{local_ip}:8080/v1/AUTH_%tenant_id%"
-         endpoint_publicURL "https://#{public_ip}:8080/v1/AUTH_%tenant_id%"
+         endpoint_publicURL "https://#{public_ip}:8080/v1/AUTH_$(tenant_id)s"
+         endpoint_adminURL "https://#{local_ip}:8080/v1/"
+         endpoint_internalURL "https://#{local_ip}:8080/v1/AUTH_$(tenant_id)s"
          #  endpoint_global true
          #  endpoint_enabled true
         action :add_endpoint_template
