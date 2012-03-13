@@ -35,7 +35,7 @@ proxy_config[:public_ip] = public_ip
 proxy_config[:hide_auth] = false
 
 
-%w{curl python-software-properties memcached swift-proxy}.each do |pkg|
+%w{curl memcached swift-proxy}.each do |pkg|
   package pkg do
     action :install
   end 

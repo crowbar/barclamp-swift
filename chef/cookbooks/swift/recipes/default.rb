@@ -16,7 +16,7 @@
 # Author: andi abes
 #
 
-%w{curl python-software-properties swift}.each do |pkg|
+%w{curl swift}.each do |pkg|
   package pkg
 end
 
