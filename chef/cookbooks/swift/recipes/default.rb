@@ -16,8 +16,13 @@
 # Author: andi abes
 #
 
-%w{curl swift}.each do |pkg|
-  package pkg
+package "curl"
+
+case node[:platform]
+when "suse"
+  package "openstack-swift"
+else
+  package "swift"
 end
 
 directory "/etc/swift" do

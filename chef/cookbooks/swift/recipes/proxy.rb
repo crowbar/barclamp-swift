@@ -35,10 +35,17 @@ proxy_config[:public_ip] = public_ip
 proxy_config[:hide_auth] = false
 
 
-%w{curl memcached swift-proxy}.each do |pkg|
+%w{curl memcached}.each do |pkg|
   package pkg do
     action :install
   end 
+end
+
+case node[:platform]
+when "suse"
+  package "openstack-swift-proxy"
+else
+  package "swift-proxy"
 end
 
 
@@ -159,7 +166,7 @@ end
 
 
 service "swift-proxy" do
-  restart_command "/etc/init.d/swift-proxy stop ; /etc/init.d/swift-proxy start"
+  service_name "openstack-swift-proxy" if node[:platform] == "suse"
   action [:enable, :start]
 end
 

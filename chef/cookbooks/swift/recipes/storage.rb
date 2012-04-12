@@ -20,7 +20,14 @@ include_recipe 'swift::disks'
 #include_recipe 'swift::auth' 
 include_recipe 'swift::rsync'
 
-%w{swift-container swift-object swift-account sqlite }.each do |pkg|
+%w{ sqlite }.each do |pkg|
+  package pkg do
+    action :upgrade
+  end
+end
+
+%w{swift-container swift-object swift-account}.each do |pkg|
+  pkg = "openstack-#{pkg}" if node[:platform] == "suse"
   package pkg do
     action :upgrade
   end
@@ -70,6 +77,7 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
   }
     
   svcs.each { |x| 
+    x = "openstack-#{x}" if node[:platform] == "suse"
     service x do
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
         restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"
