@@ -32,4 +32,5 @@ end
 
 service "rsync" do
   action :start 
+  service_name "rsyncd" if node[:platform] == "suse"
 end
