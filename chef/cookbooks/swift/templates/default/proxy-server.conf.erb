@@ -43,7 +43,7 @@ setup_console_handler = true
    	auth= "swauth"
 	@swauth=true and !@hide_auth
    when "keystone"
-        auth="keystone"
+        auth="authtoken keystone"
 	@keystone = true and !@hide_auth
    when "tempauth"
       auth="tempauth"
@@ -77,11 +77,16 @@ log_level = DEBUG
 <% if @keystone %>
 
 [filter:keystone]
-use = egg:keystone#swiftauth 
-keystone_url = http://<%= @keystone_vip %>:<%= @keystone_port %>/
+paste.filter_factory = keystone.middleware.swift_auth:filter_factory
 reseller_prefix=<%= @reseller_prefix %>
-keystone_admin_token = <%= @keystone_admin_token %>
 
+[filter:authtoken]
+paste.filter_factory = keystone.middleware.auth_token:filter_factory
+delay_auth_decision = 1
+auth_protocol = http
+auth_host = <%= @keystone_vip %>
+auth_port = <%= @keystone_port %>
+admin_token = <%= @keystone_admin_token %>
 <% end %>
 
 <% if @tempauth %>
