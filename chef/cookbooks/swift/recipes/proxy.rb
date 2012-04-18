@@ -101,9 +101,9 @@ case proxy_config[:auth_method]
          port keystone_admin_port
          endpoint_service "swift"
          endpoint_region "RegionOne"
-         endpoint_publicURL "https://#{public_ip}:8080/v1/AUTH_$(tenant_id)s"
+         endpoint_publicURL "https://#{public_ip}:8080/v1/#{proxy_config[:reseller_prefix]}$(tenant_id)s"
          endpoint_adminURL "https://#{local_ip}:8080/v1/"
-         endpoint_internalURL "https://#{local_ip}:8080/v1/AUTH_$(tenant_id)s"
+         endpoint_internalURL "https://#{local_ip}:8080/v1/#{proxy_config[:reseller_prefix]}$(tenant_id)s"
          #  endpoint_global true
          #  endpoint_enabled true
         action :add_endpoint_template
