@@ -91,8 +91,10 @@ CYL;
 2:31cyl:1044cyl:1012cyl:::;
 5:31cyl:1044cyl:1012cyl:::lvm;
 =end
-  pipe= IO.popen("parted -m -s #{dev_name} unit cyl print") # this can return 1, but it's ok (if no partition table present, we'll create it)
-  result = pipe.readlines
+  # parted can exit with exit code 1, but it's ok (if no partition table present, we'll create it)
+  result = IO.popen("parted -m -s #{dev_name} unit cyl print") do |pipe| 
+    pipe.readlines
+  end
   parted_parse_results result  
 end
 
