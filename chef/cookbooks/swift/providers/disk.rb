@@ -43,7 +43,7 @@ EOF
   
   num = 1
   parts.each { | p | 
-    s << "partition " << num  
+    s << "partition #{num}"
     s << " start/end/cyl-count: " << p[:start] + "/"+ p[:end] + "/" + p[:size].to_s 
     s << " type:" << p[:type]
     s << "\n"
