@@ -161,6 +161,7 @@ end
 ## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user] 
 node[:memcached][:listen] = local_ip
 node[:memcached][:name] = "swift-proxy"
+include_recipe "memcached"
 service "memcached" do
   action :enable
 end
