@@ -21,13 +21,21 @@ include_recipe 'swift::disks'
 include_recipe 'swift::rsync'
 
 %w{swift-container swift-object swift-account sqlite }.each do |pkg|
-  package pkg
+  package pkg do
+    action :upgrade
+  end
 end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
 %w{account-server object-server container-server}.each do |service|
-  template "/etc/swift/#{service}.conf" do
+  directory "/etc/swift/#{service}" do
+    owner "swift"
+    group "swift"
+    action :create
+  end
+  
+  template "/etc/swift/#{service}/#{service}.conf" do
     source "#{service}-conf.erb"
     owner "swift"
     group "swift"
@@ -63,6 +71,13 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
     
   svcs.each { |x| 
     service x do
+      if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
+        restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"
+        stop_command "stop #{x}"
+        start_command "start #{x}"
+        status_command "status #{x} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
+      end
+      supports :status => true, :restart => true
       action [:enable, :start]
     end
   }

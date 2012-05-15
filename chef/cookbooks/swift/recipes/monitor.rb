@@ -21,7 +21,9 @@
 
 swift_svcs = node[:swift][:monitor][:svcs]
 swift_ports = node[:swift][:monitor][:ports]
-log ("will monitor swift svcs: #{swift_svcs.join(',')} and ports #{swift_ports.values.join(',')}")
+storage_net_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
+
+log ("will monitor swift svcs: #{swift_svcs.join(',')} and ports #{swift_ports.values.join(',')} on storage_net_ip #{storage_net_ip}")
 
 include_recipe "nagios::common" if node["roles"].include?("nagios-client")
 
@@ -32,7 +34,8 @@ template "/etc/nagios/nrpe.d/swift_nrpe.cfg" do
   owner node[:nagios][:user]
   variables( {
     :svcs => swift_svcs ,
-    :swift_ports => swift_ports
+    :swift_ports => swift_ports,
+    :storage_net_ip => storage_net_ip
   })    
    notifies :restart, "service[nagios-nrpe-server]"
 end if node["roles"].include?("nagios-client")    
