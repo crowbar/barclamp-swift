@@ -27,7 +27,6 @@ bind_port = 8080
 workers = 1
 user = <%= @user %>
 group = <%= @group %>
-
 log_facility = LOG_LOCAL0
 log_level = DEBUG
 log_name = swift-p
@@ -36,35 +35,48 @@ setup_console_handler = true
 
 [pipeline:main]
 <% 
- @swauth= @tempauth= @keystone = false
- auth=""
- case @auth_method
-   when "swauth"
-   	auth= "swauth"
-	@swauth=true and !@hide_auth
-   when "keystone"
-        auth="keystone"
-	@keystone = true and !@hide_auth
-   when "tempauth"
-      auth="tempauth"
-      @tempauth=true and !@hide_auth
+  @swauth = @tempauth = @keystone = false
+  auth = ""
+  case @auth_method
+    when "swauth"
+      auth = "swauth"
+      @swauth = true and !@hide_auth
+    when "keystone"
+      auth = "auth_token keystone"
+      @keystone = true and !@hide_auth
+    when "tempauth"
+      auth = "tempauth"
+      @tempauth = true and !@hide_auth
  end
 %>
-pipeline = healthcheck cache <%= auth %> proxy-server
-
+pipeline = catch_errors healthcheck cache swift3 <%= auth %> proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
 <% if @account_management == "true" %>allow_account_management = true<% end %>
 <% if @keystone %>account_autocreate = true<% end %>
-
 log_name = proxy-server
 log_facility = LOG_LOCAL1
 log_level = DEBUG
 access_log_name = proxy-server
 access_log_facility = LOG_LOCAL1
 access_log_level = INFO
+log_headers = true
 log_requests = true
+
+[filter:healthcheck]
+use = egg:swift#healthcheck
+
+[filter:catch_errors]
+use = egg:swift#catch_errors
+
+[filter:cache]
+use = egg:swift#memcache
+memcache_servers = <%= @memcached_ips %>
+log_name = cache
+
+[filter:swift3]
+use = egg:swift#swift3
 
 <%if @swauth %>
 [filter:swauth]
@@ -77,10 +89,31 @@ log_level = DEBUG
 <% if @keystone %>
 
 [filter:keystone]
-use = egg:keystone#swiftauth 
-keystone_url = http://<%= @keystone_vip %>:<%= @keystone_port %>/
+paste.filter_factory = keystone.middleware.swift_auth:filter_factory
+operator_roles = Member,admin
 reseller_prefix=<%= @reseller_prefix %>
-keystone_admin_token = <%= @keystone_admin_token %>
+
+# NOTE(chmou): s3token middleware is not updated yet to use only
+# username and password.
+[filter:s3token]
+paste.filter_factory = keystone.middleware.s3_token:filter_factory
+service_port = <%= @keystone_service_port %>
+service_host = <%= @keystone_vip %>
+auth_port = <%= @keystone_auth_port %>
+auth_host = <%= @keystone_vip %>
+auth_protocol = http
+auth_token = <%= @keystone_admin_token %>
+admin_token = <%= @keystone_admin_token %>
+
+[filter:auth_token]
+paste.filter_factory = keystone.middleware.auth_token:filter_factory
+auth_host = <%= @keystone_vip %>
+auth_port = <%= @keystone_admin_port %>
+auth_protocol = http
+auth_uri = http://<%= @keystone_vip %>:<%= @keystone_service_port %>/
+admin_tenant_name = <%= @keystone_service_tenant %>
+admin_user = <%= @keystone_service_user %>
+admin_password = <%= @keystone_service_password %>
 
 <% end %>
 
@@ -91,14 +124,8 @@ user_admin_admin = admin .admin .reseller_admin
 user_test_tester = testing .admin
 user_test2_tester2 = testing2 .admin
 user_test_tester3 = testing3
+bind_ip = 0.0.0.0
 <% end %>
 
-
-[filter:healthcheck]
-use = egg:swift#healthcheck
-
-[filter:cache]
-use = egg:swift#memcache
-memcache_servers = <%= @memcached_ips %>
 
 

@@ -12,7 +12,7 @@
 	  "min_part_hours": 1,
 	  "auth_method": "keystone",
 	  "keystone_instance": "proposal",
-	  "reseller_prefix" : "AUTH",
+	  "reseller_prefix" : "AUTH_",
 	  "user": "swift",
 	  "group": "swift", 	  
 	  "debug": true,
