@@ -29,13 +29,7 @@ end
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
 %w{account-server object-server container-server}.each do |service|
-  directory "/etc/swift/#{service}" do
-    owner "swift"
-    group "swift"
-    action :create
-  end
-  
-  template "/etc/swift/#{service}/#{service}.conf" do
+  template "/etc/swift/#{service}.conf" do
     source "#{service}-conf.erb"
     owner "swift"
     group "swift"
