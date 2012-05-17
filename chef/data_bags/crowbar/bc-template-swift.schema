@@ -20,6 +20,8 @@
             "partitions": { "type": "int", "required": true },            
             "auth_method": { "type": "str", "required": true, "pattern": "/^swauth|keystone$/" },            
             "keystone_instance": { "type": "str", "required": false },            
+            "keystone_service_user": { "type": "str", "required": true },
+            "keystone_service_password": { "type": "str" },
             "reseller_prefix": { "type": "str", "required": false },            
             "user": { "type": "str", "required": true },
             "group": { "type": "str", "required": true },

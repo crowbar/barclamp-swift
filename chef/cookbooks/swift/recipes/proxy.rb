@@ -68,8 +68,8 @@ case proxy_config[:auth_method]
      keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
      keystone_admin_port = keystone["keystone"]["api"]["admin_port"] rescue nil
      keystone_service_tenant = keystone["keystone"]["service"]["tenant"] rescue nil
-     keystone_service_user = "swift" # GREG: Fix this
-     keystone_service_password = "swift" # GREG: Fix this
+     keystone_service_user = node["swift"]["keystone_service_user"]
+     keystone_service_password = node["swift"]["keystone_service_password"]
 
      Chef::Log.info("Keystone server found at #{keystone_address}")
      proxy_config[:keystone_admin_token]  = keystone_token

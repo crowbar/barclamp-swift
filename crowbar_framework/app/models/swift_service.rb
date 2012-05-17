@@ -58,6 +58,7 @@ class SwiftService < ServiceObject
     rescue
       @logger.info("Swift create_proposal: no keystone found - will use swauth")
     end
+    base["attributes"]["swift"]["keystone_service_password"] = '%012d' % rand(1e12)
 
 
     base["deployment"]["swift"]["elements"] = {
