@@ -4,9 +4,6 @@
   %label{:for => "proposal_attributes"}= t('.attributes')
   = link_to "Raw", proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
   %div.container
-    %p 
-      %label{ :for=> :auth_method }= t('.auth_method')
-      = select_tag :auth_method, options_for_select([["Keystone","keystone"],["Swauth","swauth"]], @proposal.raw_data['attributes'][@proposal.barclamp]["auth_method"]), :onchange => "update_value('auth_method','auth_method','string')"
     %p
       %label{ :for => :keystone_instance }= t('.keystone_instance')
       = instance_selector("keystone", :keystone_instance, "keystone_instance", @proposal)

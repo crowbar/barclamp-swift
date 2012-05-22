@@ -18,7 +18,7 @@
             "zones": { "type": "int", "required": true },
             "min_part_hours": { "type": "int", "required": true },
             "partitions": { "type": "int", "required": true },            
-            "auth_method": { "type": "str", "required": true, "pattern": "/^swauth|keystone$/" },            
+            "auth_method": { "type": "str", "required": true, "pattern": "/^keystone$/" },
             "keystone_instance": { "type": "str", "required": false },            
             "keystone_service_user": { "type": "str", "required": true },
             "keystone_service_password": { "type": "str" },
