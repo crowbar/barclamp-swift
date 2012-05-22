@@ -15,7 +15,7 @@
       "keystone_service_user": "swift",
 	  "reseller_prefix" : "AUTH_",
 	  "user": "swift",
-	  "group": "swift", 	  
+	  "group": "swift",
 	  "debug": true,
       "use_slog" : false, 
 	  "slog_account": "system_stats",
