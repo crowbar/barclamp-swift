@@ -70,7 +70,7 @@ case proxy_config[:auth_method]
        keystone = node
      end
 
-     keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+     keystone_address = keystone.address.addr
      keystone_token = keystone["keystone"]["service"]["token"] rescue nil
      keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
      keystone_admin_port = keystone["keystone"]["api"]["admin_port"] rescue nil
