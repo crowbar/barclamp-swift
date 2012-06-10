@@ -43,7 +43,6 @@ class SwiftService < ServiceObject
 
 
     base["attributes"]["swift"]["keystone_instance"] = ""
-    base["attributes"]["swift"]["auth_method"] = "swauth"
     begin
       keystoneService = KeystoneService.new(@logger)
       keystones = keystoneService.list_active[1]
