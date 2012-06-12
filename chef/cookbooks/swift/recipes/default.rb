@@ -21,14 +21,14 @@
 end
 
 directory "/etc/swift" do
-  owner "swift"
-  group "swift"
+  owner node[:swift][:user]
+  group node[:swift][:group]
   mode "0755"
 end
 
 template "/etc/swift/swift.conf" do
-  owner "swift"
-  group "swift"
+  owner node[:swift][:user]
+  group node[:swift][:group]
   source "swift.conf.erb"  
  variables( {
        :swift_cluster_hash => node[:swift][:cluster_hash]
@@ -36,8 +36,8 @@ template "/etc/swift/swift.conf" do
 end
 
 directory "/var/lock/swift" do
-  owner "swift"
-  group "swift"
+  owner node[:swift][:user]
+  group node[:swift][:group]
   mode "0755"
 end
 
