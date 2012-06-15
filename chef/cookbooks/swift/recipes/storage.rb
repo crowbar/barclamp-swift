@@ -44,8 +44,8 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
   
   template "/etc/swift/#{service}/#{service}.conf" do
     source "#{service}-conf.erb"
-    owner "swift"
-    group "swift"
+    owner "openstack-swift"
+    group "openstack-swift"
     variables({ 
       :uid => node[:swift][:user],
       :gid => node[:swift][:group],
