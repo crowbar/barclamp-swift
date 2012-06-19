@@ -35,10 +35,17 @@ proxy_config[:public_ip] = public_ip
 proxy_config[:hide_auth] = false
 
 
-%w{curl memcached swift-proxy}.each do |pkg|
+%w{curl memcached}.each do |pkg|
   package pkg do
     action :install
   end 
+end
+
+case node[:platform]
+when "suse"
+  package "openstack-swift-proxy"
+else
+  package "swift-proxy"
 end
 
 
@@ -178,12 +185,18 @@ end
 ## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user] 
 node[:memcached][:listen] = local_ip
 node[:memcached][:name] = "swift-proxy"
-memcached_instance "swift-proxy" do
+if node[:platform] == "suse"
+  include_recipe "memcached"
+  service "memcached" do
+    action :enable
+  end
+else
+  memcached_instance "swift-proxy" do
+  end
 end
 
-
 service "swift-proxy" do
-  restart_command "/etc/init.d/swift-proxy stop ; /etc/init.d/swift-proxy start"
+  service_name "openstack-swift-proxy" if node[:platform] == "suse"
   action [:enable, :start]
 end
 
@@ -191,7 +204,11 @@ bash "restart swift proxy things" do
   code <<-EOH
 EOH
   action :run
-  notifies :restart, resources(:service => "memcached-swift-proxy")
+  if node[:platform] == "suse"
+    notifies :restart, resources(:service => "memcached")
+  else
+    notifies :restart, resources(:service => "memcached-swift-proxy")
+  end
   notifies :restart, resources(:service => "swift-proxy")
 end
 
