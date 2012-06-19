@@ -185,9 +185,14 @@ end
 ## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user] 
 node[:memcached][:listen] = local_ip
 node[:memcached][:name] = "swift-proxy"
-include_recipe "memcached"
-service "memcached" do
-  action :enable
+if node[:platform] == "suse"
+  include_recipe "memcached"
+  service "memcached" do
+    action :enable
+  end
+else
+  memcached_instance "swift-proxy" do
+  end
 end
 
 service "swift-proxy" do
@@ -199,7 +204,11 @@ bash "restart swift proxy things" do
   code <<-EOH
 EOH
   action :run
-  notifies :restart, resources(:service => "memcached")
+  if node[:platform] == "suse"
+    notifies :restart, resources(:service => "memcached")
+  else
+    notifies :restart, resources(:service => "memcached-swift-proxy")
+  end
   notifies :restart, resources(:service => "swift-proxy")
 end
 
