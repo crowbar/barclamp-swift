@@ -54,8 +54,8 @@ to_use_disks.each { |k,v|
   end
   
   directory "/srv/node/#{target_suffix}" do
-    group "openstack-swift"
-    owner "openstack-swift"
+    group node[:swift][:group]
+    owner node[:swift][:user]
     recursive true
     action :create
   end
