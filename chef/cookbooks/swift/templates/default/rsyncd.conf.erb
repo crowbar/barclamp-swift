@@ -16,12 +16,7 @@
 # Author: andi abes
 #
 uid = <%= @uid %>
-gid = <%= @group  %>
-log file = /var/log/rsyncd.log
-pid file = /var/run/rsyncd.pid
-
-uid = swift
-gid = swift
+gid = <%= @gid %>
 log file = /var/log/rsyncd.log
 pid file = /var/run/rsyncd.pid
 address =  <%= @storage_net_ip %>
