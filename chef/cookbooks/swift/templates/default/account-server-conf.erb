@@ -16,7 +16,7 @@
 # Author: andi abes
 #
 
-[Default]
+[DEFAULT]
 #bind_ip = <%= @storage_net_ip %>
 bind_port = 6002
 
@@ -25,6 +25,8 @@ log_level = DEBUG
 log_name = swift-a
 log_requests = true
 setup_console_handler = true
+
+user = <%= @uid %>
 
 
 [pipeline:main]
