@@ -30,32 +30,6 @@ crowbar:
   run_order: 80
   chef_order: 80
 
-locale_additions:
-  en:
-    barclamp:
-      swift:
-        edit_attributes: 
-          attributes: Attributes
-          zones: Zones
-          partitions: Partitions
-          min_part_hours: Minimum Partitions per Hour
-          replicas: Replicas
-          cluster_hash: Cluster Hash
-          cluster_admin_pw: Cluster Admin Password
-          user: User
-          group: Group
-          debug: Debug
-          auth_method: Authentication method
-          keystone_instance: Keystone instance
-          keystone_service_user: Keystone Service User
-          keystone_service_password: Keystone Service Password
-          install_slog: Install sLogging support
-          slog_account: sLogging swift account
-          slog_user: sLogging swift user
-          slog_passwd: sLogging swift user's password
-        edit_deployment: 
-          deployment: Deployment
-
 debs:
   ubuntu-10.10:
     repos:
