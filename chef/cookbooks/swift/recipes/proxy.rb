@@ -43,9 +43,13 @@ end
 
 case node[:platform]
 when "suse"
-  package "openstack-swift-proxy"
+  package "openstack-swift-proxy" do
+    action :upgrade
+  end
 else
-  package "swift-proxy"
+  package "swift-proxy" do
+    action :upgrade
+  end
 end
 
 
