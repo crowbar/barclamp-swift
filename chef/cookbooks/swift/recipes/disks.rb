@@ -16,7 +16,9 @@
 # Author: andi abes
 #
 
-package "xfsprogs"
+package "xfsprogs" do
+  action :upgrade
+end
 
 log("locating disks using #{node[:swift][:disk_enum_expr]} test: #{node[:swift][:disk_test_expr]}") {level :debug}
 to_use_disks = {}

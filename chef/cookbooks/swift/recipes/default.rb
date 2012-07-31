@@ -16,13 +16,19 @@
 # Author: andi abes
 #
 
-package "curl"
+package "curl" do
+  action :upgrade
+end
 
 case node[:platform]
 when "suse"
-  package "openstack-swift"
+  package "openstack-swift" do
+    action :upgrade
+  end
 else
-  package "swift"
+  package "swift" do
+    action :upgrade
+  end
 end
 
 directory "/etc/swift" do

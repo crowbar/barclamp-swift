@@ -19,7 +19,9 @@
 
 case node[:platform]
 when "suse"
-  package "openstack-swift-account"
+  package "openstack-swift-account" do
+    action :upgrade
+  end
 else
   ## temporary workaround for swift-account package issue present in 1.3
   ## rather than apt-get install (which fails)
