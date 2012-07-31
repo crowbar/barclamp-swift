@@ -35,7 +35,7 @@ if node["swift"]["install_slog_from_dev"] or true
    end
 else
    package "python-slogging" do
-     action :install
+     action :upgrade
    end 
 end
 

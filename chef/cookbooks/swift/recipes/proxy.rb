@@ -37,7 +37,7 @@ proxy_config[:hide_auth] = false
 
 %w{curl memcached}.each do |pkg|
   package pkg do
-    action :install
+    action :upgrade
   end 
 end
 
@@ -52,14 +52,14 @@ end
 case proxy_config[:auth_method]
    when "swauth"
      package "python-swauth" do
-       action :install
+       action :upgrade
      end 
      proxy_config[:admin_key] =node[:swift][:cluster_admin_pw]
      proxy_config[:account_management] = node[:swift][:account_management]
 
    when "keystone" 
      package "python-keystone" do
-       action :install
+       action :upgrade
      end 
   
      env_filter = " AND keystone_config_environment:keystone-config-#{node[:swift][:keystone_instance]}"
