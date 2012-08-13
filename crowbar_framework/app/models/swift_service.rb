@@ -18,8 +18,8 @@ class SwiftService < ServiceObject
   def proposal_dependencies(new_config)
     answer = []
     hash = new_config.config_hash
-    if hash["auth_method"] == "keystone"
-      answer << { "barclamp" => "keystone", "inst" => hash["keystone_instance"] }
+    if hash["swift"]["auth_method"] == "keystone"
+      answer << { "barclamp" => "keystone", "inst" => hash["swift"]["keystone_instance"] }
     end
     answer
   end
@@ -30,9 +30,9 @@ class SwiftService < ServiceObject
     hash = base.config_hash
 
     rand_d = rand(100000)    
-    hash[:cluster_hash] = "%x" % rand_d
+    hash["swift"][:cluster_hash] = "%x" % rand_d
 
-    hash["keystone_instance"] = ""
+    hash["swift"]["keystone_instance"] = ""
     begin
       keystoneService = Barclamp.find_by_name("keystone")
       keystones = keystoneService.active_proposals
@@ -41,13 +41,13 @@ class SwiftService < ServiceObject
         keystones = keystoneService.proposals
       end
       if !keystones.empty?
-        hash["keystone_instance"] = keystones[0]
-        hash["auth_method"] = "keystone"
+        hash["swift"]["keystone_instance"] = keystones[0]
+        hash["swift"]["auth_method"] = "keystone"
       end
     rescue
       @logger.info("Swift create_proposal: no keystone found - will use swauth")
     end
-    hash["keystone_service_password"] = '%012d' % rand(1e12)
+    hash["swift"]["keystone_service_password"] = '%012d' % rand(1e12)
     base.config_hash = hash
 
     nodes = Node.all
