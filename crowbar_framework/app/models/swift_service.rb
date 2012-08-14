@@ -1,4 +1,4 @@
-# Copyright 2011, Dell 
+# Copyright 2012, Dell 
 # 
 # Licensed under the Apache License, Version 2.0 (the "License"); 
 # you may not use this file except in compliance with the License. 
@@ -15,15 +15,11 @@
 
 class SwiftService < ServiceObject
 
-  def initialize(thelogger)
-    @bc_name = "swift"
-    @logger = thelogger
-  end
-
-  def proposal_dependencies(role)
+  def proposal_dependencies(new_config)
     answer = []
-    if role.default_attributes["swift"]["auth_method"] == "keystone"
-      answer << { "barclamp" => "keystone", "inst" => role.default_attributes["swift"]["keystone_instance"] }
+    hash = new_config.config_hash
+    if hash["swift"]["auth_method"] == "keystone"
+      answer << { "barclamp" => "keystone", "inst" => hash["swift"]["keystone_instance"] }
     end
     answer
   end
@@ -31,73 +27,66 @@ class SwiftService < ServiceObject
   def create_proposal
     base = super
 
+    hash = base.config_hash
+
     rand_d = rand(100000)    
-    base[:attributes][:swift][:cluster_hash] = "%x" % rand_d
-    
-    nodes = NodeObject.all
-    nodes.delete_if { |n| n.nil? or n.admin? }
+    hash["swift"][:cluster_hash] = "%x" % rand_d
 
-
-    base["attributes"]["swift"]["keystone_instance"] = ""
+    hash["swift"]["keystone_instance"] = ""
     begin
-      keystoneService = KeystoneService.new(@logger)
-      keystones = keystoneService.list_active[1]
+      keystoneService = Barclamp.find_by_name("keystone")
+      keystones = keystoneService.active_proposals
       if keystones.empty?
         # No actives, look for proposals
-        keystones = keystoneService.proposals[1]
+        keystones = keystoneService.proposals
       end
       if !keystones.empty?
-	base["attributes"]["swift"]["keystone_instance"] = keystones[0]
-        base["attributes"]["swift"]["auth_method"] = "keystone"
+        hash["swift"]["keystone_instance"] = keystones[0]
+        hash["swift"]["auth_method"] = "keystone"
       end
     rescue
       @logger.info("Swift create_proposal: no keystone found - will use swauth")
     end
-    base["attributes"]["swift"]["keystone_service_password"] = '%012d' % rand(1e12)
+    hash["swift"]["keystone_service_password"] = '%012d' % rand(1e12)
+    base.config_hash = hash
 
-
-    base["deployment"]["swift"]["elements"] = {
-        "swift-proxy" => [  ],
-        "swift-ring-compute" => [  ],
-        "swift-storage" => []
-    }
+    nodes = Node.all
+    nodes.delete_if { |n| n.nil? or n.is_admin? }
 
     if nodes.size == 1
-      base["deployment"]["swift"]["elements"] = {
-        "swift-proxy-acct" => [ nodes.first[:fqdn] ],
-        "swift-ring-compute" => [ nodes.first[:fqdn] ],
-        "swift-storage" => [ nodes.first[:fqdn] ]
-      }
+      add_role_to_instance_and_node(nodes.first.name, base.name, "swift-proxy-acct")
+      add_role_to_instance_and_node(nodes.first.name, base.name, "swift-ring-compute")
+      add_role_to_instance_and_node(nodes.first.name, base.name, "swift-storage")
     elsif nodes.size > 1
       head = nodes.shift
-      base["deployment"]["swift"]["elements"] = {
-        "swift-proxy-acct" => [ head[:fqdn] ],
-        "swift-ring-compute" => [ head[:fqdn] ],
-        "swift-storage" => nodes.map { |x| x[:fqdn] }
-      }
+      add_role_to_instance_and_node(head.name, base.name, "swift-proxy-acct")
+      add_role_to_instance_and_node(head.name, base.name, "swift-ring-compute")
+      nodes.each do |node|
+        add_role_to_instance_and_node(node.name, base.name, "swift-storage")
+      end
     end
 
     @logger.fatal("swift create_proposal: exiting")
     base
   end
 
-  def apply_role_pre_chef_call(old_role, role, all_nodes)
+  def apply_role_pre_chef_call(old_config, new_config, all_nodes)
     @logger.debug("Swift apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
     # Make sure that the front-end pieces have public ip addreses.
-    net_svc = NetworkService.new @logger
+    net_svc = Barclamp.find_by_name("network").operations(@logger)
     [ "swift-proxy", "swift-proxy-acct" ].each do |element|
-      tnodes = role.override_attributes["swift"]["elements"][element]
+      tnodes = new_config.get_nodes_by_role(element)
       next if tnodes.nil? or tnodes.empty?
       tnodes.each do |n|
         next if n.nil?
-        net_svc.allocate_ip "default", "public", "host", n
+        net_svc.allocate_ip "default", "public", "host", n.name
       end
     end
 
     all_nodes.each do |n|
-      net_svc.allocate_ip "default", "storage", "host", n
+      net_svc.allocate_ip "default", "storage", "host", n.name
     end
     @logger.debug("Swift apply_role_pre_chef_call: leaving")
   end
