@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and 
 # limitations under the License. 
 # 
+require 'chef'
 
 class SwiftService < ServiceObject
   class ServiceError < StandardError
@@ -259,6 +260,14 @@ class SwiftService < ServiceObject
       return p if p.elements["#{@bc_name}-dispersion"].include? node
     end
     nil
+  end
+
+  def validate_proposal proposal
+    super
+
+    if proposal["attributes"]["swift"]["replicas"] <= 0
+      raise Chef::Exceptions::ValidationFailed.new("Need at least 1 replica (was configured to use #{proposal["attributes"]["swift"]["replicas"]})")
+    end
   end
 
 end
