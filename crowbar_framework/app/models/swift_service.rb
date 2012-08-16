@@ -113,6 +113,26 @@ class SwiftService < ServiceObject
     if proposal["attributes"]["swift"]["replicas"] <= 0
       raise Chef::Exceptions::ValidationFailed.new("Need at least 1 replica (was configured to use #{proposal["attributes"]["swift"]["replicas"]})")
     end
+
+    elements = proposal["deployment"]["swift"]["elements"]
+    if not elements.has_key?("swift-storage") or elements["swift-storage"].length < 1
+      raise Chef::Exceptions::ValidationFailed.new("Need at least one swift-storage node")
+    end
+
+    elements["swift-storage"].each do |n|
+      node = NodeObject.find_node_by_name(n)
+
+      usable_disks = 0
+      all_disks = eval(proposal["attributes"]["swift"]["disk_enum_expr"])
+
+      all_disks.each do |k,v|
+        usable_disks += 1 if eval(proposal["attributes"]["swift"]["disk_test_expr"])
+      end
+
+      if usable_disks == 0
+        raise Chef::Exceptions::ValidationFailed.new("swift-storage nodes need at least one additional disk; #{n} does not have any")
+      end
+    end
   end
 
 end
