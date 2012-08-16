@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and 
 # limitations under the License. 
 # 
+require 'chef'
 
 class SwiftService < ServiceObject
 
@@ -104,6 +105,14 @@ class SwiftService < ServiceObject
       net_svc.allocate_ip "default", "storage", "host", n
     end
     @logger.debug("Swift apply_role_pre_chef_call: leaving")
+  end
+
+  def validate_proposal proposal
+    super
+
+    if proposal["attributes"]["swift"]["replicas"] <= 0
+      raise Chef::Exceptions::ValidationFailed.new("Need at least 1 replica (was configured to use #{proposal["attributes"]["swift"]["replicas"]})")
+    end
   end
 
 end
