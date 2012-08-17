@@ -111,7 +111,7 @@ class SwiftService < ServiceObject
     super
 
     if proposal["attributes"]["swift"]["replicas"] <= 0
-      raise Chef::Exceptions::ValidationFailed.new("Need at least 1 replica (was configured to use #{proposal["attributes"]["swift"]["replicas"]})")
+      raise Chef::Exceptions::ValidationFailed.new("Need at least 1 replica")
     end
 
     elements = proposal["deployment"]["swift"]["elements"]
