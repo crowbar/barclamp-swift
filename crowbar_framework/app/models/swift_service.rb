@@ -113,20 +113,20 @@ class SwiftService < ServiceObject
     errors = []
 
     if proposal["attributes"]["swift"]["replicas"] <= 0
-      errors << "Need at least 1 replica"
+      errors << "Need at least 1 replica."
     end
 
     elements = proposal["deployment"]["swift"]["elements"]
 
     if not elements.has_key?("swift-storage") or elements["swift-storage"].length < 1
-      errors << "Need at least one swift-storage node"
+      errors << "Need at least one swift-storage node."
     else
 
       if elements["swift-storage"].length < proposal["attributes"]["swift"]["zones"]
         if elements["swift-storage"].length == 1
-          errors << "Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage node was set for #{proposal["attributes"]["swift"]["zones"]} zones"
+          errors << "Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage node was set for #{proposal["attributes"]["swift"]["zones"]} zones."
         else
-          errors << "Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage nodes were set for #{proposal["attributes"]["swift"]["zones"]} zones"
+          errors << "Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage nodes were set for #{proposal["attributes"]["swift"]["zones"]} zones."
         end
       end
 
@@ -136,7 +136,7 @@ class SwiftService < ServiceObject
         roles = node.roles()
         ["ceph-store", "nova-multi-controller"].each do |role|
           if roles.include?(role)
-            errors << "Node #{n} already has the #{role} role; nodes cannot have both swift-storage and #{role} roles"
+            errors << "Node #{n} already has the #{role} role; nodes cannot have both swift-storage and #{role} roles."
           end
         end
 
@@ -148,14 +148,14 @@ class SwiftService < ServiceObject
         end
 
         if usable_disks == 0
-          errors << "swift-storage nodes need at least one additional disk; #{n} does not have any"
+          errors << "Node #{n} does not have any additional disk; swift-storage nodes need at least one."
         end
       end
 
     end
 
     if errors.length > 0
-      raise Chef::Exceptions::ValidationFailed.new(errors.join("<br/>"))
+      raise Chef::Exceptions::ValidationFailed.new(errors.join("\n"))
     end
   end
 
