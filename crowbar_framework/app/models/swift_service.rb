@@ -268,6 +268,21 @@ class SwiftService < ServiceObject
     if proposal["attributes"]["swift"]["replicas"] <= 0
       raise Chef::Exceptions::ValidationFailed.new("Need at least 1 replica (was configured to use #{proposal["attributes"]["swift"]["replicas"]})")
     end
+
+    elements = proposal["deployment"]["swift"]["elements"]
+
+    if not elements.has_key?("swift-storage") or elements["swift-storage"].length < 1
+      raise Chef::Exceptions::ValidationFailed.new("Need at least one swift-storage node")
+    end
+
+    if elements["swift-storage"].length < proposal["attributes"]["swift"]["zones"]
+      if elements["swift-storage"].length == 1
+        raise Chef::Exceptions::ValidationFailed.new("Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage node was set for #{proposal["attributes"]["swift"]["zones"]} zones")
+      else
+        raise Chef::Exceptions::ValidationFailed.new("Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage nodes were set for #{proposal["attributes"]["swift"]["zones"]} zones")
+      end
+    end
+
   end
 
 end
