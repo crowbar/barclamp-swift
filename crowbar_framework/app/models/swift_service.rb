@@ -262,7 +262,7 @@ class SwiftService < ServiceObject
     nil
   end
 
-  def validate_proposal proposal
+  def validate_proposal_after_save proposal
     super
 
     if proposal["attributes"]["swift"]["replicas"] <= 0
