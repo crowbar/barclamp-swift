@@ -131,6 +131,13 @@ class SwiftService < ServiceObject
     elements["swift-storage"].each do |n|
       node = NodeObject.find_node_by_name(n)
 
+      roles = node.roles()
+      ["ceph-store", "nova-multi-controller"].each do |role|
+        if roles.include?(role)
+          raise Chef::Exceptions::ValidationFailed.new("Node #{n} already has the #{role} role; nodes cannot have both swift-storage and #{role} roles")
+        end
+      end
+
       usable_disks = 0
       all_disks = eval(proposal["attributes"]["swift"]["disk_enum_expr"])
 
