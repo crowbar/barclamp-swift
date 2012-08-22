@@ -29,7 +29,7 @@ user = <%= @user %>
 group = <%= @group %>
 
 log_facility = LOG_LOCAL0
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 log_name = swift-p
 log_requests = true
 setup_console_handler = true
@@ -60,7 +60,7 @@ use = egg:swift#proxy
 
 log_name = proxy-server
 log_facility = LOG_LOCAL1
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 access_log_name = proxy-server
 access_log_facility = LOG_LOCAL1
 access_log_level = INFO
@@ -71,7 +71,7 @@ log_requests = true
 use = egg:swauth#swauth
 set default_swift_cluster = local#https://<%= @local_ip %>:8080/v1
 super_admin_key = <%= @admin_key %>
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 <% end %>
 
 <% if @keystone %>
