@@ -156,7 +156,7 @@ proxy_config[:memcached_ips] = servers
 
 
 
-## Create the proxy server configuraiton file
+## Create the proxy server configuration file
 template "/etc/swift/proxy-server.conf" do
   source     "proxy-server.conf.erb"
   mode       "0644"
@@ -171,20 +171,15 @@ node[:memcached][:listen] = local_ip
 node[:memcached][:name] = "swift-proxy"
 include_recipe "memcached"
 service "memcached" do
-  action :enable
+  action [:enable, :start]
 end
 
 service "swift-proxy" do
   service_name "openstack-swift-proxy" if node[:platform] == "suse"
   action [:enable, :start]
-end
-
-bash "restart swift proxy things" do
-  code <<-EOH
-EOH
-  action :run
-  notifies :restart, resources(:service => "memcached")
-  notifies :restart, resources(:service => "swift-proxy")
+  subscribes(:restart,
+             resources(:template => "/etc/swift/proxy-server.conf"),
+             :immediately)
 end
 
 ### 

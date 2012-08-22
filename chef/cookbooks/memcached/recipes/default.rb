@@ -28,11 +28,6 @@ when "debian", "ubuntu"
   end
 end
 
-service "memcached" do
-  action :nothing
-  supports :status => true, :start => true, :stop => true, :restart => true
-end
-
 template "/etc/memcached.conf" do
   case node[:platform]
   when "suse"
@@ -51,7 +46,6 @@ template "/etc/memcached.conf" do
     :port => node[:memcached][:port],
     :memory => node[:memcached][:memory]
   )
-  notifies :restart, resources(:service => "memcached"), :immediately
 end
 
 case node[:lsb][:codename]
@@ -61,6 +55,19 @@ when "karmic"
     owner "root"
     group "root"
     mode "0644"
-    notifies :restart, resources(:service => "memcached"), :immediately
+  end
+end
+
+service "memcached" do
+  action :nothing
+  supports :status => true, :start => true, :stop => true, :restart => true
+  subscribes(:restart,
+             resources(:template => "/etc/memcached.conf"),
+             :immediately)
+  case node[:lsb][:codename]
+  when "karmic"
+    subscribes(:restart,
+               resources(:template => "/etc/default/memcached"),
+               :immediately)
   end
 end
