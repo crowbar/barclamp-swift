@@ -15,7 +15,7 @@
 	  "reseller_prefix" : "AUTH",
 	  "user": "openstack-swift",
 	  "group": "openstack-swift", 	  
-	  "debug": true,
+	  "debug": false,
       "use_slog" : false, 
 	  "slog_account": "system_stats",
 	  "slog_user": "swift_sys",
