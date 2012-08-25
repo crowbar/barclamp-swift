@@ -14,8 +14,5 @@
 # 
 
 class SwiftController < BarclampController
-  def initialize
-    @service_object = SwiftService.new logger
-  end
 end
 
