@@ -21,7 +21,9 @@ include_recipe 'swift::auth'
 
 
 local_ip = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
+admin_host = node[:fqdn]
 public_ip = Swift::Evaluator.get_ip_by_type(node, :public_ip_expr)
+public_host = 'public.'+node[:fqdn]
 
 
 ### 
@@ -75,7 +77,7 @@ case proxy_config[:auth_method]
        keystone = node
      end
 
-     keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+     keystone_host = keystone[:fqdn]
      keystone_protocol = keystone["keystone"]["api"]["protocol"]
      keystone_token = keystone["keystone"]["service"]["token"] rescue nil
      keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
@@ -85,16 +87,16 @@ case proxy_config[:auth_method]
      keystone_service_password = "fredfred" # GREG: Fix this
 
 
-     Chef::Log.info("Keystone server found at #{keystone_address}")
+     Chef::Log.info("Keystone server found at #{keystone_host}")
      proxy_config[:keystone_admin_token]  = keystone_token
-     proxy_config[:keystone_vip] = keystone_address
+     proxy_config[:keystone_host] = keystone_host
      proxy_config[:keystone_protocol] = keystone_protocol
      proxy_config[:keystone_port] = keystone_admin_port
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
 
      keystone_register "register swift service" do
        protocol keystone_protocol
-       host keystone_address
+       host keystone_host
        token keystone_token
        port keystone_admin_port
        service_name "swift"
@@ -105,14 +107,14 @@ case proxy_config[:auth_method]
 
      keystone_register "register swift-proxy endpoint" do
          protocol keystone_protocol
-         host keystone_address
+         host keystone_host
          token keystone_token
          port keystone_admin_port
          endpoint_service "swift"
          endpoint_region "RegionOne"
-         endpoint_publicURL "https://#{public_ip}:8080/v1/#{proxy_config[:reseller_prefix]}$(tenant_id)s"
-         endpoint_adminURL "https://#{local_ip}:8080/v1/"
-         endpoint_internalURL "https://#{local_ip}:8080/v1/#{proxy_config[:reseller_prefix]}$(tenant_id)s"
+         endpoint_publicURL "https://#{public_host}:8080/v1/#{proxy_config[:reseller_prefix]}$(tenant_id)s"
+         endpoint_adminURL "https://#{admin_host}:8080/v1/"
+         endpoint_internalURL "https://#{admin_host}:8080/v1/#{proxy_config[:reseller_prefix]}$(tenant_id)s"
          #  endpoint_global true
          #  endpoint_enabled true
         action :add_endpoint_template

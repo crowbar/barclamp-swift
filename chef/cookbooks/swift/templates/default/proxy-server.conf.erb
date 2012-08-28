@@ -84,7 +84,7 @@ reseller_prefix=<%= @reseller_prefix %>
 paste.filter_factory = keystone.middleware.auth_token:filter_factory
 delay_auth_decision = 1
 auth_protocol = <%= @keystone_protocol %>
-auth_host = <%= @keystone_vip %>
+auth_host = <%= @keystone_host %>
 auth_port = <%= @keystone_port %>
 admin_token = <%= @keystone_admin_token %>
 <% end %>
