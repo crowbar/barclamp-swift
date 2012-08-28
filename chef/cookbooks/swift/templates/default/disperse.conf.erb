@@ -1,4 +1,4 @@
 [dispersion]
-auth_url = https://<%= @local_ip %>:8080/v1
+auth_url = https://<%= @admin_host %>:8080/v1
 auth_user = <%= node["swift_account"] %>:<%= node["swift_user"] %>
 auth_key = <%= node["swift_pwd"] %>

@@ -33,7 +33,7 @@ proxy_config[:auth_method] = node[:swift][:auth_method]
 proxy_config[:group] = node[:swift][:group]
 proxy_config[:user] = node[:swift][:user]
 proxy_config[:debug] = node[:swift][:debug]
-proxy_config[:local_ip] = local_ip
+proxy_config[:admin_host] = admin_host
 proxy_config[:public_ip] = public_ip
 proxy_config[:hide_auth] = false
 
