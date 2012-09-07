@@ -45,6 +45,11 @@
         [ "swift-proxy-acct" ],
         [ "swift-storage" ]
       ],
+      "element_run_list_order": {
+        "swift-ring-compute": 80,
+        "swift-proxy-acct": 81,
+        "swift-storage": 82
+      },
       "config": {
         "environment": "swift-config-base",
         "mode": "full",
