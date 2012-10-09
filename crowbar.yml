@@ -22,6 +22,7 @@ barclamp:
   allow_multiple_proposals: true
   requires:
     - @crowbar
+    - keystone
   member:
     - openstack
 
@@ -49,7 +50,7 @@ debs:
     - sqlite
     - swift-account
     - memcached
-    - swift-proxy 
+    - swift-proxy
     - xfsprogs
     - libmemcache-dev
     - python-swift
