@@ -64,8 +64,6 @@ class RingInfo
   end
 end
 
-
-
 def load_current_resource
   name = @new_resource.name
   name = "/etc/swift/#{name}"
