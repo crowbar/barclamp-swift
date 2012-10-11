@@ -48,8 +48,8 @@ setup_console_handler = true
       auth = "tempauth"
       @tempauth = true and !@hide_auth
  end
-%>q
-pipeline = catch_errors healthcheck cache swift3 <%= auth %> proxy-server
+%>
+pipeline = catch_errors healthcheck cache <%= auth %> proxy-logging proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
@@ -103,6 +103,7 @@ auth_token = <%= @keystone_admin_token %>
 admin_token = <%= @keystone_admin_token %>
 
 [filter:auth_token]
+signing_dir = /var/cache/swift
 paste.filter_factory = keystone.middleware.auth_token:filter_factory
 auth_host = <%= @keystone_vip %>
 auth_port = <%= @keystone_admin_port %>
@@ -124,5 +125,6 @@ user_test_tester3 = testing3
 bind_ip = 0.0.0.0
 <% end %>
 
-
+[filter:proxy-logging]
+use = egg:swift#proxy_logging
 
