@@ -30,20 +30,15 @@ def get_uuid(disk)
   nil
 end
 
-log("locating disks using #{node[:swift][:disk_enum_expr]} test: #{node[:swift][:disk_test_expr]}") {level :debug}
+Chef::Log.info("locating disks using #{node[:swift][:disk_enum_expr]} test: #{node[:swift][:disk_test_expr]}")
 to_use_disks = []
-all_disks = node["crowbar"]["disks"]
+all_disks = eval(node[:swift][:disk_enum_expr])
 all_disks.each { |k,v|
-  to_use_disks << k if (v["usage"] == "Storage") && ::File.exists?("/dev/#{k}")
+  b = binding()
+  to_use_disks << k if eval(node[:swift][:disk_test_expr]) && ::File.exists?("/dev/#{k}")
 }
 
-Chef::Log.info("Swift will use these disks: #{to_use_disks.join(":")}")
-
-# Make sure that the kernel is aware of the current state of the
-# drive partition tables.
-::Kernel.system("partprobe #{to_use_disks.map{|d|"/dev/#{d}"}.join(' ')}")
-# Let udev catch up, if needed.
-sleep 3
+Chef::Log.info("Swift will use these disks: #{to_use_disks.join(" ")}")
 
 node[:swift] ||= Mash.new
 node[:swift][:devs] ||= Mash.new
