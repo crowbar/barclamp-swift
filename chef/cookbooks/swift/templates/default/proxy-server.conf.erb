@@ -48,7 +48,7 @@ setup_console_handler = true
       auth = "tempauth"
       @tempauth = true and !@hide_auth
  end
-%>
+%>q
 pipeline = catch_errors healthcheck cache swift3 <%= auth %> proxy-server
 
 [app:proxy-server]
@@ -74,9 +74,6 @@ use = egg:swift#catch_errors
 use = egg:swift#memcache
 memcache_servers = <%= @memcached_ips %>
 log_name = cache
-
-[filter:swift3]
-use = egg:swift#swift3
 
 <%if @swauth %>
 [filter:swauth]

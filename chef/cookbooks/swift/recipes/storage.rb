@@ -52,6 +52,11 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
   end
 end
 
+directory "/var/cache/swift" do
+  action :create
+  user node[:swift][:user]
+  group node[:swift][:user]
+end
 
 svcs = %w{swift-object swift-object-auditor swift-object-replicator swift-object-updater} 
 svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-updater}
