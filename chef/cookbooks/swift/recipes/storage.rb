@@ -27,6 +27,7 @@ include_recipe 'swift::rsync'
 end
 
 %w{swift-container swift-object swift-account}.each do |pkg|
+%w{swift-container swift-object swift-account python-swiftclient}.each do |pkg|
   pkg = "openstack-#{pkg}" if node[:platform] == "suse"
   package pkg do
     action :upgrade
