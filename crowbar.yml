@@ -21,6 +21,7 @@ barclamp:
   version: 0
   requires:
     - @crowbar
+    - keystone
   member:
     - openstack
 
@@ -74,7 +75,7 @@ debs:
     - sqlite
     - swift-account
     - memcached
-    - swift-proxy 
+    - swift-proxy
     - xfsprogs
     - libmemcache-dev
     - python-swift

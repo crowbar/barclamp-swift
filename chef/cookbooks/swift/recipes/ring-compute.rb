@@ -57,13 +57,15 @@ nodes.each { |node|
   log ("Looking at node: #{storage_ip}") {level :debug} 
   disks=node[:swift][:devs] 
   next if disks.nil?
-  disks.each {|disk|
+  disks.each {|uuid,disk|
+    Chef::Log.info("Swift - considering #{node[:fqdn]}:#{disk[:name]}")
+    next unless disk[:state] == "Operational"
     z_o, w_o = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "object", :disk=>disk)    
     z_c,w_c = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "container", :disk=>disk)
     z_a,w_a = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "account", :disk=>disk)
     
-    log("obj: #{z_o}/#{w_o} container: #{z_c}/#{w_c} account: #{z_a}/#{w_a}. count: #{$DISK_CNT}") {level :debug}
-    d = {:ip => storage_ip, :dev_name=>disk[:name], :port => 6000}
+    log("obj: #{z_o}/#{w_o} container: #{z_c}/#{w_c} account: #{z_a}/#{w_a}. count: #{$DISK_CNT}") {level :info}
+    d = {:ip => storage_ip, :dev_name=> disk[:name], :port => 6000}
     if z_o
       d[:port] = 6000; d[:zone]=z_o ; d[:weight]=w_o
       disks_o << d
@@ -91,6 +93,7 @@ swift_ringfile "account.builder" do
   disks disks_a
   replicas replicas
   min_part_hours min_move
+
   partitions parts
   action [:apply, :rebalance]
 end
