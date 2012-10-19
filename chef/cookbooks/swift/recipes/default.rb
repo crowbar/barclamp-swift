@@ -40,10 +40,12 @@ template "/etc/swift/swift.conf" do
  })
 end
 
-directory "/var/lock/swift" do
-  owner node[:swift][:user]
-  group node[:swift][:group]
-  mode "0755"
+[ "cache","lock"].each do |d|
+  directory "/var/#{d}/swift" do
+    owner node[:swift][:user]
+    group node[:swift][:group]
+    mode "0755"
+  end
 end
 
 

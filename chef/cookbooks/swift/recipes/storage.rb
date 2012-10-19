@@ -27,6 +27,7 @@ include_recipe 'swift::rsync'
 end
 
 %w{swift-container swift-object swift-account}.each do |pkg|
+%w{swift-container swift-object swift-account python-swiftclient}.each do |pkg|
   pkg = "openstack-#{pkg}" if node[:platform] == "suse"
   package pkg do
     action :upgrade
@@ -51,6 +52,11 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
   end
 end
 
+directory "/var/cache/swift" do
+  action :create
+  user node[:swift][:user]
+  group node[:swift][:user]
+end
 
 svcs = %w{swift-object swift-object-auditor swift-object-replicator swift-object-updater} 
 svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-updater}

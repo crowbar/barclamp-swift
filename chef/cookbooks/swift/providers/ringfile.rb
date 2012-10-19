@@ -36,8 +36,7 @@ class RingInfo
       self
     end
     def to_s
-      s = "" 
-      s <<"@" << @id <<":" << @zone << "[" << @ip <<":" << @port <<"]/" << @name 
+      s = "@#{@id}:#{@zone}[#{@ip}:#{@port}]/#{@name}" 
     end
   end
   
@@ -47,7 +46,7 @@ class RingInfo
   end
   
   def self.dev_key ip,port,name
-    "" << ip << ":" << port.to_s << "-" << name
+    "#{ip}:#{port.to_s}-#{name}"
   end
   
   def add_device d
@@ -64,8 +63,6 @@ class RingInfo
     }
   end
 end
-
-
 
 def load_current_resource
   name = @new_resource.name

@@ -22,6 +22,7 @@ barclamp:
   allow_multiple_proposals: true
   requires:
     - @crowbar
+    - keystone
   member:
     - openstack
 
@@ -38,9 +39,9 @@ debs:
   ubuntu-11.04:
     repos:
       - deb http://ops.rcb.me/packages natty diablo-final
-  ubuntu-11.10:
+  ubuntu-12.04
     repos:
-      - deb http://ops.rcb.me/packages oneiric diablo-final
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
   pkgs:
     - curl
     - swift
@@ -49,7 +50,7 @@ debs:
     - sqlite
     - swift-account
     - memcached
-    - swift-proxy 
+    - swift-proxy
     - xfsprogs
     - libmemcache-dev
     - python-swift
