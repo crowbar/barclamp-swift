@@ -24,8 +24,8 @@ class SwiftService < ServiceObject
     answer
   end
 
-  def create_proposal
-    base = super
+  def create_proposal(name)
+    base = super(name)
 
     hash = base.config_hash
 
