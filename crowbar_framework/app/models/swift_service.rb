@@ -29,6 +29,9 @@ class SwiftService < ServiceObject
     if role.default_attributes["swift"]["auth_method"] == "keystone"
       answer << { "barclamp" => "keystone", "inst" => role.default_attributes["swift"]["keystone_instance"] }
     end
+    if role.default_attributes[@bc_name]["use_gitrepo"]
+      answer << { "barclamp" => "git", "inst" => role.default_attributes[@bc_name]["git_instance"] }
+    end
     answer
   end
 
@@ -41,6 +44,20 @@ class SwiftService < ServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
+    base["attributes"][@bc_name]["git_instance"] = ""
+    begin
+      gitService = GitService.new(@logger)
+      gits = gitService.list_active[1]
+      if gits.empty?
+        # No actives, look for proposals
+        gits = gitService.proposals[1]
+      end
+      unless gits.empty?
+        base["attributes"][@bc_name]["git_instance"] = gits[0]
+      end
+    rescue
+      @logger.info("#{@bc_name} create_proposal: no git found")
+    end
 
     base["attributes"]["swift"]["keystone_instance"] = ""
     begin

@@ -16,8 +16,17 @@
 # Author: andi abes
 #
 
-%w{curl swift}.each do |pkg|
-  package pkg
+
+unless node[:swift][:use_gitrepo]
+  %w{curl swift}.each do |pkg|
+    package pkg
+  end
+else
+  pfs_and_install_deps(@cookbook_name)
+  create_user_and_dirs(@cookbook_name) do
+    user_name node[:swift][:user]
+    dir_group node[:swift][:group]
+  end
 end
 
 directory "/etc/swift" do
