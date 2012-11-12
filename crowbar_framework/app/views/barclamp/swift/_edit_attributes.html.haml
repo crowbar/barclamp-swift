@@ -17,7 +17,7 @@
     -# %p
       -# %label{ :for => :use_slog }= t('.install_slog')
       -# = select_tag :use_slog, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_slog"].to_s), :onchange => "update_value('use_slog', 'use_slog', 'boolean')"
-
+    = render 'barclamp/git/pfsdeps.html.haml'
     %p
       %label{ :for => :zones }= t('.zones')
       %input#zones{:type => "text", :name => "zones", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["zones"], :onchange => "update_value('zones', 'zones', 'integer')"}

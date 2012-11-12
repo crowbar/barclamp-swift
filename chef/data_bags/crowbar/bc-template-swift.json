@@ -7,7 +7,7 @@
       "gitrepo": "http://github.com/openstack/cinder.git",
       "git_instance": "",
       "git_refspec": "stable/folsom",
-      "use_gitrepo": false,
+      "use_gitrepo": true,
       "use_gitbarclamp": true,
       "use_pip_cache": true,
       "pfs_deps": [
@@ -27,7 +27,8 @@
         "python-webob",
         "python-xattr",
         "sqlite3",
-        "xfsprogs"
+        "xfsprogs",
+        "pip://python-swiftclient"
       ],
       "cluster_hash": "fa8bea159b55bd7e",
       "cluster_admin_pw": "swauth",

@@ -53,6 +53,14 @@ case proxy_config[:auth_method]
 
    when "keystone" 
 
+     env_filter = " AND keystone_config_environment:keystone-config-#{node[:swift][:keystone_instance]}"
+     keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
+     if keystones.length > 0
+       keystone = keystones[0]
+     else
+       keystone = node
+     end
+
      unless node[:swift][:use_gitrepo]
        package "python-keystone" do
          action :install
@@ -64,14 +72,6 @@ case proxy_config[:auth_method]
        end
      end
      
-     env_filter = " AND keystone_config_environment:keystone-config-#{node[:swift][:keystone_instance]}"
-     keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-     if keystones.length > 0
-       keystone = keystones[0]
-     else
-       keystone = node
-     end
-
      keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
      keystone_token = keystone["keystone"]["service"]["token"] rescue nil
      keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
@@ -190,7 +190,9 @@ node[:memcached][:name] = "swift-proxy"
 memcached_instance "swift-proxy" do
 end
 
-#TODO: pfs for that thing?
+if node[:swift][:use_gitrepo]
+  swift_service("swift-proxy")
+end
 service "swift-proxy" do
   restart_command "stop swift-proxy ; start swift-proxy"
   action [:enable, :start]

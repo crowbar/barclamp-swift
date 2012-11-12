@@ -65,6 +65,9 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
   }
     
   svcs.each { |x| 
+    if node[:swift][:use_gitrepo]
+      swift_service(x)
+    end
     service x do
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
         restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"
