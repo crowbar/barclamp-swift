@@ -20,11 +20,14 @@ include_recipe 'swift::disks'
 #include_recipe 'swift::auth' 
 include_recipe 'swift::rsync'
 
-#TODO:pfs pkgs
-%w{swift-container swift-object swift-account sqlite }.each do |pkg|
-  package pkg do
-    action :upgrade
+unless node[:swift][:use_gitrepo]
+  %w{swift-container swift-object swift-account sqlite }.each do |pkg|
+    package pkg do
+      action :upgrade
+    end
   end
+else
+  package "sqlite"
 end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
