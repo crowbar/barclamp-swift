@@ -26,9 +26,12 @@ log_name = swift-a
 log_requests = true
 setup_console_handler = true
 
-
 [pipeline:main]
-pipeline =  account-server
+pipeline = recon account-server
+
+[filter:recon]
+use = egg:swift#recon
+# recon_cache_path = /var/cache/swift
 
 [app:account-server]
 use = egg:swift#account

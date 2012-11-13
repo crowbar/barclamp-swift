@@ -17,7 +17,13 @@
 #
 ## temporary workaround for swift-account package issue present in 1.3
 ## rather than apt-get install (which fails)
-execute "get swift-account" do
-  command "apt-get install --allow-unauthenticated swift-account" # This will fail, but it gets the image local
-#  returns 100 
+
+
+#TODO(agordeev) PFS?
+
+unless node[:swift][:use_gitrepo]
+  execute "get swift-account" do
+    command "apt-get install --allow-unauthenticated swift-account" # This will fail, but it gets the image local
+  #  returns 100 
+  end
 end

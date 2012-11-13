@@ -42,14 +42,14 @@ setup_console_handler = true
       auth = "swauth"
       @swauth = true and !@hide_auth
     when "keystone"
-      auth = "auth_token keystone"
+      auth = "auth_token keystoneauth"
       @keystone = true and !@hide_auth
     when "tempauth"
       auth = "tempauth"
       @tempauth = true and !@hide_auth
  end
 %>
-pipeline = catch_errors healthcheck cache swift3 <%= auth %> proxy-server
+pipeline = catch_errors healthcheck cache ratelimit <%= auth %> proxy-logging proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
@@ -88,8 +88,8 @@ log_level = DEBUG
 
 <% if @keystone %>
 
-[filter:keystone]
-paste.filter_factory = keystone.middleware.swift_auth:filter_factory
+[filter:keystoneauth]
+use = egg:swift#keystoneauth
 operator_roles = Member,admin
 reseller_prefix=<%= @reseller_prefix %>
 
@@ -114,6 +114,7 @@ auth_uri = http://<%= @keystone_vip %>:<%= @keystone_service_port %>/
 admin_tenant_name = <%= @keystone_service_tenant %>
 admin_user = <%= @keystone_service_user %>
 admin_password = <%= @keystone_service_password %>
+signing_dir = /tmp/keystone-signing-swift
 
 <% end %>
 
@@ -128,4 +129,8 @@ bind_ip = 0.0.0.0
 <% end %>
 
 
+[filter:ratelimit]
+use = egg:swift#ratelimit
 
+[filter:proxy-logging]
+use = egg:swift#proxy_logging

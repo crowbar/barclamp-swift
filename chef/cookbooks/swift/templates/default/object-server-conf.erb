@@ -28,12 +28,17 @@ setup_console_handler = true
 
 
 [pipeline:main]
-pipeline =  object-server
+pipeline = recon object-server
 
 [app:object-server]
 use = egg:swift#object
 log_level = DEBUG
 log_requests = true
+
+[filter:recon]
+use = egg:swift#recon
+#recon_cache_path = /var/cache/swift
+#recon_lock_path = /var/lock
 
 [object-replicator]
 
