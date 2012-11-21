@@ -4,7 +4,7 @@
   "description": "part of Openstack, and provides a distributed blob storage",
   "attributes": {
     "swift": {
-      "gitrepo": "http://github.com/openstack/cinder.git",
+      "gitrepo": "http://github.com/openstack/swift.git",
       "git_instance": "",
       "git_refspec": "stable/folsom",
       "use_gitrepo": true,
