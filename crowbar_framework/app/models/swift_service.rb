@@ -86,12 +86,14 @@ class SwiftService < ServiceObject
     if nodes.size == 1
       base["deployment"]["swift"]["elements"] = {
         "swift-proxy-acct" => [ nodes.first[:fqdn] ],
+        "swift-dispersion" => [ nodes.first[:fqdn] ],
         "swift-ring-compute" => [ nodes.first[:fqdn] ],
         "swift-storage" => [ nodes.first[:fqdn] ]
       }
     elsif nodes.size > 1
       head = nodes.shift
       base["deployment"]["swift"]["elements"] = {
+        "swift-dispersion" => [ head[:fqdn] ],
         "swift-proxy-acct" => [ head[:fqdn] ],
         "swift-ring-compute" => [ head[:fqdn] ],
         "swift-storage" => nodes.map { |x| x[:fqdn] }

@@ -36,7 +36,8 @@
         "python-xattr",
         "sqlite3",
         "xfsprogs",
-        "pip://python-swiftclient"
+        "pip://python-swiftclient>1.2.0",
+        "pip://python-keystoneclient"
       ],
       "cluster_hash": "fa8bea159b55bd7e",
       "cluster_admin_pw": "swauth",
@@ -67,6 +68,7 @@
     "swift": {
       "crowbar-revision": 0,
       "element_states": {
+        "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
         "swift-proxy": [ "readying", "ready", "applying" ],
         "swift-proxy-acct": [ "readying", "ready", "applying" ],
@@ -77,12 +79,14 @@
         [ "swift-storage" ],  
         [ "swift-ring-compute" ], 
         [ "swift-proxy-acct" ],
+        [ "swift-dispersion" ],
         [ "swift-storage" ]
       ],
       "element_run_list_order": {
         "swift-ring-compute": 80,
         "swift-proxy-acct": 81,
-        "swift-storage": 82
+        "swift-storage": 82,
+        "swift-dispersion": 83
       },
       "config": {
         "environment": "swift-config-base",
