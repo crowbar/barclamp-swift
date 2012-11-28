@@ -14,6 +14,8 @@
 # 
 
 class SwiftService < ServiceObject
+  class ServiceError < StandardError
+  end
 
   def initialize(thelogger)
     @bc_name = "swift"
@@ -123,6 +125,143 @@ class SwiftService < ServiceObject
       net_svc.allocate_ip "default", "storage", "host", n
     end
     @logger.debug("Swift apply_role_pre_chef_call: leaving")
+  end
+
+  def get_report_run_by_uuid(uuid)
+    get_dispersion_reports.each do |r|
+        return r if r['uuid'] == uuid
+    end
+    nil
+  end
+
+  def self.get_all_nodes_hash
+    Hash[ NodeObject.find_all_nodes.map {|n| [n.name, n]} ]
+  end
+
+  def get_ready_nodes
+    nodes = get_ready_proposals.collect { |p| p.elements["#{@bc_name}-dispersion"] }.flatten
+    NodeObject.find_all_nodes.select { |n| nodes.include?(n.name) and n.ready? }
+  end
+
+  def get_ready_proposals
+    ProposalObject.find_proposals(@bc_name).select {|p| p.status == 'ready'}.compact
+  end
+
+  def _get_or_create_db
+    db = ProposalObject.find_data_bag_item "crowbar/swift"
+    if db.nil?
+      begin
+        lock = acquire_lock @bc_name
+      
+        db_item = Chef::DataBagItem.new
+        db_item.data_bag "crowbar"
+        db_item["id"] = "swift"
+        db_item["dispersion_reports"] = []
+        db = ProposalObject.new db_item
+        db.save
+      ensure
+        release_lock lock
+      end
+    end
+    db
+  end
+
+  def get_dispersion_reports
+    _get_or_create_db["dispersion_reports"]
+  end
+
+  def clear_dispersion_reports
+    def delete_file(file_name)
+      File.delete(file_name) if File.exist?(file_name)
+    end
+
+    def process_exists(pid)
+      begin
+        Process.getpgid( pid )
+        true
+      rescue Errno::ESRCH
+        false
+      end
+    end
+
+    swift_db = _get_or_create_db
+
+    @logger.info('cleaning out report runs and results')
+    swift_db['dispersion_reports'].delete_if do |report_run|
+      if report_run['status'] == 'running'
+        if report_run['pid'] and not process_exists(report_run['pid'])
+          @logger.warn("running dispersion run #{report_run['uuid']} seems to be stale")
+        elsif Time.now.utc.to_i - report_run['started'] > 60 * 60 * 4 # older than 4 hours
+          @logger.warn("running dispersion run #{report_run['uuid']} seems to be outdated, started at #{Time.at(report_run['started']).to_s}")
+        else
+          @logger.debug("omitting running dispersion run #{report_run['uuid']} while cleaning")
+          next
+        end
+      else
+        delete_file(report_run['results.html'])
+        delete_file(report_run['results.json'])
+      end
+      @logger.debug("removing dispersion run #{report_run['uuid']}")
+      true
+    end
+
+    lock = acquire_lock(@bc_name)
+    swift_db.save
+    release_lock(lock)
+  end
+
+  def run_report(node)
+    raise "unable to look up a #{@bc_name} proposal applied to #{node.inspect}" if (proposal = _get_proposal_by_node node).nil?
+    
+    report_run_uuid = `uuidgen`.strip
+    report_run = { 
+      "uuid" => report_run_uuid, "started" => Time.now.utc.to_i, "ended" => nil, "pid" => nil,
+      "status" => "running", "node" => node, "results.json" => "log/#{report_run_uuid}.json",
+      "results.html" => "log/#{report_run_uuid}.html"}
+
+    swift_db = _get_or_create_db
+
+    swift_db['dispersion_reports'].each do |dr|
+      raise ServiceError, I18n.t("barclamp.#{@bc_name}.run.duplicate") if dr['node'] == node and dr['status'] == 'running'
+    end
+
+    lock = acquire_lock(@bc_name)
+    swift_db["dispersion_reports"] << report_run
+    swift_db.save
+    release_lock(lock)
+
+    swift_user = proposal["attributes"][@bc_name]["user"]
+    @logger.info("starting dispersion-report on node #{node}, report run uuid #{report_run['uuid']}")
+
+    pid = fork do
+      command_line = "sudo -u #{swift_user} swift-dispersion-report 2>/dev/null"
+      Process.waitpid run_remote_chef_client(node, command_line, report_run["results.json"])
+
+      report_run["ended"] = Time.now.utc.to_i
+      report_run["status"] = $?.exitstatus.equal?(0) ? "passed" : "failed"
+      report_run["pid"] = nil 
+
+      lock = acquire_lock(@bc_name)
+      swift_db.save
+      release_lock(lock)
+
+      @logger.info("report run #{report_run['uuid']} complete, status '#{report_run['status']}'")
+    end
+    Process.detach pid
+
+    # saving the PID to prevent 
+    report_run['pid'] = pid
+    lock = acquire_lock(@bc_name)
+    swift_db.save
+    release_lock(lock)
+    report_run
+  end
+
+  def _get_proposal_by_node(node)
+    get_ready_proposals.each do |p|
+      return p if p.elements["#{@bc_name}-dispersion"].include? node
+    end
+    nil
   end
 
 end

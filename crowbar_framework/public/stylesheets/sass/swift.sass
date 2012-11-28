@@ -1,0 +1,62 @@
+.test_suite.box tr td:first-child
+  padding: 0
+
+.test_suite
+  table-layout: fixed
+
+  .misc
+    width: 16px
+  .name 
+    width: 100%
+  
+  .time 
+    width: 70px
+    text-align: right
+
+  .status
+    width: 70px
+    text-align: right
+
+  .msg 
+    td:first-child
+      padding: 0
+
+    pre 
+      margin: 0
+      padding: 5px
+      width: 950px
+      display: block
+      overflow-x: auto
+
+  .test._error .status 
+    color: darkred
+
+  .msg._error pre
+    background-color: darkred
+
+  .test._skipped .status
+    color: blue
+
+  .msg._skipped pre 
+    background-color: darkblue
+
+  .test._failure .status
+    color: red
+
+  .msg._failure pre 
+    background-color: brown
+
+  .test._passed .status
+    color: green
+
+.test_runs
+  .status
+    width: 70px
+    .led
+      float: left
+    span
+      margin-left: 5px
+
+.dashboard
+  #clear
+    float: right
