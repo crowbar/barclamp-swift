@@ -31,10 +31,57 @@ crowbar:
   run_order: 80
   chef_order: 80
 
+nav:
+  utils:
+    swift: '"/swift/dashboard/", { :link => { :target => "_blank" } }'
+
 locale_additions:
   en:
+    nav:
+      swift: Swift Dispersion
     barclamp:
       swift:
+        run:
+          success: "Sucessfully started dispersion report on node %{node}"
+          failure: "Failed to run dispersion report on node %{node}: %{error}"
+          duplicate: "there's already an active dispersion report run"
+
+        dashboard:
+          title: Swift Dispersion
+          n_report_runs: "%{n} report run(s)"
+          no_report_runs: No report runs
+
+          run:
+            label: Run swift dispersion report on node
+            do:  Go!
+            no_nodes: No nodes with installed dispersion tools available
+          clear:
+            do: Clear
+            success: All non-running and stale dispersion report runs were cleared
+
+          report_run:
+            node: Node
+            started: Started
+            ended: Ended
+            status: Status
+            status_:
+              running: Running
+              passed: Passed
+              failed: Failed
+
+        results:
+          title: "Results of dispersion report %{report_run}"
+          raw_json: Raw JSON
+          report:
+            r_key: Key
+            r_value: Value
+            status: Status
+            status_:
+              error: Error
+              failure: Failure
+              passed: Passed
+              skipped: Skipped
+
         edit_attributes: 
           attributes: Attributes
           zones: Zones

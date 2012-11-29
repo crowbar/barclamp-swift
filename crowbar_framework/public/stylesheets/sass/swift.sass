@@ -1,15 +1,13 @@
-.test_suite.box tr td:first-child
+.report_suite.box tr td:first-child
   padding: 0
 
-.test_suite
+.report_suite
   table-layout: fixed
 
-  .misc
-    width: 16px
-  .name 
+  .r_key 
     width: 100%
   
-  .time 
+  .r_value 
     width: 70px
     text-align: right
 
@@ -28,28 +26,28 @@
       display: block
       overflow-x: auto
 
-  .test._error .status 
+  .report._error .status 
     color: darkred
 
   .msg._error pre
     background-color: darkred
 
-  .test._skipped .status
+  .report._skipped .status
     color: blue
 
   .msg._skipped pre 
     background-color: darkblue
 
-  .test._failure .status
+  .report._failure .status
     color: red
 
   .msg._failure pre 
     background-color: brown
 
-  .test._passed .status
+  .report._passed .status
     color: green
 
-.test_runs
+.dispersion_reports
   .status
     width: 70px
     .led
