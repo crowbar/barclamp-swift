@@ -12,6 +12,12 @@
         "retries": 5,
         "concurrency": 25
       },
+      "s3":{
+        "gitrepo": "http://github.com/fujita/swift3",
+        "git_refspec": "195e6c76ff46a8f00621a56d4e13b500becc2c9a",
+        "use_gitrepo": true,
+        "use_gitbarclamp": true 
+      },
       "gitrepo": "http://github.com/openstack/swift.git",
       "git_instance": "",
       "git_refspec": "stable/folsom",

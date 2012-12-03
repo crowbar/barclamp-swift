@@ -39,8 +39,22 @@ proxy_config[:hide_auth] = false
     action :install
   end 
 end
-unless node[:swift][:use_gitrepo]
-  package("swift-proxy")
+package("swift-proxy") unless node[:swift][:use_gitrepo]
+
+if node[:swift][:s3][:use_gitrepo]
+  s3_path = "/opt/swift3"
+  pfs_and_install_deps("swift3") do
+    path s3_path
+    reference node[:swift][:s3][:git_refspec]
+    without_setup true
+  end
+  execute "setup_swift3" do
+    cwd s3_path
+    command "python setup.py develop"
+    creates "#{s3_path}/swift3.egg-info"
+  end
+else
+  package("swift-plugin-s3")
 end
 
 case proxy_config[:auth_method]

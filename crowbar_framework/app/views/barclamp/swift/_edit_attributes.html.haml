@@ -65,4 +65,20 @@
     %p
       %label{ :for => :debug }= t('.debug')
       = select_tag :debug, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["debug"].to_s), :onchange => "update_value('debug', 'debug', 'boolean')"
+    %div{ :id => 's3_parameters', :class => 'container' }
+      %p
+        %label{ :for => :s3_header }= t('.s3_parameters')
+      %div.container
+        %p
+          %label{ :for => :gitrepo }= t('.s3.gitrepo')
+          %input#gitrepo{:type => "text", :name => "gitrepo", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["s3"]["gitrepo"], :onchange => "update_value('s3/gitrepo', 'gitrepo', 'string')"}
+        %p
+          %label{ :for => :git_refspec }= t('.s3.git_refspec')
+          %input#git_refspec{:type => "text", :name => "git_refspec", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["s3"]["git_refspec"], :onchange => "update_value('s3/git_refspec', 'git_refspec', 'string')"}
+        %p
+          %label{ :for => :use_gitrepo }= t('.s3.use_gitrepo')
+          = select_tag :use_gitrepo, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["s3"]["use_gitrepo"].to_s), :onchange => "update_value('s3/use_gitrepo', 'use_gitrepo', 'boolean')"
+        %p
+          %label{ :for => :use_gitbarclamp }= t('.s3.use_gitbarclamp')
+          = select_tag :use_gitbarclamp, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["s3"]["use_gitbarclamp"].to_s), :onchange => "update_value('s3/use_gitbarclamp', 'use_gitbarclamp', 'boolean')"
 

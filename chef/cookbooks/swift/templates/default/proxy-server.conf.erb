@@ -49,7 +49,7 @@ setup_console_handler = true
       @tempauth = true and !@hide_auth
  end
 %>
-pipeline = catch_errors healthcheck cache ratelimit <%= auth %> proxy-logging proxy-server
+pipeline = catch_errors healthcheck cache ratelimit swift3 s3token <%= auth %> proxy-logging proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
@@ -76,7 +76,7 @@ memcache_servers = <%= @memcached_ips %>
 log_name = cache
 
 [filter:swift3]
-use = egg:swift#swift3
+use = egg:swift3#swift3
 
 <%if @swauth %>
 [filter:swauth]
@@ -99,7 +99,7 @@ reseller_prefix=<%= @reseller_prefix %>
 paste.filter_factory = keystone.middleware.s3_token:filter_factory
 service_port = <%= @keystone_service_port %>
 service_host = <%= @keystone_vip %>
-auth_port = <%= @keystone_auth_port %>
+auth_port = <%= @keystone_admin_port %>
 auth_host = <%= @keystone_vip %>
 auth_protocol = http
 auth_token = <%= @keystone_admin_token %>
