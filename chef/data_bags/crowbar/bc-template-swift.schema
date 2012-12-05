@@ -24,6 +24,66 @@
                 "concurrency": { "type": "int", "required": true }
               }
             },
+            "middlewares": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "staticweb": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "enabled": { "type": "bool", "required": true }
+                  }
+                },
+                "tempurl": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "enabled": { "type": "bool", "required": true }
+                  }
+                },
+                "formpost": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "enabled": { "type": "bool", "required": true }
+                  }
+                },
+                "domain_remap": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "path_root": { "type": "str", "required": true },
+                    "storage_domain": { "type": "str", "required": true },
+                    "enabled": { "type": "bool", "required": true }
+                  }
+                },
+                "cname_lookup": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "lookup_depth": { "type": "int", "required": true },
+                    "storage_domain": { "type": "str", "required": true },
+                    "enabled": { "type": "bool", "required": true }
+                  }
+                },
+                "ratelimit": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "clock_accuracy": { "type": "int", "required": true },
+                    "max_sleep_time_seconds": { "type": "int", "required": true },
+                    "log_sleep_time_seconds": { "type": "int", "required": true },
+                    "rate_buffer_seconds": { "type": "int", "required": true },
+                    "account_ratelimit": { "type": "int", "required": true },
+                    "account_whitelist": { "type": "str", "required": true },
+                    "account_blacklist": { "type": "str", "required": true },
+                    "container_ratelimit_size": { "type": "str", "required": true },
+                    "enabled": { "type": "bool", "required": true }
+                  }
+                }
+              }
+            },
             "s3": {
               "type": "map",
               "required": true,

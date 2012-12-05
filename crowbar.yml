@@ -141,6 +141,7 @@ debs:
     - python-configobj
     - python-coverage
     - python-dev
+    - python-dnspython
     - python-eventlet
     - python-greenlet
     - python-netifaces

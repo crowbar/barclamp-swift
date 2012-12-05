@@ -12,7 +12,39 @@
         "retries": 5,
         "concurrency": 25
       },
-      "s3":{
+      "middlewares": {
+        "staticweb": {
+          "enabled": true
+        },
+        "tempurl": {
+          "enabled": true
+        },
+        "formpost": {
+          "enabled": true
+        },
+        "domain_remap": {
+          "path_root": "v1",
+          "storage_domain": "swift.storage.crowbar.org",
+          "enabled": true
+        },
+        "cname_lookup": {
+          "storage_domain": "swift.storage.crowbar.org",
+          "lookup_depth" : 1,
+          "enabled": true
+        },
+        "ratelimit": {
+          "clock_accuracy": 1000,
+          "max_sleep_time_seconds": 60,
+          "log_sleep_time_seconds": 0,
+          "rate_buffer_seconds": 5,
+          "account_ratelimit": 0,
+          "account_whitelist": "",
+          "account_blacklist": "",
+          "container_ratelimit_size": "100=100,200=50,500=20",
+          "enabled": true
+        }
+      },
+      "s3": {
         "gitrepo": "http://github.com/fujita/swift3",
         "git_refspec": "195e6c76ff46a8f00621a56d4e13b500becc2c9a",
         "use_gitrepo": true,

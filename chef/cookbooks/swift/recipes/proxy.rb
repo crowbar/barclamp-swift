@@ -33,6 +33,19 @@ proxy_config[:user] = node[:swift][:user]
 proxy_config[:local_ip] = local_ip
 proxy_config[:public_ip] = public_ip
 proxy_config[:hide_auth] = false
+### middleware items
+proxy_config[:clock_accuracy] = node[:swift][:middlewares][:ratelimit][:clock_accuracy]
+proxy_config[:max_sleep_time_seconds] = node[:swift][:middlewares][:ratelimit][:max_sleep_time_seconds]
+proxy_config[:log_sleep_time_seconds] = node[:swift][:middlewares][:ratelimit][:log_sleep_time_seconds]
+proxy_config[:rate_buffer_seconds] = node[:swift][:middlewares][:ratelimit][:rate_buffer_seconds]
+proxy_config[:account_ratelimit] = node[:swift][:middlewares][:ratelimit][:account_ratelimit]
+proxy_config[:account_whitelist] = node[:swift][:middlewares][:ratelimit][:account_whitelist]
+proxy_config[:account_blacklist] = node[:swift][:middlewares][:ratelimit][:account_blacklist]
+proxy_config[:container_ratelimit_size] = node[:swift][:middlewares][:ratelimit][:container_ratelimit_size]
+proxy_config[:lookup_depth] = node[:swift][:middlewares][:cname_lookup][:lookup_depth]
+proxy_config[:storage_domain] = node[:swift][:middlewares][:cname_lookup][:storage_domain]
+proxy_config[:storage_domain_remap] = node[:swift][:middlewares][:domain_remap][:storage_domain]
+proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
 
 %w{curl memcached}.each do |pkg|
   package pkg do
