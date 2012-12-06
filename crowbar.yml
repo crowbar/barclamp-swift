@@ -101,8 +101,27 @@ locale_additions:
           slog_account: sLogging swift account
           slog_user: sLogging swift user
           slog_passwd: sLogging swift user's password
-          s3_parameters: S3 parameters
-          s3:
+          middlewares:
+            label: Additional middlewares
+            enabled: Enabled
+            staticweb: StaticWeb
+            tempurl: TempURL
+            formpost: FormPOST
+            domain_remap: Domain Remap
+            path_root: Path root
+            storage_domain: Storage Domain
+            cname_lookup: CNAME Lookup
+            lookup_depth: Lookup depth
+            ratelimit: Ratelimit
+            clock_accuracy: Clock accuracy
+            max_sleep_time_seconds: Max sleep time seconds
+            log_sleep_time_seconds: Log sleep time seconds
+            rate_buffer_seconds: Rate buffer seconds
+            account_ratelimit: Account ratelimit
+            account_whitelist: Account whitelist
+            account_blacklist: Account blacklist
+            container_ratelimit_size: Container_ratelimit_
+            s3: S3
             gitrepo: Git repo url
             git_refspec: Git ref_spec
             use_gitrepo: Use PFS for S3

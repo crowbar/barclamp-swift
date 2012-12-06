@@ -49,9 +49,10 @@ setup_console_handler = true
       @tempauth = true and !@hide_auth
   end
   middlewares = node[:swift][:middlewares].keys.select{|mw| node[:swift][:middlewares][mw][:enabled]}
-  ratelimit = middlewares.delete("ratelimit") ? "ratelimit":nil
+  ratelimit = middlewares.delete("ratelimit")
+  auth = "swift3 s3token " + auth if middlewares.delete("s3")
 %>
-pipeline = catch_errors healthcheck cache <%= ratelimit %> swift3 s3token <%= auth %> <%= middlewares.join(' ') %> proxy-logging proxy-server
+pipeline = catch_errors healthcheck cache <%= ratelimit %> <%= auth %> <%= middlewares.join(' ') %> proxy-logging proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy

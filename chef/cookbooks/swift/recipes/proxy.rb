@@ -47,27 +47,29 @@ proxy_config[:storage_domain] = node[:swift][:middlewares][:cname_lookup][:stora
 proxy_config[:storage_domain_remap] = node[:swift][:middlewares][:domain_remap][:storage_domain]
 proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
 
-%w{curl memcached}.each do |pkg|
+%w{curl memcached python-dnspython}.each do |pkg|
   package pkg do
     action :install
   end 
 end
 package("swift-proxy") unless node[:swift][:use_gitrepo]
 
-if node[:swift][:s3][:use_gitrepo]
-  s3_path = "/opt/swift3"
-  pfs_and_install_deps("swift3") do
-    path s3_path
-    reference node[:swift][:s3][:git_refspec]
-    without_setup true
+if node[:swift][:middlewares][:s3][:enabled]
+  if node[:swift][:middlewares][:s3][:use_gitrepo]
+    s3_path = "/opt/swift3"
+    pfs_and_install_deps("swift3") do
+      path s3_path
+      reference node[:swift][:middlewares][:s3][:git_refspec]
+      without_setup true
+    end
+    execute "setup_swift3" do
+      cwd s3_path
+      command "python setup.py develop"
+      creates "#{s3_path}/swift3.egg-info"
+    end
+  else
+    package("swift-plugin-s3")
   end
-  execute "setup_swift3" do
-    cwd s3_path
-    command "python setup.py develop"
-    creates "#{s3_path}/swift3.egg-info"
-  end
-else
-  package("swift-plugin-s3")
 end
 
 case proxy_config[:auth_method]

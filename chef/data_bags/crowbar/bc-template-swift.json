@@ -32,6 +32,13 @@
           "lookup_depth" : 1,
           "enabled": true
         },
+        "s3": {
+          "gitrepo": "http://github.com/fujita/swift3",
+          "git_refspec": "195e6c76ff46a8f00621a56d4e13b500becc2c9a",
+          "use_gitrepo": true,
+          "use_gitbarclamp": true, 
+          "enabled": true
+        },
         "ratelimit": {
           "clock_accuracy": 1000,
           "max_sleep_time_seconds": 60,
@@ -43,12 +50,6 @@
           "container_ratelimit_size": "100=100,200=50,500=20",
           "enabled": true
         }
-      },
-      "s3": {
-        "gitrepo": "http://github.com/fujita/swift3",
-        "git_refspec": "195e6c76ff46a8f00621a56d4e13b500becc2c9a",
-        "use_gitrepo": true,
-        "use_gitbarclamp": true 
       },
       "gitrepo": "http://github.com/openstack/swift.git",
       "git_instance": "",
