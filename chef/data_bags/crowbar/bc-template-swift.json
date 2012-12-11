@@ -1,4 +1,3 @@
-
 {
   "id": "bc-template-swift",
   "description": "part of Openstack, and provides a distributed blob storage",
@@ -14,30 +13,30 @@
       },
       "middlewares": {
         "staticweb": {
-          "enabled": true
+          "enabled": false
         },
         "tempurl": {
-          "enabled": true
+          "enabled": false
         },
         "formpost": {
-          "enabled": true
+          "enabled": false
         },
         "domain_remap": {
           "path_root": "v1",
           "storage_domain": "swift.storage.crowbar.org",
-          "enabled": true
+          "enabled": false
         },
         "cname_lookup": {
           "storage_domain": "swift.storage.crowbar.org",
           "lookup_depth" : 1,
-          "enabled": true
+          "enabled": false
         },
         "s3": {
           "gitrepo": "http://github.com/fujita/swift3",
           "git_refspec": "195e6c76ff46a8f00621a56d4e13b500becc2c9a",
           "use_gitrepo": true,
           "use_gitbarclamp": true, 
-          "enabled": true
+          "enabled": false
         },
         "ratelimit": {
           "clock_accuracy": 1000,
@@ -48,7 +47,7 @@
           "account_whitelist": "",
           "account_blacklist": "",
           "container_ratelimit_size": "100=100,200=50,500=20",
-          "enabled": true
+          "enabled": false
         }
       },
       "gitrepo": "http://github.com/openstack/swift.git",
