@@ -12,6 +12,18 @@
           "type": "map",
           "required": true,
           "mapping": {
+            "dispersion": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "service_user": { "type": "str", "required": true },
+                "service_password": { "type": "str", "required": true },
+                "service_tenant": { "type": "str", "required": true },
+                "dispersion_coverage": { "type": "int", "required": true },
+                "retries": { "type": "int", "required": true },
+                "concurrency": { "type": "int", "required": true }
+              }
+            },
             "gitrepo": { "type": "str", "required": true },
             "git_instance": { "type": "str", "required": true },
             "git_refspec": { "type": "str", "required": true },
