@@ -47,9 +47,12 @@ setup_console_handler = true
     when "tempauth"
       auth = "tempauth"
       @tempauth = true and !@hide_auth
- end
+  end
+  middlewares = node[:swift][:middlewares].keys.select{|mw| node[:swift][:middlewares][mw][:enabled]}
+  ratelimit = middlewares.delete("ratelimit")
+  auth = "swift3 s3token " + auth if middlewares.delete("s3")
 %>
-pipeline = catch_errors healthcheck cache ratelimit <%= auth %> proxy-logging proxy-server
+pipeline = catch_errors healthcheck cache <%= ratelimit %> <%= auth %> <%= middlewares.join(' ') %> proxy-logging proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
@@ -76,7 +79,7 @@ memcache_servers = <%= @memcached_ips %>
 log_name = cache
 
 [filter:swift3]
-use = egg:swift#swift3
+use = egg:swift3#swift3
 
 <%if @swauth %>
 [filter:swauth]
@@ -99,7 +102,7 @@ reseller_prefix=<%= @reseller_prefix %>
 paste.filter_factory = keystone.middleware.s3_token:filter_factory
 service_port = <%= @keystone_service_port %>
 service_host = <%= @keystone_vip %>
-auth_port = <%= @keystone_auth_port %>
+auth_port = <%= @keystone_admin_port %>
 auth_host = <%= @keystone_vip %>
 auth_protocol = http
 auth_token = <%= @keystone_admin_token %>
@@ -131,6 +134,36 @@ bind_ip = 0.0.0.0
 
 [filter:ratelimit]
 use = egg:swift#ratelimit
+clock_accuracy = <%= @clock_accuracy %>
+max_sleep_time_seconds = <%= @max_sleep_time_seconds %>
+log_sleep_time_seconds = <%= @log_sleep_time_seconds %>
+rate_buffer_seconds = <%= @rate_buffer_seconds %>
+account_ratelimit = <%= @account_ratelimit %>
+account_whitelist = <%= @account_whitelist %>
+account_blacklist = <%= @account_blacklist %>
+<% @container_ratelimit_size.split(',').each do |limit| -%>
+<%=  "container_ratelimit_" + limit %>
+<% end -%>
 
 [filter:proxy-logging]
 use = egg:swift#proxy_logging
+
+[filter:cname_lookup]
+use = egg:swift#cname_lookup
+lookup_depth = <%= @lookup_depth %>
+storage_domain = <%= @storage_domain %>
+
+[filter:staticweb]
+use = egg:swift#staticweb
+
+[filter:domain_remap]
+use = egg:swift#domain_remap
+storage_domain = <%= @storage_domain_remap %>
+path_root = <%= @path_root %>
+reseller_prefixes = <%= @reseller_prefix %>
+
+[filter:tempurl]
+use = egg:swift#tempurl
+
+[filter:formpost]
+use = egg:swift#formpost

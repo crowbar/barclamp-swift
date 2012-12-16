@@ -33,14 +33,43 @@ proxy_config[:user] = node[:swift][:user]
 proxy_config[:local_ip] = local_ip
 proxy_config[:public_ip] = public_ip
 proxy_config[:hide_auth] = false
+### middleware items
+proxy_config[:clock_accuracy] = node[:swift][:middlewares][:ratelimit][:clock_accuracy]
+proxy_config[:max_sleep_time_seconds] = node[:swift][:middlewares][:ratelimit][:max_sleep_time_seconds]
+proxy_config[:log_sleep_time_seconds] = node[:swift][:middlewares][:ratelimit][:log_sleep_time_seconds]
+proxy_config[:rate_buffer_seconds] = node[:swift][:middlewares][:ratelimit][:rate_buffer_seconds]
+proxy_config[:account_ratelimit] = node[:swift][:middlewares][:ratelimit][:account_ratelimit]
+proxy_config[:account_whitelist] = node[:swift][:middlewares][:ratelimit][:account_whitelist]
+proxy_config[:account_blacklist] = node[:swift][:middlewares][:ratelimit][:account_blacklist]
+proxy_config[:container_ratelimit_size] = node[:swift][:middlewares][:ratelimit][:container_ratelimit_size]
+proxy_config[:lookup_depth] = node[:swift][:middlewares][:cname_lookup][:lookup_depth]
+proxy_config[:storage_domain] = node[:swift][:middlewares][:cname_lookup][:storage_domain]
+proxy_config[:storage_domain_remap] = node[:swift][:middlewares][:domain_remap][:storage_domain]
+proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
 
-%w{curl memcached}.each do |pkg|
+%w{curl memcached python-dnspython}.each do |pkg|
   package pkg do
     action :install
   end 
 end
-unless node[:swift][:use_gitrepo]
-  package("swift-proxy")
+package("swift-proxy") unless node[:swift][:use_gitrepo]
+
+if node[:swift][:middlewares][:s3][:enabled]
+  if node[:swift][:middlewares][:s3][:use_gitrepo]
+    s3_path = "/opt/swift3"
+    pfs_and_install_deps("swift3") do
+      path s3_path
+      reference node[:swift][:middlewares][:s3][:git_refspec]
+      without_setup true
+    end
+    execute "setup_swift3" do
+      cwd s3_path
+      command "python setup.py develop"
+      creates "#{s3_path}/swift3.egg-info"
+    end
+  else
+    package("swift-plugin-s3")
+  end
 end
 
 case proxy_config[:auth_method]

@@ -65,9 +65,9 @@ locale_additions:
             ended: Ended
             status: Status
             status_:
-              running: Running
-              passed: Passed
-              failed: Failed
+              running: Collecting
+              passed: Ready
+              failed: Error
 
         results:
           title: "Results of dispersion report %{report_run}"
@@ -101,6 +101,31 @@ locale_additions:
           slog_account: sLogging swift account
           slog_user: sLogging swift user
           slog_passwd: sLogging swift user's password
+          middlewares:
+            label: Additional middlewares
+            enabled: Enabled
+            staticweb: StaticWeb
+            tempurl: TempURL
+            formpost: FormPOST
+            domain_remap: Domain Remap
+            path_root: Path root
+            storage_domain: Storage Domain
+            cname_lookup: CNAME Lookup
+            lookup_depth: Lookup depth
+            ratelimit: Ratelimit
+            clock_accuracy: Clock accuracy
+            max_sleep_time_seconds: Max sleep time seconds
+            log_sleep_time_seconds: Log sleep time seconds
+            rate_buffer_seconds: Rate buffer seconds
+            account_ratelimit: Account ratelimit
+            account_whitelist: Account whitelist
+            account_blacklist: Account blacklist
+            container_ratelimit_size: Container_ratelimit_
+            s3: S3
+            gitrepo: Git repo url
+            git_refspec: Git ref_spec
+            use_gitrepo: Use PFS for S3
+            use_gitbarclamp: Use barclamp-git to checkout
         edit_deployment: 
           deployment: Deployment
 
@@ -114,6 +139,9 @@ debs:
   ubuntu-11.10:
     repos:
       - deb http://ops.rcb.me/packages oneiric diablo-final
+  ubuntu-12.04:
+    repos:
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main 
   pkgs:
     - curl
     - swift
@@ -132,6 +160,7 @@ debs:
     - python-configobj
     - python-coverage
     - python-dev
+    - python-dnspython
     - python-eventlet
     - python-greenlet
     - python-netifaces
@@ -142,6 +171,8 @@ debs:
     - python-webob
     - python-xattr
     - sqlite3
+    - swift-plugin-s3
 
 git_repo:
   - swift http://github.com/openstack/swift.git stable/folsom
+  - swift3 http://github.com/fujita/swift3 master
