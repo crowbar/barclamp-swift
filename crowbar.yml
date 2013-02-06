@@ -35,7 +35,7 @@ crowbar:
   chef_order: 80
 
 debs:
-  ubuntu-12.04
+  ubuntu-12.04:
     repos:
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
   pkgs:
