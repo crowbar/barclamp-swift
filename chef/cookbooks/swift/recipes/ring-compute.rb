@@ -121,8 +121,14 @@ end
 
 
 
+target_proxies = []
 proxy_nodes = search(:node, "roles:swift-proxy#{env_filter}")
-target_nodes = target_nodes + proxy_nodes
+proxy_nodes.each do |p|
+  storage_ip = Swift::Evaluator.get_ip_by_type(p, :storage_ip_expr)
+  target_proxies << storage_ip
+end
+
+target_nodes = target_nodes + target_proxies
 target_nodes.uniq!
 log ("nodes to notify: #{target_nodes.join ' '}") {level :debug}
 target_nodes.each {|t|
