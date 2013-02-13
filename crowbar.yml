@@ -67,6 +67,9 @@ debs:
   ubuntu-11.10:
     repos:
       - deb http://ops.rcb.me/packages oneiric diablo-final
+  ubuntu-12.04
+    repos:
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
   pkgs:
     - curl
     - swift
@@ -97,4 +100,4 @@ debs:
     - sqlite3
 
 git_repo:
-  - swift http://github.com/openstack/swift.git stable/folsom
+  - swift http://github.com/openstack/swift.git 1.7.5
