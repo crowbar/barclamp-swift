@@ -38,6 +38,7 @@ locale_additions:
         edit_attributes: 
           attributes: Attributes
           zones: Zones
+          frontend: Frontend
           partitions: Partitions
           min_part_hours: Minimum Partitions per Hour
           replicas: Replicas
@@ -100,4 +101,8 @@ debs:
     - sqlite3
 
 git_repo:
-  - swift http://github.com/openstack/swift.git 1.7.5
+  - swift http://github.com/openstack/swift.git 1.7.6
+
+git:
+  date: Fri Feb 15 16:21:11 2013 +0000
+  commit: 6054740bb2881a5fe088950bf720afcbeb548084

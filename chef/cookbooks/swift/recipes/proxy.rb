@@ -190,12 +190,64 @@ node[:memcached][:name] = "swift-proxy"
 memcached_instance "swift-proxy" do
 end
 
-if node[:swift][:use_gitrepo]
-  swift_service("swift-proxy")
-end
-service "swift-proxy" do
-  restart_command "stop swift-proxy ; start swift-proxy"
-  action [:enable, :start]
+if node[:swift][:frontend]=='native'
+  if node[:swift][:use_gitrepo]
+    swift_service("swift-proxy")
+  end
+  service "swift-proxy" do
+    restart_command "stop swift-proxy ; start swift-proxy"
+    action [:enable, :start]
+  end
+elsif node[:swift][:frontend]=='apache'
+
+  service "swift-proxy" do
+    supports :status => true, :restart => true
+    action [ :disable, :stop ]
+    ignore_failure true
+  end
+
+  include_recipe "apache2"
+  include_recipe "apache2::mod_wsgi"
+  include_recipe "apache2::mod_ssl"
+  include_recipe "apache2::mod_rewrite"
+
+
+  directory "/usr/lib/cgi-bin/swift/" do
+    owner "swift"
+    mode 0755
+    action :create
+    recursive true
+  end
+
+  template "/usr/lib/cgi-bin/swift/proxy" do
+    source "swift-wsgi-service.py.erb"
+    mode 0755
+    variables(
+      :service => "proxy"
+    )
+  end
+
+  apache_site "000-default" do
+    enable false
+  end
+
+  template "/etc/apache2/sites-available/swift-proxy.conf" do
+    source "apache-swift-proxy.conf.erb"
+    variables(
+      :proxy_user => node[:swift][:user],
+      :proxy_group => node[:swift][:group],
+      :proxy_port => 8080,
+      :processes => 3,
+      :threads => 10
+    )
+    notifies :restart, resources(:service => "apache2"), :immediately
+  end
+
+  apache_site "keystone.conf" do
+    enable true
+  end
+
+
 end
 
 bash "restart swift proxy things" do

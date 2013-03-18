@@ -33,6 +33,7 @@
             "user": { "type": "str", "required": true },
             "group": { "type": "str", "required": true },
             "debug": { "type": "bool", "required": false},
+            "frontend": { "type": "str", "required": true },
             "use_slog": { "type": "bool", "required": false},
             "slog_account": { "type": "str", "required": false},
             "slog_user": { "type": "str", "required": false},
