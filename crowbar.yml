@@ -99,7 +99,7 @@ debs:
     - python-webob
     - python-xattr
     - sqlite3
-    - nginx-full
+    - nginx-light
     - uwsgi
     - uwsgi-plugin-python
 
