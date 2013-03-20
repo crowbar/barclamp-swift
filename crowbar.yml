@@ -99,6 +99,9 @@ debs:
     - python-webob
     - python-xattr
     - sqlite3
+    - nginx-full
+    - uwsgi
+    - uwsgi-plugin-python
 
 git_repo:
   - swift http://github.com/openstack/swift.git 1.7.6
@@ -106,3 +109,7 @@ git_repo:
 git:
   date: Fri Feb 15 16:21:11 2013 +0000
   commit: 6054740bb2881a5fe088950bf720afcbeb548084
+
+git:
+  date: Mon Mar 18 16:14:47 2013 +0000
+  commit: 9cff475fbe17ccefbd4ef3342b1c6dd0533cf43b
