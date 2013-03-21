@@ -207,7 +207,7 @@ elsif node[:swift][:frontend]=='apache'
   end
 
 
-  %w{nginx-light uwsgi uwsgi-plugin-python}.each do |pkg|
+  %w{nginx-extras uwsgi uwsgi-plugin-python}.each do |pkg|
     package pkg do
       action :install
     end
@@ -234,6 +234,13 @@ elsif node[:swift][:frontend]=='apache'
     variables(
       :port => 8080
     )
+  end
+
+  directory "/usr/lib/cgi-bin/swift/" do
+    owner "swift"
+    mode 0755
+    action :create
+    recursive true
   end
 
   template "/usr/lib/cgi-bin/swift/proxy.py" do
