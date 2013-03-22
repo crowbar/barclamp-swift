@@ -190,12 +190,88 @@ node[:memcached][:name] = "swift-proxy"
 memcached_instance "swift-proxy" do
 end
 
-if node[:swift][:use_gitrepo]
-  swift_service("swift-proxy")
-end
-service "swift-proxy" do
-  restart_command "stop swift-proxy ; start swift-proxy"
-  action [:enable, :start]
+if node[:swift][:frontend]=='native'
+  if node[:swift][:use_gitrepo]
+    swift_service("swift-proxy")
+  end
+  service "swift-proxy" do
+    restart_command "stop swift-proxy ; start swift-proxy"
+    action [:enable, :start]
+  end
+elsif node[:swift][:frontend]=='apache'
+
+  service "swift-proxy" do
+    supports :status => true, :restart => true
+    action [ :disable, :stop ]
+    ignore_failure true
+  end
+
+
+  %w{nginx-extras uwsgi uwsgi-plugin-python}.each do |pkg|
+    package pkg do
+      action :install
+    end
+  end
+  service "nginx" do
+    supports :status => true, :restart => true
+    action :enable
+  end
+  service "uwsgi" do
+    supports :status => true, :restart => true
+    action :enable
+  end
+
+
+  file "/etc/nginx/sites-enabled/default" do
+    action :delete
+    notifies :restart, resources(:service => "nginx")
+  end
+
+  template "/etc/nginx/sites-enabled/swift-proxy.conf" do
+    source "nginx-swift-proxy.conf.erb"
+    mode 0644
+    notifies :restart, resources(:service => "nginx")
+    variables(
+      :port => 8080
+    )
+  end
+
+  directory "/usr/lib/cgi-bin/swift/" do
+    owner "swift"
+    mode 0755
+    action :create
+    recursive true
+  end
+
+  template "/usr/lib/cgi-bin/swift/proxy.py" do
+    source "swift-uwsgi-service.py.erb"
+    mode 0755
+    variables(
+      :service => "proxy"
+    )
+    notifies :restart, resources(:service => "uwsgi")
+  end
+
+  template "/usr/share/uwsgi/conf/default.ini" do
+    source "uwsgi-default.ini.erb"
+    mode 0644
+    variables(
+      :uid => "swift",
+      :gid => "www-data",
+      :workers => 5
+    )
+    notifies :restart, resources(:service => "uwsgi")
+  end
+  template "/etc/uwsgi/apps-enabled/swift-proxy.xml" do
+    source "uwsgi-swift-proxy.xml.erb"
+    mode 0644
+    variables(
+      :uid => "swift",
+      :gid => "www-data",
+      :processes => 4
+    )
+    notifies :restart, resources(:service => "uwsgi")
+  end
 end
 
 bash "restart swift proxy things" do
@@ -203,7 +279,9 @@ bash "restart swift proxy things" do
 EOH
   action :run
   notifies :restart, resources(:service => "memcached-swift-proxy")
-  notifies :restart, resources(:service => "swift-proxy")
+  if node[:swift][:frontend]=='native'
+    notifies :restart, resources(:service => "swift-proxy")
+  end
 end
 
 ### 
