@@ -52,7 +52,7 @@
       },
       "gitrepo": "http://github.com/openstack/swift.git",
       "git_instance": "",
-      "git_refspec": "stable/folsom",
+      "git_refspec": "1.7.5",
       "use_gitrepo": true,
       "use_gitbarclamp": true,
       "use_pip_cache": true,
