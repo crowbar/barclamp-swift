@@ -71,7 +71,7 @@ debs:
   ubuntu-12.04
     repos:
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
-      - deb http://ppa.launchpad.net/nginx/stable/ubuntu oneiric main
+      - deb http://ppa.launchpad.net/nginx/stable/ubuntu precise main
   pkgs:
     - curl
     - swift
