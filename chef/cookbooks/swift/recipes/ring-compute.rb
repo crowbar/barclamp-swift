@@ -26,6 +26,9 @@ include_recipe 'swift::rsync'
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
 nodes = search(:node, "roles:swift-storage#{env_filter}")
 
+venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
+venv_prefix = node[:swift][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+
 =begin
   http://swift.openstack.org/howto_installmultinode.html
 
@@ -92,6 +95,7 @@ swift_ringfile "account.builder" do
   replicas replicas
   min_part_hours min_move
   partitions parts
+  virtualenv venv_prefix
   action [:apply, :rebalance]
 end
 swift_ringfile "container.builder" do
@@ -99,6 +103,7 @@ swift_ringfile "container.builder" do
   replicas replicas
   min_part_hours min_move
   partitions parts
+  virtualenv venv_prefix
   action [:apply, :rebalance]
 end
 swift_ringfile "object.builder" do
@@ -106,6 +111,7 @@ swift_ringfile "object.builder" do
   replicas replicas
   min_part_hours min_move
   partitions parts
+  virtualenv venv_prefix
   action [:apply, :rebalance]
 end
 

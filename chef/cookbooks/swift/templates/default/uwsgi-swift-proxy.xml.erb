@@ -7,6 +7,9 @@
         <script>proxy</script>
 
     </app>
+    <% if @virtualenv %>
+    <virtualenv><%= @virtualenv %></virtualenv>
+    <% end %>
     <master/>
     <uid><%= @uid %></uid>
     <chown-socket><%= @uid %>:<%= @gid %></chown-socket>

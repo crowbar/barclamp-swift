@@ -66,9 +66,18 @@ case proxy_config[:auth_method]
          action :install
        end 
      else
-       pfs_and_install_deps "keystone" do
-         cookbook "keystone"
-         cnode keystone
+       if node[:swift][:use_virtualenv]
+         pfs_and_install_deps "keystone" do
+           cookbook "keystone"
+           cnode keystone
+           path "/opt/swift/keystone"
+           virtualenv "/opt/swift/.venv"
+         end
+       else
+         pfs_and_install_deps "keystone" do
+           cookbook "keystone"
+           cnode keystone
+         end
        end
      end
      
@@ -190,9 +199,13 @@ node[:memcached][:name] = "swift-proxy"
 memcached_instance "swift-proxy" do
 end
 
+venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
+
 if node[:swift][:frontend]=='native'
   if node[:swift][:use_gitrepo]
-    swift_service("swift-proxy")
+    swift_service "swift-proxy" do
+      virtualenv venv_path
+    end
   end
   service "swift-proxy" do
     restart_command "stop swift-proxy ; start swift-proxy"
@@ -268,7 +281,8 @@ elsif node[:swift][:frontend]=='apache'
     variables(
       :uid => "swift",
       :gid => "www-data",
-      :processes => 4
+      :processes => 4,
+      :virtualenv => venv_path
     )
     notifies :restart, resources(:service => "uwsgi")
   end
