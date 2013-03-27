@@ -10,6 +10,7 @@
       "use_gitrepo": true,
       "use_gitbarclamp": true,
       "use_pip_cache": true,
+      "use_virtualenv": true,
       "frontend": "apache",
       "pfs_deps": [
         "curl",
