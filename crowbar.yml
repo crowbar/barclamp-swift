@@ -20,7 +20,7 @@ barclamp:
   display: Swift
   version: 0
   requires:
-    - @crowbar
+    - '@crowbar'
     - git
   member:
     - openstack
