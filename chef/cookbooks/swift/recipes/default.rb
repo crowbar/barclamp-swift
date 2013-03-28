@@ -28,6 +28,7 @@ else
   pfs_and_install_deps @cookbook_name do
     path swift_path
     virtualenv venv_path
+    wrap_bins [ "swift" ]
   end
 
   create_user_and_dirs(@cookbook_name) do
