@@ -85,6 +85,7 @@ locale_additions:
         edit_attributes: 
           attributes: Attributes
           zones: Zones
+          frontend: Frontend
           partitions: Partitions
           min_part_hours: Minimum Partitions per Hour
           replicas: Replicas
@@ -139,9 +140,10 @@ debs:
   ubuntu-11.10:
     repos:
       - deb http://ops.rcb.me/packages oneiric diablo-final
-  ubuntu-12.04:
+  ubuntu-12.04
     repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main 
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+      - deb http://ppa.launchpad.net/nginx/stable/ubuntu precise main
   pkgs:
     - curl
     - swift
@@ -172,8 +174,9 @@ debs:
     - python-xattr
     - sqlite3
     - swift-plugin-s3
+    - nginx-full
+    - uwsgi
+    - uwsgi-plugin-python
 
 git_repo:
-  - swift http://github.com/openstack/swift.git 1.7.5
-  - swift3 http://github.com/fujita/swift3 master
-
+  - swift http://github.com/openstack/swift.git 1.7.6

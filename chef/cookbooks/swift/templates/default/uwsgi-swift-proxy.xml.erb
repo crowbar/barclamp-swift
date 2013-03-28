@@ -1,0 +1,29 @@
+<uwsgi>
+    <plugin>python</plugin>
+    <socket>/tmp/swift-proxy.sock</socket>
+    <pythonpath>/usr/lib/cgi-bin/swift/</pythonpath>
+    <app mountpoint="/">
+
+        <script>proxy</script>
+
+    </app>
+    <% if @virtualenv %>
+    <virtualenv><%= @virtualenv %></virtualenv>
+    <% end %>
+    <master/>
+    <uid><%= @uid %></uid>
+    <chown-socket><%= @uid %>:<%= @gid %></chown-socket>
+    <chmod-socket></chmod-socket>
+    <buffer-size>65535</buffer-size>
+    <processes><%= @processes %></processes>
+    <harakiri>60</harakiri>
+    <reload-mercy>8</reload-mercy>
+    <cpu-affinity>1</cpu-affinity>
+    <max-requests>2000</max-requests>
+    <limit-as>512</limit-as>
+    <reload-on-as>256</reload-on-as>
+    <reload-on-rss>192</reload-on-rss>
+    <no-orphans/>
+    <vacuum/>
+</uwsgi>
+

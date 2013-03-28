@@ -24,7 +24,8 @@ define :swift_service, :action => :create do
     variables({
       :path => "/opt/swift", #TODO(agordeev): remove hardcoded value
       :comp_name => comp_name,
-      :service_name => service_name 
+      :service_name => service_name,
+      :virtualenv => params[:virtualenv]
     })
   end
   execute "link_service_#{full_name}" do

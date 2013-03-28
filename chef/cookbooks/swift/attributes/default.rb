@@ -84,3 +84,7 @@ default[:swift][:keystone_service_password] = "swift"
 
 default[:swift][:install_slog_from_dev] = false
 
+
+
+default[:keystone][:frontend] = 'apache'
+
