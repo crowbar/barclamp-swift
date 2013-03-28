@@ -29,6 +29,12 @@
 	  "disk_zone_assign_expr":  "$SWIFT_DISK_CNT||=0; $SWIFT_DISK_CNT= $SWIFT_DISK_CNT+1 ;[ $SWIFT_DISK_CNT % node[:swift][:zones] , 99]"  	  
     }
   },
+    "roles": {
+        "swift-storage": { "jig": "chef" },
+        "swift-ring-compute": { "jig": "chef" },
+        "swift-proxy": { "jig": "chef" },
+        "swift-proxy-acct": { "jig": "chef" }
+    },
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
