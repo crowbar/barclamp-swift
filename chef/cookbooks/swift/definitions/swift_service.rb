@@ -14,9 +14,12 @@
 #
 define :swift_service, :action => :create do
   full_name = params[:name] # eg.: 'swift-comp-srv' || 'swift-comp'
+  venv_path = params[:virtualenv]
+
 
   comp_name, srv_name = full_name.split('-').drop(1)
   service_name = "#{comp_name}-#{srv_name ? srv_name : "server"}"
+
   template "/etc/init/#{full_name}.conf" do
     cookbook "swift"
     source "upstart.conf.erb"
@@ -24,7 +27,8 @@ define :swift_service, :action => :create do
     variables({
       :path => "/opt/swift", #TODO(agordeev): remove hardcoded value
       :comp_name => comp_name,
-      :service_name => service_name 
+      :service_name => service_name,
+      :virtualenv => venv_path
     })
   end
   execute "link_service_#{full_name}" do
