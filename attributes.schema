@@ -1,0 +1,36 @@
+{
+    "type": "map",
+    "required": true,
+    "mapping": {
+	"swift": {
+	    "type": "map",
+	    "required": true,
+	    "mapping": {
+		"cluster_hash": { "type": "str", "required": true },
+		"cluster_admin_pw": { "type": "str", "required": true },
+		"replicas": { "type": "int", "required": true },
+		"zones": { "type": "int", "required": true },
+		"min_part_hours": { "type": "int", "required": true },
+		"partitions": { "type": "int", "required": true },
+		"auth_method": { "type": "str", "required": true, "pattern": "/^keystone$/" },
+		"keystone_instance": { "type": "str", "required": false },
+		"keystone_service_user": { "type": "str", "required": true },
+		"keystone_service_password": { "type": "str" },
+		"reseller_prefix": { "type": "str", "required": false },
+		"user": { "type": "str", "required": true },
+		"group": { "type": "str", "required": true },
+		"debug": { "type": "bool", "required": false},
+		"use_slog": { "type": "bool", "required": false},
+		"slog_account": { "type": "str", "required": false},
+		"slog_user": { "type": "str", "required": false},
+		"slog_passwd": { "type": "str", "required": false},
+		"admin_ip_expr": { "type": "str", "required": true},
+		"storage_ip_expr": { "type": "str", "required": true},
+		"public_ip_expr": { "type": "str", "required": true},
+		"disk_enum_expr": { "type": "str", "required": true},
+		"disk_test_expr": { "type": "str", "required": true},
+		"disk_zone_assign_expr": { "type": "str", "required": false}
+	    }
+	}
+    }
+}
