@@ -33,14 +33,44 @@ proxy_config[:user] = node[:swift][:user]
 proxy_config[:local_ip] = local_ip
 proxy_config[:public_ip] = public_ip
 proxy_config[:hide_auth] = false
+### middleware items
+proxy_config[:clock_accuracy] = node[:swift][:middlewares][:ratelimit][:clock_accuracy]
+proxy_config[:max_sleep_time_seconds] = node[:swift][:middlewares][:ratelimit][:max_sleep_time_seconds]
+proxy_config[:log_sleep_time_seconds] = node[:swift][:middlewares][:ratelimit][:log_sleep_time_seconds]
+proxy_config[:rate_buffer_seconds] = node[:swift][:middlewares][:ratelimit][:rate_buffer_seconds]
+proxy_config[:account_ratelimit] = node[:swift][:middlewares][:ratelimit][:account_ratelimit]
+proxy_config[:account_whitelist] = node[:swift][:middlewares][:ratelimit][:account_whitelist]
+proxy_config[:account_blacklist] = node[:swift][:middlewares][:ratelimit][:account_blacklist]
+proxy_config[:container_ratelimit_size] = node[:swift][:middlewares][:ratelimit][:container_ratelimit_size]
+proxy_config[:lookup_depth] = node[:swift][:middlewares][:cname_lookup][:lookup_depth]
+proxy_config[:storage_domain] = node[:swift][:middlewares][:cname_lookup][:storage_domain]
+proxy_config[:storage_domain_remap] = node[:swift][:middlewares][:domain_remap][:storage_domain]
+proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
 
-
-%w{curl memcached swift-proxy}.each do |pkg|
+%w{curl memcached python-dnspython}.each do |pkg|
   package pkg do
     action :install
   end 
 end
+package("swift-proxy") unless node[:swift][:use_gitrepo]
 
+if node[:swift][:middlewares][:s3][:enabled]
+  if node[:swift][:middlewares][:s3][:use_gitrepo]
+    s3_path = "/opt/swift3"
+    pfs_and_install_deps("swift3") do
+      path s3_path
+      reference node[:swift][:middlewares][:s3][:git_refspec]
+      without_setup true
+    end
+    execute "setup_swift3" do
+      cwd s3_path
+      command "python setup.py develop"
+      creates "#{s3_path}/swift3.egg-info"
+    end
+  else
+    package("swift-plugin-s3")
+  end
+end
 
 case proxy_config[:auth_method]
    when "swauth"
@@ -51,10 +81,7 @@ case proxy_config[:auth_method]
      proxy_config[:account_management] = node[:swift][:account_management]
 
    when "keystone" 
-     package "python-keystone" do
-       action :install
-     end 
-  
+
      env_filter = " AND keystone_config_environment:keystone-config-#{node[:swift][:keystone_instance]}"
      keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
      if keystones.length > 0
@@ -63,6 +90,26 @@ case proxy_config[:auth_method]
        keystone = node
      end
 
+     unless node[:swift][:use_gitrepo]
+       package "python-keystone" do
+         action :install
+       end 
+     else
+       if node[:swift][:use_virtualenv]
+         pfs_and_install_deps "keystone" do
+           cookbook "keystone"
+           cnode keystone
+           path "/opt/swift/keystone"
+           virtualenv "/opt/swift/.venv"
+         end
+       else
+         pfs_and_install_deps "keystone" do
+           cookbook "keystone"
+           cnode keystone
+         end
+       end
+     end
+     
      keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
      keystone_token = keystone["keystone"]["service"]["token"] rescue nil
      keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
@@ -181,10 +228,93 @@ node[:memcached][:name] = "swift-proxy"
 memcached_instance "swift-proxy" do
 end
 
+venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
 
-service "swift-proxy" do
-  restart_command "/etc/init.d/swift-proxy stop ; /etc/init.d/swift-proxy start"
-  action [:enable, :start]
+if node[:swift][:frontend]=='native'
+  if node[:swift][:use_gitrepo]
+    swift_service "swift-proxy" do
+      virtualenv venv_path
+    end
+  end
+  service "swift-proxy" do
+    restart_command "stop swift-proxy ; start swift-proxy"
+    action [:enable, :start]
+  end
+elsif node[:swift][:frontend]=='apache'
+
+  service "swift-proxy" do
+    supports :status => true, :restart => true
+    action [ :disable, :stop ]
+    ignore_failure true
+  end
+
+
+  %w{nginx-full uwsgi uwsgi-plugin-python}.each do |pkg|
+    package pkg do
+      action :install
+    end
+  end
+  service "nginx" do
+    supports :status => true, :restart => true
+    action :enable
+  end
+  service "uwsgi" do
+    supports :status => true, :restart => true
+    action :enable
+  end
+
+
+  file "/etc/nginx/sites-enabled/default" do
+    action :delete
+    notifies :restart, resources(:service => "nginx")
+  end
+
+  template "/etc/nginx/sites-enabled/swift-proxy.conf" do
+    source "nginx-swift-proxy.conf.erb"
+    mode 0644
+    notifies :restart, resources(:service => "nginx")
+    variables(
+      :port => 8080
+    )
+  end
+
+  directory "/usr/lib/cgi-bin/swift/" do
+    owner "swift"
+    mode 0755
+    action :create
+    recursive true
+  end
+
+  template "/usr/lib/cgi-bin/swift/proxy.py" do
+    source "swift-uwsgi-service.py.erb"
+    mode 0755
+    variables(
+      :service => "proxy"
+    )
+    notifies :restart, resources(:service => "uwsgi")
+  end
+
+  template "/usr/share/uwsgi/conf/default.ini" do
+    source "uwsgi-default.ini.erb"
+    mode 0644
+    variables(
+      :uid => "swift",
+      :gid => "www-data",
+      :workers => 5
+    )
+    notifies :restart, resources(:service => "uwsgi")
+  end
+  template "/etc/uwsgi/apps-enabled/swift-proxy.xml" do
+    source "uwsgi-swift-proxy.xml.erb"
+    mode 0644
+    variables(
+      :uid => "swift",
+      :gid => "www-data",
+      :processes => 4,
+      :virtualenv => venv_path
+    )
+    notifies :restart, resources(:service => "uwsgi")
+  end
 end
 
 bash "restart swift proxy things" do
@@ -192,7 +322,9 @@ bash "restart swift proxy things" do
 EOH
   action :run
   notifies :restart, resources(:service => "memcached-swift-proxy")
-  notifies :restart, resources(:service => "swift-proxy")
+  if node[:swift][:frontend]=='native'
+    notifies :restart, resources(:service => "swift-proxy")
+  end
 end
 
 ### 

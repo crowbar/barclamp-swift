@@ -28,7 +28,11 @@ log_requests = true
 setup_console_handler = true
 
 [pipeline:main]
-pipeline =  container-server
+pipeline = recon container-server
+
+[filter:recon]
+use = egg:swift#recon
+#recon_cache_path = /var/cache/swift
 
 [app:container-server]
 use = egg:swift#container
@@ -39,4 +43,6 @@ log_level = DEBUG
 [container-updater]
 
 [container-auditor]
+
+[container-sync]
 

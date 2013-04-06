@@ -1,38 +1,114 @@
-
 {
   "id": "bc-template-swift",
   "description": "part of Openstack, and provides a distributed blob storage",
   "attributes": {
     "swift": {
-	  "cluster_hash": "fa8bea159b55bd7e",
-	  "cluster_admin_pw": "swauth",
-	  "replicas": 1,
-	  "partitions": 18,
-	  "zones": 2,
-	  "min_part_hours": 1,
-	  "auth_method": "keystone",
-	  "keystone_instance": "proposal",
+      "dispersion": {
+        "service_user": "dispersion",
+        "service_password": "dispersion",
+        "service_tenant": "dispersion",
+        "dispersion_coverage": 1,
+        "retries": 5,
+        "concurrency": 25
+      },
+      "middlewares": {
+        "staticweb": {
+          "enabled": false
+        },
+        "tempurl": {
+          "enabled": false
+        },
+        "formpost": {
+          "enabled": false
+        },
+        "domain_remap": {
+          "path_root": "v1",
+          "storage_domain": "swift.storage.crowbar.org",
+          "enabled": false
+        },
+        "cname_lookup": {
+          "storage_domain": "swift.storage.crowbar.org",
+          "lookup_depth" : 1,
+          "enabled": false
+        },
+        "s3": {
+          "gitrepo": "http://github.com/fujita/swift3",
+          "git_refspec": "195e6c76ff46a8f00621a56d4e13b500becc2c9a",
+          "use_gitrepo": true,
+          "use_gitbarclamp": true, 
+          "enabled": false
+        },
+        "ratelimit": {
+          "clock_accuracy": 1000,
+          "max_sleep_time_seconds": 60,
+          "log_sleep_time_seconds": 0,
+          "rate_buffer_seconds": 5,
+          "account_ratelimit": 0,
+          "account_whitelist": "",
+          "account_blacklist": "",
+          "container_ratelimit_size": "100=100,200=50,500=20",
+          "enabled": false
+        }
+      },
+      "gitrepo": "http://github.com/openstack/swift.git",
+      "git_instance": "",
+      "git_refspec": "1.7.6",
+      "use_gitrepo": true,
+      "use_gitbarclamp": true,
+      "use_pip_cache": true,
+      "use_virtualenv": true,
+      "frontend": "apache",
+      "pfs_deps": [
+        "curl",
+        "gcc",
+        "memcached",
+        "python-configobj",
+        "python-coverage",
+        "python-dev",
+        "python-eventlet",
+        "python-greenlet",
+        "python-netifaces",
+        "python-nose",
+        "python-pastedeploy",
+        "python-setuptools",
+        "python-simplejson",
+        "python-webob",
+        "python-xattr",
+        "sqlite3",
+        "xfsprogs",
+        "pip://python-swiftclient>1.2.0",
+        "pip://python-keystoneclient"
+      ],
+      "cluster_hash": "fa8bea159b55bd7e",
+      "cluster_admin_pw": "swauth",
+      "replicas": 1,
+      "partitions": 18,
+      "zones": 2,
+      "min_part_hours": 1,
+      "auth_method": "keystone",
+      "keystone_instance": "proposal",
       "keystone_service_user": "swift",
-	  "reseller_prefix" : "AUTH_",
-	  "user": "swift",
-	  "group": "swift",
-	  "debug": true,
+      "reseller_prefix" : "AUTH_",
+      "user": "swift",
+      "group": "swift",
+      "debug": true,
       "use_slog" : false, 
-	  "slog_account": "system_stats",
-	  "slog_user": "swift_sys",
-	  "slog_passwd": "swift_pwd",
-	  "admin_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"admin\").address",
-	  "storage_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"storage\").address",
-	  "public_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"public\").address",
-	  "disk_enum_expr": "node[\"crowbar\"][\"disks\"]",
-	  "disk_test_expr": "v[\"usage\"] == \"Storage\"", 
-	  "disk_zone_assign_expr":  "$SWIFT_DISK_CNT||=0; $SWIFT_DISK_CNT= $SWIFT_DISK_CNT+1 ;[ $SWIFT_DISK_CNT % node[:swift][:zones] , 99]"  	  
+      "slog_account": "system_stats",
+      "slog_user": "swift_sys",
+      "slog_passwd": "swift_pwd",
+      "admin_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"admin\").address",
+      "storage_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"storage\").address",
+      "public_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"public\").address",
+      "disk_enum_expr": "node[\"crowbar\"][\"disks\"]",
+      "disk_test_expr": "v[\"usage\"] == \"Storage\"", 
+      "disk_zone_assign_expr":  "$SWIFT_DISK_CNT||=0; $SWIFT_DISK_CNT= $SWIFT_DISK_CNT+1 ;[ $SWIFT_DISK_CNT % node[:swift][:zones] , 99]"     
     }
   },
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
       "element_states": {
+        "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
         "swift-proxy": [ "readying", "ready", "applying" ],
         "swift-proxy-acct": [ "readying", "ready", "applying" ],
@@ -43,12 +119,14 @@
         [ "swift-storage" ],  
         [ "swift-ring-compute" ], 
         [ "swift-proxy-acct" ],
+        [ "swift-dispersion" ],
         [ "swift-storage" ]
       ],
       "element_run_list_order": {
         "swift-ring-compute": 80,
         "swift-proxy-acct": 81,
-        "swift-storage": 82
+        "swift-storage": 82,
+        "swift-dispersion": 83
       },
       "config": {
         "environment": "swift-config-base",

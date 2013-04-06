@@ -20,10 +20,14 @@ include_recipe 'swift::disks'
 #include_recipe 'swift::auth' 
 include_recipe 'swift::rsync'
 
-%w{swift-container swift-object swift-account sqlite }.each do |pkg|
-  package pkg do
-    action :upgrade
+unless node[:swift][:use_gitrepo]
+  %w{swift-container swift-object swift-account sqlite }.each do |pkg|
+    package pkg do
+      action :upgrade
+    end
   end
+else
+  package "sqlite"
 end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
@@ -45,9 +49,11 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 end
 
 
-svcs = %w{swift-object swift-object-auditor swift-object-replicator swift-object-updater} 
+svcs = %w{swift-object swift-object-auditor swift-object-replicator swift-object-updater}
 svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-updater}
 svcs = svcs + %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
+
+venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
 
 ## make sure to fetch ring files from the ring compute node
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
@@ -63,7 +69,12 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
     end
   }
     
-  svcs.each { |x| 
+  svcs.each { |x|
+    if node[:swift][:use_gitrepo]
+      swift_service x do
+        virtualenv venv_path
+      end
+    end
     service x do
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
         restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"

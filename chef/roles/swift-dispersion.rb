@@ -1,5 +1,5 @@
 #
-# Copyright 2011, Dell
+# Copyright 2012, Dell
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Author: andi abes
-#
-## temporary workaround for swift-account package issue present in 1.3
-## rather than apt-get install (which fails)
 
+name "swift-dispersion"
+description "provides the health check service to swift"
+run_list(
+    "recipe[swift::dispersion]"
+)
 
-#TODO(agordeev) PFS?
-
-unless node[:swift][:use_gitrepo]
-  execute "get swift-account" do
-    command "apt-get install --allow-unauthenticated swift-account" # This will fail, but it gets the image local
-  #  returns 100 
-  end
-end

@@ -16,8 +16,25 @@
 # Author: andi abes
 #
 
-%w{curl swift}.each do |pkg|
-  package pkg
+swift_path = "/opt/swift"
+venv_path = node[:swift][:use_virtualenv] ? "#{swift_path}/.venv" : nil
+
+unless node[:swift][:use_gitrepo]
+  %w{curl swift}.each do |pkg|
+    package pkg
+  end
+else
+
+  pfs_and_install_deps @cookbook_name do
+    path swift_path
+    virtualenv venv_path
+    wrap_bins [ "swift" ]
+  end
+
+  create_user_and_dirs(@cookbook_name) do
+    user_name node[:swift][:user]
+    dir_group node[:swift][:group]
+  end
 end
 
 directory "/etc/swift" do
