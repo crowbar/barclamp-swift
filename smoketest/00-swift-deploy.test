@@ -22,14 +22,14 @@ die () { local _res=$1; shift; echo "$@"; exit $_res; }
 set -e
 
 echo "Findind swift-proxy..."
-proxy_ip=$(knife_node_find 'roles:swift-proxy' IP)
+proxy_ip=$(knife_node_find 'roles:swift-proxy-acct' IP)
 echo "Findind swift-dispersion..."
 dispersion_ip=$(knife_node_find 'roles:swift-dispersion' IP)
 echo "Findind keystone..."
 keystone_ip=$(knife_node_find 'roles:keystone-server' IP)
 
 if ! [[ $proxy_ip ]]; then
-    die 1 "Could not find swift-proxy."
+    die 1 "Could not find swift-proxy-acct."
 fi
 
 if ! [[ $keystone_ip ]]; then
