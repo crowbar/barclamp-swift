@@ -69,7 +69,7 @@ do_swift delete testdir "$file" || \
     die 1 "Could not delete our random data back from Swift"
 do_swift delete testdir || \
     die 1 "Could not delete container from Swift"
-if [[ $(do_swift list) ]]; then
+if [[ $(do_swift list testdir) ]]; then
     die 1 "Container list should be empty"
 fi
 echo "Swift deploy passed."
