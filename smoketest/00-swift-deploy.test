@@ -21,103 +21,61 @@ die () { local _res=$1; shift; echo "$@"; exit $_res; }
 [[ $DEBUG ]] && set -x
 set -e
 
-crowbar swift proposal create cluster1
-crowbar swift proposal show cluster1 >"$LOGDIR/swift-proposal.json"
-crowbar swift proposal commit cluster1 || {
-    echo "Swift proposal failed to commit"
-    exit 1
-}
+echo "Findind swift-proxy..."
+proxy_ip=$(knife_node_find 'roles:swift-proxy-acct' IP)
+echo "Findind swift-dispersion..."
+dispersion_ip=$(knife_node_find 'roles:swift-dispersion' IP)
+echo "Findind keystone..."
+keystone_ip=$(knife_node_find 'roles:keystone-server' IP)
 
-crowbar swift show cluster1 > "$LOGDIR/swift-cluster1.json"
-read proxy < <(sed -n '/"swift-proxy-acct": \[/ { n; p }' \
-    "$LOGDIR/swift-cluster1.json")
-proxy="${proxy//\"/}."
-addr_re='Address: ([0-9.]+)'
-if ! [[ $(nslookup "$proxy" "$CROWBAR_IP") =~ $addr_re ]]; then
-    crowbar swift show cluster1 >"$LOGDIR/swift-failed.json"
-    die 1 "Could not find IP address of the swift proxy ($proxy)"
+if ! [[ $proxy_ip ]]; then
+    die 1 "Could not find swift-proxy-acct."
 fi
-proxy_ip="${BASH_REMATCH[1]}"
 
-try_with_recovery() {
-    for action in 'service memcached-swift-proxy restart' \
-	'/etc/init.d/swift-proxy restart' \
-	'swift-ring-builder /etc/swift/account.builder' \
-	'service swift-account restart' \
-	'reboot'; do
-        if [[ $(run_on "$proxy_ip" "$@") ]]; then
-	    break
-	fi
-	overall_failure=1
-	printf "Trying workaround: %s\n" "$action"
-	run_on "$proxy_ip" $action || :
-	if [[ $action =~ reboot ]]; then
-	    sleep 120
-	else
-	    sleep 5
-	fi
-    done
-}
+if ! [[ $keystone_ip ]]; then
+    die 1 "Could not find keystone."
+fi
+if ! [[ $dispersion_ip ]]; then
+    die 1 "Could not find swift-dispersion."
+fi
 
-crowbar swift show cluster1 >"$LOGDIR/swift-deployed.json"
-echo "Swift proxy at $proxy_ip.  Prepping the Storage subsystem..."
-try_with_recovery swauth-prep -K swauth -U .super_admin \
-    -A 'https://127.0.0.1:8080/auth/'
+prop_file="$LOGDIR/swift-proposal.json"
 
-echo "Creating an account..."
-try_with_recovery swauth-add-account -K swauth -U .super_admin \
-    -A https://127.0.0.1:8080/auth/ a_test
+crowbar swift proposal show smoketest >"$prop_file"
 
-echo "Creating a user..."
-try_with_recovery swauth-add-user -K swauth -U .super_admin \
-    -A https://127.0.0.1:8080/auth/ -a a_test test test
+swift_user=$(grep keystone_service_user $prop_file | sed 's/[:,"]//g' | awk '{print $2}')
+swift_pass=$(grep keystone_service_password $prop_file | sed 's/[:,"]//g' | awk '{print $2}')
 
-auth_hdr=$(mktemp "$LOGDIR/swift-auth-header-XXXXX.txt") || \
-    die 1 "Could not make a temp location for the aithentication header."
+apt-get -y install python-swiftclient
 
-# get the auth information we will need
-while read line; do
-    echo "$line" >>"$auth_hdr"
-    hdr=${line%%:*}
-    param=${line#*:}
-    case $hdr in
-	X-Storage-Url) storage_url=$param;;
-	X-Storage-Token) storage_token=$param;;
-	X-Auth-Token) auth_token=$param;;
-    esac
-done < <(curl -k -D - -H -o /dev/null "X-Auth-User: a_test:test" \
-    -H "X-Auth-Key: test" --connect-timeout 30 --max-time 120 \
-    https://$proxy_ip:8080/auth/v1.0/)
-    
-[[ $storage_url && $storage_token && $auth_token ]] || \
-    die 1 "Could not get a necessary parameter from the Swift proxy!"
-
-# $1 = http method
-# $2 = pathname for swift
-# $3 = local path (optional)
 do_swift() {
-    local curlargs=(-k -D - 
-	-H "X-Auth-Token: $auth_token"
-	-H "X-Auth-User: a_test:test"
-	-X "$1"
-	"$storage_url/$2")
-    if [[ $3 && $1 = PUT ]]; then
-	curlargs+=(-T "$3")
-    elif [[ $3 && $1 = GET ]]; then
-	curlargs+=(-o "$3")
-    fi
-    curl "${curlargs[@]}" || return 1
+    local swiftargs=(--os-username "$swift_user"
+    --os-password "$swift_pass"
+    --os-tenant-name service
+    --os-auth-url "http://$keystone_ip:5000/v2.0")
+    swift ${swiftargs[@]} $1 $2 $3 || return 1
 }
 
 echo "Testing Swift functionality..."
-do_swift PUT testdir || die 1 "Could not create a directory in Swift"
+do_swift post testdir || die 1 "Could not create a container in Swift"
 testfile=$(mktemp "$LOGDIR/swift-testfile-XXXXX")
 outfile=$(mktemp "$LOGDIR/swift-outfile-XXXXX")
 dd if=/dev/urandom "of=$testfile" bs=64K count=1
-do_swift PUT testdir/testfile "$testfile" || \
-    die 1 "Could not store random information into Swift"
-do_swift GET testdir/testfile "$outfile" || \
+file=$(do_swift upload testdir "$testfile" || \
+    die 1 "Could not store random information into Swift")
+do_swift download testdir "$file" "-o $outfile" || \
     die 1 "Could not get our random data back from Swift"
+do_swift delete testdir "$file" || \
+    die 1 "Could not delete our random data back from Swift"
+do_swift delete testdir || \
+    die 1 "Could not delete container from Swift"
+if [[ $(do_swift list testdir) ]]; then
+    die 1 "Container list should be empty"
+fi
 echo "Swift deploy passed."
-exit $overall_failure
 
+echo "Getting dispersion report..."
+ssh root@$dispersion_ip sudo -u swift swift-dispersion-report || \
+    die 1 "Could not get dispersion report"
+
+exit $overall_failure
