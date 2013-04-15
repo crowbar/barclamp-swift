@@ -30,7 +30,7 @@ class RingInfo
   attr_accessor :partitions, :replicas, :zones, :device_num, :devices, :min_part_hours
   
   class RingDeviceInfo
-    attr_accessor :id, :zone, :ip, :port, :name, :weight, :partitions
+    attr_accessor :id, :region, :zone, :ip, :port, :name, :weight, :partitions
     
     def initialize
       Chef::Log.debug "new device"
@@ -116,7 +116,7 @@ def scan_ring_desc(input)
       
       when :dev_info  #              0     1 192.168.124.131  6002      sdb1 100.00          0 -100.00
       Chef::Log.debug "reading dev info:" + line
-      line =~ /^\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s+([-0-9.]+)\s*$/
+      line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s+([-0-9.]+)\s*$/
       if $~.nil? 
         raise "failed to parse: #{line}"
       else
@@ -124,12 +124,13 @@ def scan_ring_desc(input)
       end
       dev = RingInfo::RingDeviceInfo.new
       dev.id = $1
-      dev.zone = $2
-      dev.ip = $3
-      dev.port = $4
-      dev.name = $5
-      dev.weight = $6
-      dev.partitions = $7
+      dev.region = $2
+      dev.zone = $3
+      dev.ip = $4
+      dev.port = $5
+      dev.name = $6
+      dev.weight = $7
+      dev.partitions = $8
       r.add_device dev
     end
   }
