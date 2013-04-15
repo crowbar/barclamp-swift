@@ -4,8 +4,8 @@ server {
         ssl_certificate      /etc/swift/cert.crt;
         ssl_certificate_key  /etc/swift/cert.key;
         client_max_body_size 5368709122;
-        access_log /var/log/swift/access-proxy.log;
-        error_log /var/log/swift/error-proxy.log;
+        access_log /var/log/swift_access-proxy.log;
+        error_log /var/log/swift_error-proxy.log;
 
         location / {
             uwsgi_pass      unix:///tmp/swift-proxy.sock;
