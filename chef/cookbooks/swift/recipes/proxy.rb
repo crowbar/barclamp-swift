@@ -256,11 +256,11 @@ elsif node[:swift][:frontend]=='apache'
   end
   service "nginx" do
     supports :status => true, :restart => true
-    action :enable
+    action [ :start, :enable ]
   end
   service "uwsgi" do
     supports :status => true, :restart => true
-    action :enable
+    action [ :start, :enable ]
   end
 
 
