@@ -71,6 +71,7 @@ execute "populate-dispersion" do
   command "swift-dispersion-populate"
   user node[:swift][:user]
   action :run
+  ignore_failure true
   only_if "swift -V 2.0 -U #{service_tenant}:#{service_user} -K '#{service_password}' -A #{keystone_auth_url} stat dispersion_objects 2>&1 | grep 'Container.*not found'"
 end
 
