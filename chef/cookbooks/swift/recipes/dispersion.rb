@@ -70,7 +70,7 @@ end
 execute "populate-dispersion" do
   command "swift-dispersion-populate"
   user node[:swift][:user]
-  action :nothing
+  action :run
   only_if "swift -V 2.0 -U #{service_tenant}:#{service_user} -K '#{service_password}' -A #{keystone_auth_url} stat dispersion_objects 2>&1 | grep 'Container.*not found'"
 end
 
@@ -82,6 +82,6 @@ template "/etc/swift/dispersion.conf" do
   variables(
     :auth_url => keystone_auth_url
   )
-  only_if "swift-recon --md5 | grep -q '0 error'"
-  notifies :run, "execute[populate-dispersion]", :immediately
+  #only_if "swift-recon --md5 | grep -q '0 error'"
+  #notifies :run, "execute[populate-dispersion]", :immediately
 end
