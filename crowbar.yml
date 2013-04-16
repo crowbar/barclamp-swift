@@ -167,7 +167,7 @@ debs:
     - python-xattr
     - sqlite3
     - swift-plugin-s3
-    - nginx-full
+    - nginx-extras
     - uwsgi
     - uwsgi-plugin-python
 

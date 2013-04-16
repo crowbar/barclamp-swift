@@ -1,4 +1,10 @@
 server {
+        chunkin on;
+        chunkin_keepalive on;
+        error_page 411 = @my_error;
+        location @my_error {
+            chunkin_resume;
+        }
         listen          <%= @port %>;
         ssl                  on;
         ssl_certificate      /etc/swift/cert.crt;
