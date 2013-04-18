@@ -63,9 +63,10 @@ nodes.each { |node|
   disks.each {|uuid,disk|
     Chef::Log.info("Swift - considering #{node[:fqdn]}:#{disk[:name]}")
     next unless disk[:state] == "Operational"
-    z_o, w_o = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "object", :disk=>disk)    
-    z_c,w_c = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "container", :disk=>disk)
-    z_a,w_a = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "account", :disk=>disk)
+    #we need at least node for which we trying to predict zone to avoid odd searching across chef by disk uuid
+    z_o, w_o = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "object", :disk=>disk, :target_node=>node)
+    z_c,w_c = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "container", :disk=>disk, :target_node=>node)
+    z_a,w_a = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "account", :disk=>disk, :target_node=>node)
     
     log("obj: #{z_o}/#{w_o} container: #{z_c}/#{w_c} account: #{z_a}/#{w_a}. count: #{$DISK_CNT}") {level :info}
     d = {:ip => storage_ip, :dev_name=> disk[:name], :port => 6000}
