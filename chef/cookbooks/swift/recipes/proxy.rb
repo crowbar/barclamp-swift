@@ -245,7 +245,6 @@ elsif node[:swift][:frontend]=='apache'
   service "swift-proxy" do
     supports :status => true, :restart => true
     action [ :disable, :stop ]
-    ignore_failure true
   end
 
 
