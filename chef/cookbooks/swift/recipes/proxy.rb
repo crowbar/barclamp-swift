@@ -249,18 +249,18 @@ elsif node[:swift][:frontend]=='apache'
   end
 
 
-  %w{nginx-full uwsgi uwsgi-plugin-python}.each do |pkg|
+  %w{nginx-extras uwsgi uwsgi-plugin-python}.each do |pkg|
     package pkg do
       action :install
     end
   end
   service "nginx" do
     supports :status => true, :restart => true
-    action :enable
+    action [ :start, :enable ]
   end
   service "uwsgi" do
     supports :status => true, :restart => true
-    action :enable
+    action [ :start, :enable ]
   end
 
 
