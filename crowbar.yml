@@ -22,7 +22,6 @@ barclamp:
   requires:
     - '@crowbar'
     - keystone
-    - git
   member:
     - openstack
 
