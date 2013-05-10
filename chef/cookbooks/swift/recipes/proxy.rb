@@ -253,6 +253,12 @@ elsif node[:swift][:frontend]=='apache'
       action :install
     end
   end
+
+
+  link "/etc/nginx/sites-enabled/default" do
+    action :delete
+  end
+
   service "nginx" do
     supports :status => true, :restart => true
     action [ :start, :enable ]
@@ -262,11 +268,6 @@ elsif node[:swift][:frontend]=='apache'
     action [ :start, :enable ]
   end
 
-
-  file "/etc/nginx/sites-enabled/default" do
-    action :delete
-    notifies :restart, resources(:service => "nginx")
-  end
 
   template "/etc/nginx/sites-enabled/swift-proxy.conf" do
     source "nginx-swift-proxy.conf.erb"
