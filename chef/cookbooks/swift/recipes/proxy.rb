@@ -336,7 +336,8 @@ end
 bash "restart swift proxy things" do
   code <<-EOH
 EOH
-  action :run
+  action :nothing
+  subscribes :run, resources(:template => "/etc/swift/proxy-server.conf")
   notifies :restart, resources(:service => "memcached-swift-proxy")
   if node[:swift][:frontend]=='native'
     notifies :restart, resources(:service => "swift-proxy")
