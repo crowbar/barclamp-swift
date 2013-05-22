@@ -22,7 +22,7 @@ die () { local _res=$1; shift; echo "$@"; exit $_res; }
 set -e
 
 echo "Findind swift-proxy..."
-proxy_ip=$(knife_node_find 'roles:swift-proxy-acct' IP)
+proxy_ip=$(knife_node_find 'roles:swift-multi-proxy' IP)
 echo "Findind swift-dispersion..."
 dispersion_ip=$(knife_node_find 'roles:swift-dispersion' IP)
 echo "Findind keystone..."

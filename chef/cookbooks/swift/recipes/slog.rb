@@ -54,7 +54,7 @@ config["slog_account"] = node["swift"]["slog_account"]
 config["swift_account_hash"] = node["swift"]["reseller_prefix"]+ "_" +  node["swift"]["slog_account"]
 
 roles = node['roles']
-config["proxy"] =  (roles.include?("swift-proxy") or roles.include?("swift-proxy-acct"))
+config["proxy"] =  roles.include?("swift-multi-proxy")
 config["storage"] = true if roles.include?("swift-storage")
 config["hide_auth"] = false #true unless config["proxy"]
 

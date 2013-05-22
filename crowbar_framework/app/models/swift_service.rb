@@ -87,7 +87,7 @@ class SwiftService < ServiceObject
 
     if nodes.size == 1
       base["deployment"]["swift"]["elements"] = {
-        "swift-proxy-acct" => [ nodes.first[:fqdn] ],
+        "swift-multi-proxy" => [ nodes.first[:fqdn] ],
         "swift-dispersion" => [ nodes.first[:fqdn] ],
         "swift-ring-compute" => [ nodes.first[:fqdn] ],
         "swift-storage" => [ nodes.first[:fqdn] ]
@@ -96,7 +96,7 @@ class SwiftService < ServiceObject
       head = nodes.shift
       base["deployment"]["swift"]["elements"] = {
         "swift-dispersion" => [ head[:fqdn] ],
-        "swift-proxy-acct" => [ head[:fqdn] ],
+        "swift-multi-proxy" => [ head[:fqdn] ],
         "swift-ring-compute" => [ head[:fqdn] ],
         "swift-storage" => nodes.map { |x| x[:fqdn] }
       }
@@ -112,13 +112,10 @@ class SwiftService < ServiceObject
 
     # Make sure that the front-end pieces have public ip addreses.
     net_svc = NetworkService.new @logger
-    [ "swift-proxy", "swift-proxy-acct" ].each do |element|
-      tnodes = role.override_attributes["swift"]["elements"][element]
-      next if tnodes.nil? or tnodes.empty?
-      tnodes.each do |n|
-        next if n.nil?
-        net_svc.allocate_ip "default", "public", "host", n
-      end
+    tnodes = role.override_attributes["swift"]["elements"]["swift-multi-proxy"]
+    tnodes.each do |n|
+      next if n.nil?
+      net_svc.allocate_ip "default", "public", "host", n
     end
 
     all_nodes.each do |n|

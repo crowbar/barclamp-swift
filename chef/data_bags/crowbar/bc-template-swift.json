@@ -111,21 +111,20 @@
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
-        "swift-proxy": [ "readying", "ready", "applying" ],
-        "swift-proxy-acct": [ "readying", "ready", "applying" ],
+        "swift-multi-proxy": [ "readying", "ready", "applying" ],
         "swift-ring-compute": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
         [ "swift-storage" ],  
         [ "swift-ring-compute" ], 
-        [ "swift-proxy-acct" ],
+        [ "swift-multi-proxy" ],
         [ "swift-dispersion" ],
         [ "swift-storage" ]
       ],
       "element_run_list_order": {
         "swift-ring-compute": 80,
-        "swift-proxy-acct": 81,
+        "swift-multi-proxy": 81,
         "swift-storage": 82,
         "swift-dispersion": 83
       },
