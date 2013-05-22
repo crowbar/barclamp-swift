@@ -16,7 +16,7 @@
 # Author: andi abes
 #
 
-name "swift-multi-proxy"
+name "swift-proxy"
 description "provides the proxy and authentication components to swift"
 run_list(
     "recipe[swift::default]",

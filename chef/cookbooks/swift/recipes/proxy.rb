@@ -198,7 +198,7 @@ end
 ## we use their memcached!
 servers =""
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-result= search(:node, "roles:swift-multi-proxy #{env_filter}")
+result= search(:node, "roles:swift-proxy #{env_filter}")
 if !result.nil? and (result.length > 0)  
   memcached_servers = result.map {|x|
     s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)     
