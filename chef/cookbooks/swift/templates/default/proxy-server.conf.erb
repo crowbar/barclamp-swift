@@ -117,7 +117,7 @@ auth_uri = http://<%= @keystone_vip %>:<%= @keystone_service_port %>/
 admin_tenant_name = <%= @keystone_service_tenant %>
 admin_user = <%= @keystone_service_user %>
 admin_password = <%= @keystone_service_password %>
-signing_dir = /tmp/keystone-signing-swift
+signing_dir = /var/cache/swift/
 
 <% end %>
 
