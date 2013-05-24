@@ -29,7 +29,7 @@ echo "Findind keystone..."
 keystone_ip=$(knife_node_find 'roles:keystone-server' IP)
 
 if ! [[ $proxy_ip ]]; then
-    die 1 "Could not find swift-proxyt."
+    die 1 "Could not find swift-proxy."
 fi
 
 if ! [[ $keystone_ip ]]; then
