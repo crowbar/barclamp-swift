@@ -282,6 +282,7 @@ elsif node[:swift][:frontend]=='apache'
   service "uwsgi" do
     supports :status => true, :restart => true
     action [ :start, :enable ]
+    subscribes :restart, "template[/etc/swift/proxy-server.conf]"
   end
 
 
