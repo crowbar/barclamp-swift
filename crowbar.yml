@@ -18,11 +18,11 @@
 barclamp:
   name: swift
   display: Swift
+  description: 'OpenStack Object Storage: cost effective, scale-out object store'
   version: 0
   requires:
     - '@crowbar'
     - keystone
-    - git
   member:
     - openstack
 

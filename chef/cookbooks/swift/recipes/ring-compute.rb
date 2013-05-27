@@ -120,27 +120,39 @@ swift_ringfile "object.builder" do
 end
 
 
+
+target_proxies = []
+proxy_nodes = search(:node, "roles:swift-proxy#{env_filter}")
+proxy_nodes.each do |p|
+  storage_ip = Swift::Evaluator.get_ip_by_type(p, :storage_ip_expr)
+  target_proxies << storage_ip
+end
+
+target_nodes = target_nodes + target_proxies
+target_nodes.uniq!
 log ("nodes to notify: #{target_nodes.join ' '}") {level :debug}
 target_nodes.each {|t|
-  execute "push account ring-to #{t}" do
-    command "rsync account.ring.gz #{node[:swift][:user]}@#{t}::ring"
-    cwd "/etc/swift"
-    ignore_failure true
-    action :nothing 
-    subscribes :run, resources(:swift_ringfile =>"account.builder")  
-  end  
-  execute "push container ring-to #{t}" do
-    command "rsync container.ring.gz #{node[:swift][:user]}@#{t}::ring"
-    cwd "/etc/swift"
-    ignore_failure true
-    action :nothing
-    subscribes :run, resources(:swift_ringfile =>"container.builder")  
-  end
-  execute "push object ring-to #{t}" do
-    command "rsync object.ring.gz #{node[:swift][:user]}@#{t}::ring"
-    cwd "/etc/swift"
-    ignore_failure true
-    action :nothing
-    subscribes :run, resources(:swift_ringfile =>"object.builder")
-  end 
+  if node[:fqdn]!=t[:fqdn]
+    execute "push account ring-to #{t}" do
+      command "rsync account.ring.gz #{node[:swift][:user]}@#{t}::ring"
+      cwd "/etc/swift"
+      ignore_failure true
+      action :nothing
+      subscribes :run, resources(:swift_ringfile =>"account.builder")
+    end
+    execute "push container ring-to #{t}" do
+      command "rsync container.ring.gz #{node[:swift][:user]}@#{t}::ring"
+      cwd "/etc/swift"
+      ignore_failure true
+      action :nothing
+      subscribes :run, resources(:swift_ringfile =>"container.builder")
+    end
+    execute "push object ring-to #{t}" do
+      command "rsync object.ring.gz #{node[:swift][:user]}@#{t}::ring"
+      cwd "/etc/swift"
+      ignore_failure true
+      action :nothing
+      subscribes :run, resources(:swift_ringfile =>"object.builder")
+    end
+   end
 }

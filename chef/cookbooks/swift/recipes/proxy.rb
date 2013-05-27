@@ -18,6 +18,7 @@
 
 include_recipe 'utils'
 include_recipe 'swift::auth'
+include_recipe 'swift::rsync'
 
 
 local_ip = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
@@ -197,7 +198,7 @@ end
 ## we use their memcached!
 servers =""
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-result= search(:node, "(roles:swift-proxy OR roles:swift-proxy-acct) #{env_filter}")
+result= search(:node, "roles:swift-proxy #{env_filter}")
 if !result.nil? and (result.length > 0)  
   memcached_servers = result.map {|x|
     s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)     
@@ -230,6 +231,21 @@ end
 
 venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
 
+## make sure to fetch ring files from the ring compute node
+env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
+compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
+if (!compute_nodes.nil? and compute_nodes.length > 0 and node[:fqdn]!=compute_nodes[0][:fqdn] )
+  compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
+  log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") {level :debug}
+  %w{container account object}.each { |ring|
+    execute "pull #{ring} ring" do
+      command "rsync #{node[:swift][:user]}@#{compute_node_addr}::ring/#{ring}.ring.gz ."
+      cwd "/etc/swift"
+      ignore_failure true
+    end
+  }
+end
+
 if node[:swift][:frontend]=='native'
   if node[:swift][:use_gitrepo]
     swift_service "swift-proxy" do
@@ -245,7 +261,6 @@ elsif node[:swift][:frontend]=='apache'
   service "swift-proxy" do
     supports :status => true, :restart => true
     action [ :disable, :stop ]
-    ignore_failure true
   end
 
 
@@ -254,6 +269,12 @@ elsif node[:swift][:frontend]=='apache'
       action :install
     end
   end
+
+
+  link "/etc/nginx/sites-enabled/default" do
+    action :delete
+  end
+
   service "nginx" do
     supports :status => true, :restart => true
     action [ :start, :enable ]
@@ -261,13 +282,9 @@ elsif node[:swift][:frontend]=='apache'
   service "uwsgi" do
     supports :status => true, :restart => true
     action [ :start, :enable ]
+    subscribes :restart, "template[/etc/swift/proxy-server.conf]"
   end
 
-
-  file "/etc/nginx/sites-enabled/default" do
-    action :delete
-    notifies :restart, resources(:service => "nginx")
-  end
 
   template "/etc/nginx/sites-enabled/swift-proxy.conf" do
     source "nginx-swift-proxy.conf.erb"
@@ -320,7 +337,8 @@ end
 bash "restart swift proxy things" do
   code <<-EOH
 EOH
-  action :run
+  action :nothing
+  subscribes :run, resources(:template => "/etc/swift/proxy-server.conf")
   notifies :restart, resources(:service => "memcached-swift-proxy")
   if node[:swift][:frontend]=='native'
     notifies :restart, resources(:service => "swift-proxy")

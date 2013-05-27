@@ -35,7 +35,7 @@
           "gitrepo": "http://github.com/fujita/swift3",
           "git_refspec": "195e6c76ff46a8f00621a56d4e13b500becc2c9a",
           "use_gitrepo": true,
-          "use_gitbarclamp": true, 
+          "use_gitbarclamp": true,
           "enabled": false
         },
         "ratelimit": {
@@ -91,8 +91,8 @@
       "reseller_prefix" : "AUTH_",
       "user": "swift",
       "group": "swift",
-      "debug": true,
-      "use_slog" : false, 
+      "debug": false,
+      "use_slog" : false,
       "slog_account": "system_stats",
       "slog_user": "swift_sys",
       "slog_passwd": "swift_pwd",
@@ -112,20 +112,19 @@
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
         "swift-proxy": [ "readying", "ready", "applying" ],
-        "swift-proxy-acct": [ "readying", "ready", "applying" ],
         "swift-ring-compute": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
         [ "swift-storage" ],  
         [ "swift-ring-compute" ], 
-        [ "swift-proxy-acct" ],
+        [ "swift-proxy" ],
         [ "swift-dispersion" ],
         [ "swift-storage" ]
       ],
       "element_run_list_order": {
         "swift-ring-compute": 80,
-        "swift-proxy-acct": 81,
+        "swift-proxy": 81,
         "swift-storage": 82,
         "swift-dispersion": 83
       },
@@ -138,4 +137,3 @@
     }
   }
 }
-

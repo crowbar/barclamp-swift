@@ -37,10 +37,12 @@ else
   end
 end
 
-directory "/etc/swift" do
-  owner node[:swift][:user]
-  group node[:swift][:group]
-  mode "0755"
+["/etc/swift", "/var/lock/swift", "/var/cache/swift"].each do |d|
+  directory d do
+    owner node[:swift][:user]
+    group node[:swift][:group]
+    mode "0755"
+  end
 end
 
 template "/etc/swift/swift.conf" do
@@ -51,11 +53,4 @@ template "/etc/swift/swift.conf" do
        :swift_cluster_hash => node[:swift][:cluster_hash]
  })
 end
-
-directory "/var/lock/swift" do
-  owner node[:swift][:user]
-  group node[:swift][:group]
-  mode "0755"
-end
-
 
