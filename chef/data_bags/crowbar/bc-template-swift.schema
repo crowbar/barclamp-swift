@@ -113,6 +113,7 @@
             "keystone_instance": { "type": "str", "required": false },            
             "keystone_service_user": { "type": "str", "required": true },
             "keystone_service_password": { "type": "str" },
+            "keystone_delay_auth_decision": { "type": "bool", "required": false },
             "reseller_prefix": { "type": "str", "required": false },            
             "user": { "type": "str", "required": true },
             "group": { "type": "str", "required": true },

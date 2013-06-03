@@ -1,5 +1,6 @@
 #
 # Copyright 2011, Dell
+# Copyright 2013, Dell
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +15,7 @@
 # limitations under the License.
 #
 # Author: andi abes
+# Author: Judd Maltin
 #
 ### The cluster hash is shared among all nodes in a swift cluster.
 ### can be generated using od -t x8 -N 8 -A n </dev/random
@@ -81,6 +83,7 @@ default[:swift][:keystone_instance] = "proposal"
 default[:swift][:reseller_prefix] = "AUTH_"
 default[:swift][:keystone_service_user] = "swift"
 default[:swift][:keystone_service_password] = "swift"
+default[:swift][:keystone_delay_auth_decision] = true
 
 default[:swift][:install_slog_from_dev] = false
 

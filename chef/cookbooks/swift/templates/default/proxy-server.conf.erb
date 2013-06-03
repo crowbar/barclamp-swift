@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 # Author: andi abes
+# Author: Judd Maltin
 #
 
 #
@@ -59,7 +60,7 @@ use = egg:swift#proxy
 <% if @account_management == "true" %>allow_account_management = true<% end %>
 <% if @keystone %>account_autocreate = true<% end %>
 log_name = proxy-server
-log_facility = LOG_LOCAL1
+log_facility = LOG_LOCAL5
 log_level = DEBUG
 access_log_name = proxy-server
 access_log_facility = LOG_LOCAL1
@@ -109,6 +110,11 @@ auth_token = <%= @keystone_admin_token %>
 admin_token = <%= @keystone_admin_token %>
 
 [filter:auth_token]
+# Delaying the auth decision is required to support token-less
+# usage for anonymous referrers ('.r:*').
+# delay_auth_decision = true
+delay_auth_decision = <%= @keystone_delay_auth_decision %>
+
 paste.filter_factory = keystone.middleware.auth_token:filter_factory
 auth_host = <%= @keystone_vip %>
 auth_port = <%= @keystone_admin_port %>
