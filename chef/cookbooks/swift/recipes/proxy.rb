@@ -118,6 +118,7 @@ case proxy_config[:auth_method]
      keystone_service_tenant = keystone["keystone"]["service"]["tenant"] rescue nil
      keystone_service_user = node["swift"]["keystone_service_user"]
      keystone_service_password = node["swift"]["keystone_service_password"]
+     keystone_delay_auth_decision = node["swift"]["keystone_delay_auth_decision"] rescue nil
 
      Chef::Log.info("Keystone server found at #{keystone_address}")
      proxy_config[:keystone_admin_token]  = keystone_token
@@ -129,6 +130,8 @@ case proxy_config[:auth_method]
      proxy_config[:keystone_service_user] = keystone_service_user
      proxy_config[:keystone_service_password] = keystone_service_password
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
+     proxy_config[:keystone_delay_auth_decision] = keystone_delay_auth_decision
+
 
      keystone_register "register swift user" do
        host keystone_address
