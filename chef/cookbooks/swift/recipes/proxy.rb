@@ -54,7 +54,15 @@ proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
     action :install
   end 
 end
-package("swift-proxy") unless node[:swift][:use_gitrepo]
+
+unless node[:swift][:use_gitrepo]
+  case node[:platform]
+  when "suse"
+    package "openstack-swift-proxy"
+  else
+    package "swift-proxy"
+  end
+end
 
 if node[:swift][:middlewares][:s3][:enabled]
   if node[:swift][:middlewares][:s3][:use_gitrepo]
@@ -263,6 +271,7 @@ if node[:swift][:frontend]=='native'
 elsif node[:swift][:frontend]=='apache'
 
   service "swift-proxy" do
+    service_name "openstack-swift-proxy" if node[:platform] == "suse"
     supports :status => true, :restart => true
     action [ :disable, :stop ]
   end
