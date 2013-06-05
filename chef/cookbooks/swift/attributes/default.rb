@@ -32,8 +32,14 @@ default[:swift][:min_part_hours]= 1
 default[:swift][:partitions]= 18
 
 ### the uid/gid to be used for swift processes
-default[:swift][:user]= "swift"
-default[:swift][:group]= "swift"
+case node[:platform]
+when "suse"
+  default[:swift][:user]= "openstack-swift"
+  default[:swift][:group]= "openstack-swift"
+else
+  default[:swift][:user]= "swift"
+  default[:swift][:group]= "swift"
+end
 
 
 default[:swift][:config] = {}
