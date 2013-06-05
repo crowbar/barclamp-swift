@@ -1,0 +1,42 @@
+# Configured by Chef. Logcal changes will be lost.
+
+## Path:        Network/WWW/Memcached
+## Description: start parameters for memcached.
+## Type:        string
+## Default:     "-d -l 127.0.0.1"
+## Config:      memcached
+#
+# start parameters for memcached.
+#
+# see man 1 memcached for more
+#
+MEMCACHED_PARAMS="-d -m <%= @memory %> -l <%= @listen %> -p <%= @port %>"
+
+## Path:        Network/WWW/Memcached
+## Description: username memcached should run as
+## Type:        string
+## Default:     "memcached"
+## Config:      memcached
+#
+# username memcached should run as
+# 
+#
+MEMCACHED_USER="<%= @user %>"
+
+## Path:        Network/WWW/Memcached
+## Description: group memcached should be run as
+## Type:        string
+## Default:     "memcached"
+## Config:      memcached
+#
+# group memcached should be run as
+#
+<%
+# SUSE's init script uses startproc -u $MEMCACHED_USER -g $MEMCACHED_GROUP
+# so we need to find the default group even though startproc would
+# do it just fine had -g been omitted
+require "etc"
+gid = Etc.getpwnam(@user).gid
+group = Etc.getgrgid(gid).name
+-%>
+MEMCACHED_GROUP="<%= group %>"
