@@ -265,7 +265,13 @@ if node[:swift][:frontend]=='native'
     end
   end
   service "swift-proxy" do
-    restart_command "stop swift-proxy ; start swift-proxy"
+    case node[:platform]
+    when "suse"
+      service_name "openstack-swift-proxy"
+      supports :status => true, :restart => true
+    else
+      restart_command "stop swift-proxy ; start swift-proxy"
+    end
     action [:enable, :start]
   end
 elsif node[:swift][:frontend]=='apache'
