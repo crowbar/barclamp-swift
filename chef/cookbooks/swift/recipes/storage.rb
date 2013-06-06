@@ -20,8 +20,6 @@ include_recipe 'swift::disks'
 #include_recipe 'swift::auth' 
 include_recipe 'swift::rsync'
 
-package sqlite
-
 unless node[:swift][:use_gitrepo]
   case node[:platform]
   when "suse"
