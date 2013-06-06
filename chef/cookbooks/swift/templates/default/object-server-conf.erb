@@ -19,6 +19,7 @@
 bind_ip = <%= @storage_net_ip %>
 bind_port = 6000
 workers = 2
+user = <%= node[:swift][:user] %>
 
 log_facility = LOG_LOCAL0
 log_level = <%= @debug? "DEBUG": "INFO" %>
@@ -28,12 +29,20 @@ setup_console_handler = true
 
 
 [pipeline:main]
-pipeline = recon object-server
+pipeline = healthcheck recon object-server
+
+
 
 [app:object-server]
 use = egg:swift#object
 log_level = <%= @debug? "DEBUG": "INFO" %>
 log_requests = true
+
+[filter:healthcheck]
+use = egg:swift#healthcheck
+# An optional filesystem path, which if present, will cause the healthcheck
+# URL to return "503 Service Unavailable" with a body of "DISABLED BY FILE"
+# disable_path =
 
 [filter:recon]
 use = egg:swift#recon

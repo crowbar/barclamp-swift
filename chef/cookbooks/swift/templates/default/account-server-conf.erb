@@ -19,6 +19,7 @@
 [Default]
 bind_ip = <%= @storage_net_ip %>
 bind_port = 6002
+user = <%= node[:swift][:user] %>
 
 log_facility = LOG_LOCAL0
 log_level = <%= @debug? "DEBUG": "INFO" %>
