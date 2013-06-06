@@ -347,14 +347,27 @@ elsif node[:swift][:frontend]=='apache'
   end
 end
 
-bash "restart swift proxy things" do
-  code <<-EOH
+
+
+case node[:platform]
+when "suse"
+  service "swift-proxy" do
+    service_name "openstack-swift-proxy" if node[:platform] == "suse"
+    action [:enable, :start]
+    subscribes(:restart,
+               resources(:template => "/etc/swift/proxy-server.conf"),
+               :immediately)
+  end
+else
+  bash "restart swift proxy things" do
+    code <<-EOH
 EOH
-  action :nothing
-  subscribes :run, resources(:template => "/etc/swift/proxy-server.conf")
-  notifies :restart, resources(:service => "memcached-swift-proxy")
-  if node[:swift][:frontend]=='native'
-    notifies :restart, resources(:service => "swift-proxy")
+    action :nothing
+    subscribes :run, resources(:template => "/etc/swift/proxy-server.conf")
+    notifies :restart, resources(:service => "memcached-swift-proxy")
+    if node[:swift][:frontend]=='native'
+      notifies :restart, resources(:service => "swift-proxy")
+    end
   end
 end
 
