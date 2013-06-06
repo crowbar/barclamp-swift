@@ -315,7 +315,7 @@ elsif node[:swift][:frontend]=='apache'
   end
 
   directory "/usr/lib/cgi-bin/swift/" do
-    owner "swift"
+    owner default[:swift][:user]
     mode 0755
     action :create
     recursive true
