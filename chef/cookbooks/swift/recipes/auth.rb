@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 # Author: andi abes
+# Author: Judd Maltin
 #
 
 
@@ -23,12 +24,7 @@ case node[:platform]
 when "suse"
   package "openstack-swift-account"
 else
-  ## temporary workaround for swift-account package issue present in 1.3
-  ## rather than apt-get install (which fails)
   unless node[:swift][:use_gitrepo]
-    execute "get swift-account" do
-      command "apt-get install --allow-unauthenticated swift-account" # This will fail, but it gets the image local
-    #  returns 100
-    end
+    package "swift-account"
   end
 end
