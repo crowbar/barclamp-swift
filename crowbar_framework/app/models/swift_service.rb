@@ -286,7 +286,7 @@ class SwiftService < ServiceObject
     end
 
     if errors.length > 0
-      raise Chef::Exceptions::ValidationFailed.new(errors.join("<br/>"))
+      raise Chef::Exceptions::ValidationFailed.new(errors.join("\n"))
     end
   end
 
