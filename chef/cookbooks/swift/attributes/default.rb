@@ -89,7 +89,7 @@ default[:swift][:keystone_instance] = "proposal"
 default[:swift][:reseller_prefix] = "AUTH_"
 default[:swift][:keystone_service_user] = "swift"
 default[:swift][:keystone_service_password] = "swift"
-default[:swift][:keystone_delay_auth_decision] = true
+default[:swift][:keystone_delay_auth_decision] = false
 
 default[:swift][:install_slog_from_dev] = false
 
