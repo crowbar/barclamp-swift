@@ -22,8 +22,9 @@ class SwiftService < ServiceObject
     @logger = thelogger
   end
 
+# Turn off multi proposal support till it really works and people ask for it.
   def self.allow_multiple_proposals?
-    true
+    false
   end
 
   def proposal_dependencies(role)
