@@ -20,9 +20,10 @@
 bind_ip = <%= @storage_net_ip %>
 bind_port = 6001
 workers = 2
+user = <%= node[:swift][:user] %>
 
 log_facility = LOG_LOCAL0
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 log_name = swift-c
 log_requests = true
 setup_console_handler = true
@@ -36,7 +37,7 @@ use = egg:swift#recon
 
 [app:container-server]
 use = egg:swift#container
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 
 [container-replicator]
 

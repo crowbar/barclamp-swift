@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and 
 # limitations under the License. 
 # 
+require 'chef'
 
 class SwiftService < ServiceObject
   class ServiceError < StandardError
@@ -260,6 +261,34 @@ class SwiftService < ServiceObject
       return p if p.elements["#{@bc_name}-dispersion"].include? node
     end
     nil
+  end
+
+  def validate_proposal_after_save proposal
+    super
+
+    errors = []
+
+    if proposal["attributes"]["swift"]["replicas"] <= 0
+      errors << "Need at least 1 replica"
+    end
+
+    elements = proposal["deployment"]["swift"]["elements"]
+
+    if not elements.has_key?("swift-storage") or elements["swift-storage"].length < 1
+      errors << "Need at least one swift-storage node"
+    end
+
+    if elements["swift-storage"].length < proposal["attributes"]["swift"]["zones"]
+      if elements["swift-storage"].length == 1
+        errors << "Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage node was set for #{proposal["attributes"]["swift"]["zones"]} zones"
+      else
+        errors << "Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage nodes were set for #{proposal["attributes"]["swift"]["zones"]} zones"
+      end
+    end
+
+    if errors.length > 0
+      raise Chef::Exceptions::ValidationFailed.new(errors.join("\n"))
+    end
   end
 
 end

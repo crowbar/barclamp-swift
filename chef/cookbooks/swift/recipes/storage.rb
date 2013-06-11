@@ -21,13 +21,23 @@ include_recipe 'swift::disks'
 include_recipe 'swift::rsync'
 
 unless node[:swift][:use_gitrepo]
-  %w{swift-container swift-object swift-account sqlite }.each do |pkg|
-    package pkg do
-      action :upgrade
+  case node[:platform]
+  when "suse"
+    %w{openstack-swift-container
+       openstack-swift-object
+       openstack-swift-account}.each do |pkg|
+      package pkg do
+        action :install
+      end
+    end
+  else
+    %w{swift-container swift-object swift-account}.each do |pkg|
+      pkg = "openstack-#{pkg}" if node[:platform] == "suse"
+      package pkg do
+        action :upgrade
+      end
     end
   end
-else
-  package "sqlite"
 end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
@@ -74,6 +84,7 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
         virtualenv venv_path
       end
     end
+    x = "openstack-#{x}" if node[:platform] == "suse"
     service x do
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
         restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"

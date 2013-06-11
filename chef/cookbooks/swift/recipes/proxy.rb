@@ -31,6 +31,7 @@ proxy_config = {}
 proxy_config[:auth_method] = node[:swift][:auth_method]
 proxy_config[:group] = node[:swift][:group]
 proxy_config[:user] = node[:swift][:user]
+proxy_config[:debug] = node[:swift][:debug]
 proxy_config[:local_ip] = local_ip
 proxy_config[:public_ip] = public_ip
 proxy_config[:hide_auth] = false
@@ -53,7 +54,15 @@ proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
     action :install
   end 
 end
-package("swift-proxy") unless node[:swift][:use_gitrepo]
+
+unless node[:swift][:use_gitrepo]
+  case node[:platform]
+  when "suse"
+    package "openstack-swift-proxy"
+  else
+    package "swift-proxy"
+  end
+end
 
 if node[:swift][:middlewares][:s3][:enabled]
   if node[:swift][:middlewares][:s3][:use_gitrepo]
@@ -256,12 +265,19 @@ if node[:swift][:frontend]=='native'
     end
   end
   service "swift-proxy" do
-    restart_command "stop swift-proxy ; start swift-proxy"
+    case node[:platform]
+    when "suse"
+      service_name "openstack-swift-proxy"
+      supports :status => true, :restart => true
+    else
+      restart_command "stop swift-proxy ; start swift-proxy"
+    end
     action [:enable, :start]
   end
 elsif node[:swift][:frontend]=='apache'
 
   service "swift-proxy" do
+    service_name "openstack-swift-proxy" if node[:platform] == "suse"
     supports :status => true, :restart => true
     action [ :disable, :stop ]
   end
@@ -299,7 +315,7 @@ elsif node[:swift][:frontend]=='apache'
   end
 
   directory "/usr/lib/cgi-bin/swift/" do
-    owner "swift"
+    owner node[:swift][:user]
     mode 0755
     action :create
     recursive true
@@ -337,14 +353,27 @@ elsif node[:swift][:frontend]=='apache'
   end
 end
 
-bash "restart swift proxy things" do
-  code <<-EOH
+
+
+case node[:platform]
+when "suse"
+  service "swift-proxy" do
+    service_name "openstack-swift-proxy" if node[:platform] == "suse"
+    action [:enable, :start]
+    subscribes(:restart,
+               resources(:template => "/etc/swift/proxy-server.conf"),
+               :immediately)
+  end
+else
+  bash "restart swift proxy things" do
+    code <<-EOH
 EOH
-  action :nothing
-  subscribes :run, resources(:template => "/etc/swift/proxy-server.conf")
-  notifies :restart, resources(:service => "memcached-swift-proxy")
-  if node[:swift][:frontend]=='native'
-    notifies :restart, resources(:service => "swift-proxy")
+    action :nothing
+    subscribes :run, resources(:template => "/etc/swift/proxy-server.conf")
+    notifies :restart, resources(:service => "memcached-swift-proxy")
+    if node[:swift][:frontend]=='native'
+      notifies :restart, resources(:service => "swift-proxy")
+    end
   end
 end
 

@@ -26,10 +26,15 @@ template "/etc/rsyncd.conf" do
   })
 end
 
-cookbook_file "/etc/default/rsync" do
-  source "default-rsync"
+case node[:platform]
+when "suse"
+else
+  cookbook_file "/etc/default/rsync" do
+    source "default-rsync"
+  end
 end
 
 service "rsync" do
   action :start 
+  service_name "rsyncd" if node[:platform] == "suse"
 end

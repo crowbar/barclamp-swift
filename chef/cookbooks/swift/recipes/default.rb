@@ -20,8 +20,13 @@ swift_path = "/opt/swift"
 venv_path = node[:swift][:use_virtualenv] ? "#{swift_path}/.venv" : nil
 
 unless node[:swift][:use_gitrepo]
-  %w{curl swift}.each do |pkg|
-    package pkg
+  package "curl"
+
+  case node[:platform]
+  when "suse"
+    package "openstack-swift"
+  else
+    package "swift"
   end
 else
 

@@ -20,13 +20,20 @@
 define :memcached_instance do
   include_recipe "memcached"
 
-  runit_service "memcached-#{params[:name]}" do
-    template_name "memcached"
-    cookbook "memcached"
-    options({
-      :memory => node[:memcached][:memory],
-      :port => node[:memcached][:port],
-      :user => node[:memcached][:user]}.merge(params)
-    )
+  case node[:platform]
+  when "suse"
+    service "memcached" do
+      action [:enable, :start]
+    end
+  else
+    runit_service "memcached-#{params[:name]}" do
+      template_name "memcached"
+      cookbook "memcached"
+      options({
+        :memory => node[:memcached][:memory],
+        :port => node[:memcached][:port],
+        :user => node[:memcached][:user]}.merge(params)
+      )
+    end
   end
 end

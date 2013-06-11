@@ -21,8 +21,11 @@ package "memcached" do
   action :upgrade
 end
 
-package "libmemcache-dev" do
-  action :upgrade
+case node[:platform]
+when "debian", "ubuntu"
+  package "libmemcache-dev" do
+    action :upgrade
+  end
 end
 
 service "memcached" do
@@ -31,7 +34,13 @@ service "memcached" do
 end
 
 template "/etc/memcached.conf" do
-  source "memcached.conf.erb"
+  case node[:platform]
+  when "suse"
+    source "memcached.sysconfig.erb"
+    path "/etc/sysconfig/memcached"
+  else
+    source "memcached.conf.erb"
+  end
   owner "root"
   group "root"
   mode "0644"
