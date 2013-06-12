@@ -90,8 +90,6 @@
       "keystone_service_user": "swift",
       "keystone_delay_auth_decision": false,
       "reseller_prefix" : "AUTH_",
-      "user": "swift",
-      "group": "swift",
       "debug": false,
       "use_slog" : false,
       "slog_account": "system_stats",
