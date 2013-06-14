@@ -4,9 +4,7 @@
   %label{:for => "proposal_attributes"}= t('.attributes')
   = link_to "Raw", proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
   %div.container
-    %p
-      %label{ :for => :keystone_instance }= t('.keystone_instance')
-      = instance_selector("keystone", :keystone_instance, "keystone_instance", @proposal)
+    = render_instance_selector("keystone", :keystone_instance, t('.keystone_instance'), "keystone_instance", @proposal)
     %p
       %label{ :for => :keystone_service_user }= t('.keystone_service_user')
       %input#keystone_service_user{:type => "text", :name => "keystone_service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_service_user"], :onchange => "update_value('keystone_service_user','keystone_service_user', 'string')"}
