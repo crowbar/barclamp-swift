@@ -6,12 +6,6 @@
   %div.container
     = render_instance_selector("keystone", :keystone_instance, t('.keystone_instance'), "keystone_instance", @proposal)
     %p
-      %label{ :for => :keystone_service_user }= t('.keystone_service_user')
-      %input#keystone_service_user{:type => "text", :name => "keystone_service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_service_user"], :onchange => "update_value('keystone_service_user','keystone_service_user', 'string')"}
-    %p
-      %label{ :for => :keystone_service_password }= t('.keystone_service_password')
-      %input#keystone_service_password{:type => "text", :name => "keystone_service_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_service_password"], :onchange => "update_value('keystone_service_password','keystone_service_password', 'string')"}
-    %p
       %label{ :for => :keystone_delay_auth_decision }= t('.keystone_delay_auth_decision')
       = select_tag :keystone_delay_auth_decision, options_for_select([['false', 'false'], ['true', 'true']], @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_delay_auth_decision"].to_s), :onchange => "update_value('keystone_delay_auth_decision', 'keystone_delay_auth_decision', 'boolean')"
 
