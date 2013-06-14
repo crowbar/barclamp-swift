@@ -17,14 +17,16 @@
 # limitations under the License.
 #
 
-package "memcached" do
-  action :upgrade
-end
-
 case node[:platform]
+when "suse"
+  package "memcached" do
+    action :install
+  end
 when "debian", "ubuntu"
-  package "libmemcache-dev" do
-    action :upgrade
+  %w{libmemcache-dev memcached}.each do |pkg|
+    package pkg do
+      action :upgrade
+    end
   end
 end
 
