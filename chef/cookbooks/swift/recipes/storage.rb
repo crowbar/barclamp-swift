@@ -34,7 +34,7 @@ unless node[:swift][:use_gitrepo]
     %w{swift-container swift-object swift-account}.each do |pkg|
       pkg = "openstack-#{pkg}" if node[:platform] == "suse"
       package pkg do
-        action :upgrade
+        action :install
       end
     end
   end
