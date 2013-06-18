@@ -31,10 +31,13 @@ def get_uuid(disk)
 end
 
 Chef::Log.info("locating disks using #{node[:swift][:disk_enum_expr]} test: #{node[:swift][:disk_test_expr]}")
+
 to_use_disks = []
 all_disks = eval(node[:swift][:disk_enum_expr])
 all_disks.each { |k,v|
   b = binding()
+  #skip if the disk is ahci and we have raid.
+  next if v.is_ahci and node[:crowbar_wall].has_key?('raid')
   to_use_disks << k if eval(node[:swift][:disk_test_expr]) && ::File.exists?("/dev/#{k}")
 }
 
