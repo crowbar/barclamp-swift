@@ -115,7 +115,7 @@ admin_token = <%= @keystone_admin_token %>
 # delay_auth_decision = true
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
 
-paste.filter_factory = keystone.middleware.auth_token:filter_factory
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
 auth_host = <%= @keystone_vip %>
 auth_port = <%= @keystone_admin_port %>
 auth_protocol = http
