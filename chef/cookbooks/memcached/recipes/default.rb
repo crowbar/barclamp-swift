@@ -25,7 +25,7 @@ when "suse"
 when "debian", "ubuntu"
   %w{libmemcache-dev memcached}.each do |pkg|
     package pkg do
-      action :upgrade
+      action :install
     end
   end
 end
