@@ -34,7 +34,7 @@ crowbar:
 
 nav:
   utils:
-    swift: '"/swift/dashboard/", { :link => { :target => "_blank" } }'
+    swift: "/swift/dashboard/"
 
 locale_additions:
   en:
