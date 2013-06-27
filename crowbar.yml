@@ -34,7 +34,7 @@ crowbar:
 
 nav:
   utils:
-    swift: "/swift/dashboard/"
+    swift: '"/swift/dashboard/"'
 
 locale_additions:
   en:
