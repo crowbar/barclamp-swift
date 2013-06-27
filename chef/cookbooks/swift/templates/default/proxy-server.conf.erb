@@ -29,7 +29,7 @@ workers = 1
 user = <%= @user %>
 group = <%= @group %>
 log_facility = LOG_LOCAL0
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 log_name = swift-p
 log_requests = true
 setup_console_handler = true
@@ -61,7 +61,7 @@ use = egg:swift#proxy
 <% if @keystone %>account_autocreate = true<% end %>
 log_name = proxy-server
 log_facility = LOG_LOCAL5
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 access_log_name = proxy-server
 access_log_facility = LOG_LOCAL1
 access_log_level = INFO
@@ -87,7 +87,7 @@ use = egg:swift3#swift3
 use = egg:swauth#swauth
 set default_swift_cluster = local#https://<%= @local_ip %>:8080/v1
 super_admin_key = <%= @admin_key %>
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 <% end %>
 
 <% if @keystone %>
@@ -105,7 +105,7 @@ service_port = <%= @keystone_service_port %>
 service_host = <%= @keystone_vip %>
 auth_port = <%= @keystone_admin_port %>
 auth_host = <%= @keystone_vip %>
-auth_protocol = http
+auth_protocol = <%= @keystone_protocol %>
 auth_token = <%= @keystone_admin_token %>
 admin_token = <%= @keystone_admin_token %>
 
@@ -115,11 +115,11 @@ admin_token = <%= @keystone_admin_token %>
 # delay_auth_decision = true
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
 
-paste.filter_factory = keystone.middleware.auth_token:filter_factory
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
 auth_host = <%= @keystone_vip %>
 auth_port = <%= @keystone_admin_port %>
-auth_protocol = http
-auth_uri = http://<%= @keystone_vip %>:<%= @keystone_service_port %>/
+auth_protocol = <%= @keystone_protocol %>
+auth_uri = <%= @keystone_protocol %>://<%= @keystone_vip %>:<%= @keystone_service_port %>/
 admin_tenant_name = <%= @keystone_service_tenant %>
 admin_user = <%= @keystone_service_user %>
 admin_password = <%= @keystone_service_password %>

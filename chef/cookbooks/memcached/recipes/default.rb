@@ -17,12 +17,17 @@
 # limitations under the License.
 #
 
-package "memcached" do
-  action :upgrade
-end
-
-package "libmemcache-dev" do
-  action :upgrade
+case node[:platform]
+when "suse"
+  package "memcached" do
+    action :install
+  end
+when "debian", "ubuntu"
+  %w{libmemcache-dev memcached}.each do |pkg|
+    package pkg do
+      action :install
+    end
+  end
 end
 
 service "memcached" do
@@ -31,7 +36,13 @@ service "memcached" do
 end
 
 template "/etc/memcached.conf" do
-  source "memcached.conf.erb"
+  case node[:platform]
+  when "suse"
+    source "memcached.sysconfig.erb"
+    path "/etc/sysconfig/memcached"
+  else
+    source "memcached.conf.erb"
+  end
   owner "root"
   group "root"
   mode "0644"

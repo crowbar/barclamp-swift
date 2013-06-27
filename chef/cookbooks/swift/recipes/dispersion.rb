@@ -23,6 +23,7 @@ else
 end
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_token = keystone["keystone"]["service"]["token"] rescue nil
 keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"] rescue nil
@@ -30,7 +31,7 @@ keystone_admin_port = keystone["keystone"]["api"]["admin_port"] rescue nil
 service_tenant = node[:swift][:dispersion][:service_tenant]
 service_user = node[:swift][:dispersion][:service_user]
 service_password = node[:swift][:dispersion][:service_password]
-keystone_auth_url = "http://#{keystone_address}:#{keystone_admin_port}/v2.0"
+keystone_auth_url = "#{keystone_protocol}://#{keystone_address}:#{keystone_admin_port}/v2.0"
 
 keystone_register "swift dispersion wakeup keystone" do
   host keystone_address

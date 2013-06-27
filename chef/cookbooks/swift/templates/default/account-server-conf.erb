@@ -16,12 +16,13 @@
 # Author: andi abes
 #
 
-[Default]
+[DEFAULT]
 bind_ip = <%= @storage_net_ip %>
 bind_port = 6002
+user = <%= node[:swift][:user] %>
 
 log_facility = LOG_LOCAL0
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 log_name = swift-a
 log_requests = true
 setup_console_handler = true
@@ -35,7 +36,7 @@ use = egg:swift#recon
 
 [app:account-server]
 use = egg:swift#account
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 log_requests = true
 
 
