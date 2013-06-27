@@ -143,6 +143,16 @@ case proxy_config[:auth_method]
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
      proxy_config[:keystone_delay_auth_decision] = keystone_delay_auth_decision
 
+     # ResellerAdmin is used by swift (see reseller_admin_role option)
+     role = "ResellerAdmin"
+     keystone_register "add #{role} role for swift" do
+       protocol keystone_protocol
+       host keystone_address
+       port keystone_admin_port
+       token keystone_token
+       role_name role
+       action :add_role
+     end
 
      keystone_register "register swift user" do
        protocol keystone_protocol
