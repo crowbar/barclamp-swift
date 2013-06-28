@@ -1,7 +1,7 @@
 .report_results
   - json.keys.sort.each do |key_name|
     %h2= key_name
-    %table.data.box.report_suite
+    %table.report_suite.table.table-bordered
       %thead
         %tr
           %th.r_key= t '.report.r_key'

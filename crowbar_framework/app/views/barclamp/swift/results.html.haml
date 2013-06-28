@@ -1,6 +1,7 @@
 = stylesheet_link_tag @bc_name
 
-%h1.divided= t('.title', :report_run => @report_run['uuid'])
+%h2.page-header= t('.title', :report_run => @report_run['uuid'])
+.page-header-bottom
 .info
   %dl
     = dl_item(t("barclamp.#{@bc_name}.dashboard.report_run.node"), @report_run['node'])
