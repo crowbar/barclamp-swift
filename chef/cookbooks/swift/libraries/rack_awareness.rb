@@ -59,7 +59,7 @@ class Rack_awareness
     def switch_to_zone()
         #set switch to zone by round-robin
         zone_count=@node[:swift][:zones]
-        zone_list=*(0..zone_count-1)
+        zone_list=zone_count.times.to_a
         switch_list=@switch_list
         switch_list.keys.each do |sw_name|
              switch_list["#{sw_name}"]["zones"]=[] if not switch_list["#{sw_name}"].has_key?("zones")
@@ -69,7 +69,7 @@ class Rack_awareness
             #some switches may have same zone with each other
             switch_list.keys.sort.each do |sw_name|
                 zone=zone_list.shift
-                zone_list=*(0..zone_count-1) if zone_list.size == 0
+                zone_list=zone_count.times.to_a if zone_list.size == 0
                 switch_list["#{sw_name}"]["zones"] << zone
             end
         else
