@@ -3,12 +3,11 @@
   %h2.page-header
     = t '.title'
     %form.form-inline.pull-right{:method => :post, :action => "/#{@bc_name}/dispersion_reports/clear"}
-      %label
-        - if @dispersion_reports.empty?
-          .header-text
-            = t('.no_report_runs')
-        - else
-          %input.btn.header-text{:type=> 'submit', :value => t('.clear.do')}
+      - if @dispersion_reports.empty?
+        .header-text
+          = t('.no_report_runs')
+      - else
+        %input.btn.header-text{:type=> 'submit', :value => t('.clear.do')}
   .page-header-bottom
   .row
     .span12
@@ -21,7 +20,7 @@
             %select{:name => 'node'}
               - @ready_nodes.each do |node|
                 %option{ :value => node.name }= node.alias  
-          %input.btn.btn-success{:type=>'submit', :value => t('.run.do') }
+          %input.btn{:type=>'submit', :value => t('.run.do') }
 
 - if not @dispersion_reports.empty?
   .row
