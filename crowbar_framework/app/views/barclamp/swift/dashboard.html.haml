@@ -1,18 +1,18 @@
 = stylesheet_link_tag @bc_name
 .dashboard
-  %h2.page-header= t '.title'
+  %h2.page-header
+    = t '.title'
+    %form.form-inline.pull-right{:method => :post, :action => "/#{@bc_name}/dispersion_reports/clear"}
+      %label
+        - if @dispersion_reports.empty?
+          .header-text
+            = t('.no_report_runs')
+        - else
+          %input.btn.header-text{:type=> 'submit', :value => t('.clear.do')}
   .page-header-bottom
   .row
     .span12
-      %form{:method => :post, :id =>'clear', :action => "/#{@bc_name}/dispersion_reports/clear"}
-        %label
-          - if @dispersion_reports.empty?
-            = t('.no_report_runs')
-          - else
-            = t('.n_report_runs', :n => @dispersion_reports.count)
-            %input{:type=> 'submit', :class => 'btn', :value => t('.clear.do')}
-        
-      %form{:method => :post, :id => 'run_report', :action => "/#{@bc_name}/dispersion_reports" } 
+      %form.form-inline{:method => :post, :id => 'run_report', :action => "/#{@bc_name}/dispersion_reports" } 
         - if @ready_nodes.empty?
           %span{:class => 'no_nodes'}= t '.run.no_nodes'
         - else
@@ -21,34 +21,35 @@
             %select{:name => 'node'}
               - @ready_nodes.each do |node|
                 %option{ :value => node.name }= node.alias  
-          %input{:type=>'submit', :class=>'btn', :value => t('.run.do') }
+          %input.btn.btn-success{:type=>'submit', :value => t('.run.do') }
 
-    - if not @dispersion_reports.empty?
+- if not @dispersion_reports.empty?
+  .row
+    .span12
       %table.dispersion_reports.table.table-bordered
+        %thead
+          %th.node= t '.report_run.node'
+          %th.status= t '.report_run.status'
+          %th.started= t '.report_run.started'
+          %th.ended= t '.report_run.ended'
         %tbody
-          %thead
-            %th.node= t '.report_run.node'
-            %th.status= t '.report_run.status'
-            %th.started= t '.report_run.started'
-            %th.ended= t '.report_run.ended'
-          %tbody
-            - @dispersion_reports.each do |report_run|
-              %tr
-                %td.node{:title=>report_run['node']}
-                  = link_to @nodes_hash[report_run['node']].alias, { :controller => 'nodes', :action => 'show', :name => report_run['node'] }
-                %td{:class=>"status _#{report_run['status']}"}
-                  - if report_run['status'] == 'passed'
-                    %div.led.green
-                  - elsif report_run['status'] == 'failed'
-                    %div.led.red
-                  - else
-                    %div.led.in_process
-                  %span
-                    - if report_run['status'] == 'running'
-                      = t(".report_run.status_.#{report_run['status']}")
-                    - else 
-                      = link_to t(".report_run.status_.#{report_run['status']}"), "/#{@bc_name}/results/#{report_run['uuid']}.html"
-                %td.started
-                  = Time.at(report_run['started']).to_s
-                %td.ended
-                  = report_run['ended'].nil? ? "" : Time.at(report_run['ended']).to_s
+          - @dispersion_reports.each do |report_run|
+            %tr
+              %td.node{:title=>report_run['node']}
+                = link_to @nodes_hash[report_run['node']].alias, { :controller => 'nodes', :action => 'show', :name => report_run['node'] }
+              %td{:class=>"status _#{report_run['status']}"}
+                - if report_run['status'] == 'passed'
+                  %div.led.green
+                - elsif report_run['status'] == 'failed'
+                  %div.led.red
+                - else
+                  %div.led.in_process
+                %span
+                  - if report_run['status'] == 'running'
+                    = t(".report_run.status_.#{report_run['status']}")
+                  - else 
+                    = link_to t(".report_run.status_.#{report_run['status']}"), "/#{@bc_name}/results/#{report_run['uuid']}.html"
+              %td.started
+                = Time.at(report_run['started']).to_s
+              %td.ended
+                = report_run['ended'].nil? ? "" : Time.at(report_run['ended']).to_s
