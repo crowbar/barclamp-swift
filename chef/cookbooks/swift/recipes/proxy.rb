@@ -78,7 +78,11 @@ if node[:swift][:middlewares][:s3][:enabled]
       creates "#{s3_path}/swift3.egg-info"
     end
   else
-    package("swift-plugin-s3")
+    if node[:platform] == "suse"
+      package "python-swift3"
+    else
+      package("swift-plugin-s3")
+    end
   end
 end
 
