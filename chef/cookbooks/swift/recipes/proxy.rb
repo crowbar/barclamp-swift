@@ -24,6 +24,20 @@ include_recipe 'swift::rsync'
 local_ip = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
 public_ip = Swift::Evaluator.get_ip_by_type(node, :public_ip_expr)
 
+admin_host = node[:fqdn]
+# For the public endpoint, we prefer the public name. If not set, then we
+# use the IP address except for SSL, where we always prefer a hostname
+# (for certificate validation).
+# In the case of swift, we always configure SSL.
+use_ssl = true
+public_host = node[:crowbar][:public_name]
+if public_host.nil? or public_host.empty?
+  unless use_ssl
+    public_host = public_ip
+  else
+    public_host = 'public.'+node[:fqdn]
+  end
+end
 
 ### 
 # bucket to collect all the config items that end up in the proxy config template
@@ -32,8 +46,7 @@ proxy_config[:auth_method] = node[:swift][:auth_method]
 proxy_config[:group] = node[:swift][:group]
 proxy_config[:user] = node[:swift][:user]
 proxy_config[:debug] = node[:swift][:debug]
-proxy_config[:local_ip] = local_ip
-proxy_config[:public_ip] = public_ip
+proxy_config[:admin_host] = admin_host
 proxy_config[:hide_auth] = false
 ### middleware items
 proxy_config[:clock_accuracy] = node[:swift][:middlewares][:ratelimit][:clock_accuracy]
@@ -124,7 +137,7 @@ case proxy_config[:auth_method]
        end
      end
      
-     keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+     keystone_host = keystone[:fqdn]
      keystone_protocol = keystone["keystone"]["api"]["protocol"]
      keystone_token = keystone["keystone"]["service"]["token"] rescue nil
      keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
@@ -134,10 +147,10 @@ case proxy_config[:auth_method]
      keystone_service_password = node["swift"]["keystone_service_password"]
      keystone_delay_auth_decision = node["swift"]["keystone_delay_auth_decision"] rescue nil
 
-     Chef::Log.info("Keystone server found at #{keystone_address}")
+     Chef::Log.info("Keystone server found at #{keystone_host}")
      proxy_config[:keystone_protocol] = keystone_protocol
      proxy_config[:keystone_admin_token]  = keystone_token
-     proxy_config[:keystone_vip] = keystone_address
+     proxy_config[:keystone_host] = keystone_host
      proxy_config[:keystone_admin_port] = keystone_admin_port
      proxy_config[:keystone_service_port] = keystone_service_port
      proxy_config[:keystone_service_port] = keystone_service_port
@@ -151,7 +164,7 @@ case proxy_config[:auth_method]
      role = "ResellerAdmin"
      keystone_register "add #{role} role for swift" do
        protocol keystone_protocol
-       host keystone_address
+       host keystone_host
        port keystone_admin_port
        token keystone_token
        role_name role
@@ -160,7 +173,7 @@ case proxy_config[:auth_method]
 
      keystone_register "register swift user" do
        protocol keystone_protocol
-       host keystone_address
+       host keystone_host
        port keystone_admin_port
        token keystone_token
        user_name keystone_service_user
@@ -171,7 +184,7 @@ case proxy_config[:auth_method]
 
      keystone_register "give swift user access" do
        protocol keystone_protocol
-       host keystone_address
+       host keystone_host
        port keystone_admin_port
        token keystone_token
        user_name keystone_service_user
@@ -182,7 +195,7 @@ case proxy_config[:auth_method]
 
      keystone_register "register swift service" do
        protocol keystone_protocol
-       host keystone_address
+       host keystone_host
        token keystone_token
        port keystone_admin_port
        service_name "swift"
@@ -193,14 +206,14 @@ case proxy_config[:auth_method]
 
      keystone_register "register swift-proxy endpoint" do
          protocol keystone_protocol
-         host keystone_address
+         host keystone_host
          token keystone_token
          port keystone_admin_port
          endpoint_service "swift"
          endpoint_region "RegionOne"
-         endpoint_publicURL "https://#{public_ip}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
-         endpoint_adminURL "https://#{local_ip}:8080/v1/"
-         endpoint_internalURL "https://#{local_ip}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
+         endpoint_publicURL "https://#{public_host}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
+         endpoint_adminURL "https://#{admin_host}:8080/v1/"
+         endpoint_internalURL "https://#{admin_host}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
          #  endpoint_global true
          #  endpoint_enabled true
         action :add_endpoint_template

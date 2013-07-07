@@ -85,7 +85,7 @@ use = egg:swift3#swift3
 <%if @swauth %>
 [filter:swauth]
 use = egg:swauth#swauth
-set default_swift_cluster = local#https://<%= @local_ip %>:8080/v1
+set default_swift_cluster = local#https://<%= @admin_host %>:8080/v1
 super_admin_key = <%= @admin_key %>
 log_level = <%= @debug? "DEBUG": "INFO" %>
 <% end %>
@@ -102,9 +102,9 @@ reseller_prefix=<%= @reseller_prefix %>
 [filter:s3token]
 paste.filter_factory = keystone.middleware.s3_token:filter_factory
 service_port = <%= @keystone_service_port %>
-service_host = <%= @keystone_vip %>
+service_host = <%= @keystone_host %>
 auth_port = <%= @keystone_admin_port %>
-auth_host = <%= @keystone_vip %>
+auth_host = <%= @keystone_host %>
 auth_protocol = <%= @keystone_protocol %>
 auth_token = <%= @keystone_admin_token %>
 admin_token = <%= @keystone_admin_token %>
@@ -116,10 +116,10 @@ admin_token = <%= @keystone_admin_token %>
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
 
 paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
-auth_host = <%= @keystone_vip %>
+auth_host = <%= @keystone_host %>
 auth_port = <%= @keystone_admin_port %>
 auth_protocol = <%= @keystone_protocol %>
-auth_uri = <%= @keystone_protocol %>://<%= @keystone_vip %>:<%= @keystone_service_port %>/
+auth_uri = <%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/
 admin_tenant_name = <%= @keystone_service_tenant %>
 admin_user = <%= @keystone_service_user %>
 admin_password = <%= @keystone_service_password %>
