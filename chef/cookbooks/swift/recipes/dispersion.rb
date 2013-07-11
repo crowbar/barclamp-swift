@@ -38,6 +38,7 @@ keystone_register "swift dispersion wakeup keystone" do
   port keystone_admin_port
   token keystone_token
   action :wakeup
+  protocol keystone_protocol
 end
 
 keystone_register "create tenant #{service_tenant} for dispersion" do
@@ -46,6 +47,7 @@ keystone_register "create tenant #{service_tenant} for dispersion" do
   token keystone_token
   tenant_name service_tenant
   action :add_tenant
+  protocol keystone_protocol
 end
 
 keystone_register "add #{service_user}:#{service_tenant} user" do
@@ -56,6 +58,7 @@ keystone_register "add #{service_user}:#{service_tenant} user" do
   user_password service_password
   tenant_name service_tenant 
   action :add_user
+  protocol keystone_protocol
 end
 
 keystone_register "add #{service_user}:#{service_tenant} user admin role" do
@@ -66,6 +69,7 @@ keystone_register "add #{service_user}:#{service_tenant} user admin role" do
   role_name "admin"
   tenant_name service_tenant 
   action :add_access
+  protocol keystone_protocol
 end
 
 execute "populate-dispersion" do
