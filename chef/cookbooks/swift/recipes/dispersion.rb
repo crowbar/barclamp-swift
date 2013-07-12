@@ -35,23 +35,24 @@ service_password = node[:swift][:dispersion][:service_password]
 keystone_auth_url = "#{keystone_protocol}://#{keystone_host}:#{keystone_admin_port}/v2.0"
 
 keystone_register "swift dispersion wakeup keystone" do
+  protocol keystone_protocol
   host keystone_host
   port keystone_admin_port
   token keystone_token
   action :wakeup
-  protocol keystone_protocol
 end
 
 keystone_register "create tenant #{service_tenant} for dispersion" do
+  protocol keystone_protocol
   host keystone_host
   port keystone_admin_port
   token keystone_token
   tenant_name service_tenant
   action :add_tenant
-  protocol keystone_protocol
 end
 
 keystone_register "add #{service_user}:#{service_tenant} user" do
+  protocol keystone_protocol
   host keystone_host
   port keystone_admin_port
   token keystone_token
@@ -59,10 +60,10 @@ keystone_register "add #{service_user}:#{service_tenant} user" do
   user_password service_password
   tenant_name service_tenant 
   action :add_user
-  protocol keystone_protocol
 end
 
 keystone_register "add #{service_user}:#{service_tenant} user admin role" do
+  protocol keystone_protocol
   host keystone_host
   port keystone_admin_port
   token keystone_token
@@ -70,9 +71,7 @@ keystone_register "add #{service_user}:#{service_tenant} user admin role" do
   role_name "admin"
   tenant_name service_tenant 
   action :add_access
-  protocol keystone_protocol
 end
-
 
 if keystone_insecure
   swift_cmd="swift --insecure"
