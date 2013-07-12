@@ -117,11 +117,7 @@ case proxy_config[:auth_method]
        keystone = node
      end
 
-     unless node[:swift][:use_gitrepo]
-       package "python-keystone" do
-         action :install
-       end 
-     else
+     if node[:swift][:use_gitrepo]
        if node[:swift][:use_virtualenv]
          pfs_and_install_deps "keystone" do
            cookbook "keystone"
