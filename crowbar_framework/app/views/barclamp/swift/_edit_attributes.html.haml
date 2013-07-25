@@ -119,18 +119,6 @@
           %label{ :for => :storage_domain }= t('.middlewares.storage_domain')
           %input#storage_domain{:type => "text", :name => "storage_domain", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["domain_remap"]["storage_domain"], :onchange => "update_value('middlewares/domain_remap/storage_domain', 'storage_domain', 'string')"}
       %p
-        %label{ :for => :cname_lookup }= t('.middlewares.cname_lookup')
-      %div.container
-        %p
-          %label{ :for => :enable_cname_lookup }= t('.middlewares.enabled')
-          = select_tag :enable_cname_lookup, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["cname_lookup"]["enabled"].to_s), :onchange => "update_value('middlewares/cname_lookup/enabled', 'enable_cname_lookup', 'boolean')"
-        %p
-          %label{ :for => :lookup_depth }= t('.middlewares.lookup_depth')
-          %input#lookup_depth{:type => "text", :name => "lookup_depth", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["cname_lookup"]["lookup_depth"], :onchange => "update_value('middlewares/cname_lookup/lookup_depth', 'lookup_depth', 'integer')"}
-        %p
-          %label{ :for => :storage_domain_cname_lookup }= t('.middlewares.storage_domain')
-          %input#storage_domain_cname_lookup{:type => "text", :name => "storage_domain_cname_lookup", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["cname_lookup"]["storage_domain"], :onchange => "update_value('middlewares/cname_lookup/storage_domain', 'storage_domain_cname_lookup', 'string')"}
-      %p
         %label{ :for => :ratelimit }= t('.middlewares.ratelimit')
       %div.container
         %p
