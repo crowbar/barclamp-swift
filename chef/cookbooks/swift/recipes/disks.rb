@@ -4,9 +4,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,9 +33,11 @@ end
 Chef::Log.info("locating disks using #{node[:swift][:disk_enum_expr]} test: #{node[:swift][:disk_test_expr]}")
 to_use_disks = []
 all_disks = eval(node[:swift][:disk_enum_expr])
+Chef::Log.info("Swift considers to use these disks: #{all_disks.keys.join(" ")}")
 all_disks.each { |k,v|
   b = binding()
-  to_use_disks << k if eval(node[:swift][:disk_test_expr]) && ::File.exists?("/dev/#{k}")
+  disk_name = k.gsub(/!/, "/")  # "cciss!c0d0"
+  to_use_disks << k if eval(node[:swift][:disk_test_expr]) && ::File.exists?("/dev/#{disk_name}")
 }
 
 Chef::Log.info("Swift will use these disks: #{to_use_disks.join(" ")}")
@@ -46,14 +48,16 @@ found_disks=[]
 wait_for_format = false
 to_use_disks.each do |k|
 
-  target_suffix= k + "1" # by default, will use format first partition.
-  target_dev = "/dev/#{k}"
-  target_dev_part = "/dev/#{target_suffix}"
+  disk_name = k.gsub(/!/, "/")  # "cciss!c0d0"
+  partition_suffix = "1" # by default, will use format first partition.
+  partition_suffix = "p1" if k =~ /cciss/
+  target_dev = "/dev/#{disk_name}"
+  target_dev_part = "/dev/#{disk_name}#{partition_suffix}"
 
   disk = Hash.new
   disk[:device] = target_dev_part
   disk[:device_disk_name] = k
-  disk[:device_disk_partition] = target_suffix
+  disk[:device_disk_partition] = k + partition_suffix
   disk[:uuid] = get_uuid(target_dev_part)
 
   # Test to see if there is a partition table on the disk.
