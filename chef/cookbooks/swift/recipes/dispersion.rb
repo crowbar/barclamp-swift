@@ -83,7 +83,7 @@ else
 end
 
 execute "populate-dispersion" do
-  command "#{swift-dispersion-populate}"
+  command "#{dispersion_cmd}"
   user node[:swift][:user]
   action :run
   ignore_failure true
