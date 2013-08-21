@@ -31,23 +31,23 @@ def get_uuid(disk)
 end
 
 Chef::Log.info("locating disks using #{node[:swift][:disk_enum_expr]} test: #{node[:swift][:disk_test_expr]}")
+unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
 to_use_disks = []
-all_disks = eval(node[:swift][:disk_enum_expr])
-Chef::Log.info("Swift considers to use these disks: #{all_disks.keys.join(" ")}")
-all_disks.each { |k,v|
-  b = binding()
-  disk_name = k.gsub(/!/, "/")  # "cciss!c0d0"
-  to_use_disks << k if eval(node[:swift][:disk_test_expr]) && ::File.exists?("/dev/#{disk_name}")
-}
-
-Chef::Log.info("Swift will use these disks: #{to_use_disks.join(" ")}")
+unclaimed_disks.each do |k|
+  to_use_disks << k
+end
+claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node, "Swift")
+claimed_disks.each do |k|
+  to_use_disks << k
+end
 
 node[:swift] ||= Mash.new
 node[:swift][:devs] ||= Mash.new
 found_disks=[]
 wait_for_format = false
-to_use_disks.each do |k|
+to_use_disks.each do |d|
 
+  k = d.device
   disk_name = k.gsub(/!/, "/")  # "cciss!c0d0"
   partition_suffix = "1" # by default, will use format first partition.
   partition_suffix = "p1" if k =~ /cciss/
@@ -80,6 +80,7 @@ to_use_disks.each do |k|
     next
   elsif disk[:uuid].nil?
     # No filesystem.  Format that bad boy and claim it as our own.
+    d.claim("Swift")
     Chef::Log.info("Swift - formatting #{target_dev_part}")
     ::Kernel.exec "mkfs.xfs -i size=1024 -f #{target_dev_part}" unless ::Process.fork
     disk[:state] = "Fresh"
