@@ -142,8 +142,9 @@ node[:swift][:devs].each do |uuid,disk|
     mount "/srv/node/#{disk[:name]}"  do
       device disk[:uuid]
       device_type :uuid
-      options "noatime,nodiratime,nobarrier,logbufs=8"
+      options "noatime,nodiratime,nobarrier,nofail,logbufs=8"
       dump 0
+      pass 0
       fstype "xfs"
       action [:mount, :enable]
     end
@@ -154,6 +155,7 @@ node[:swift][:devs].each do |uuid,disk|
       device_type :uuid
       options "noatime,nodiratime,nobarrier,logbufs=8"
       dump 0
+      pass 0
       fstype "xfs"
       action [:umount, :disable]
     end
