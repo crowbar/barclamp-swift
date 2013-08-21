@@ -126,8 +126,6 @@
             "admin_ip_expr": { "type": "str", "required": true},
             "storage_ip_expr": { "type": "str", "required": true},
             "public_ip_expr": { "type": "str", "required": true},
-            "disk_enum_expr": { "type": "str", "required": true},
-            "disk_test_expr": { "type": "str", "required": true},
             "disk_zone_assign_expr": { "type": "str", "required": false}                        
            }
         }

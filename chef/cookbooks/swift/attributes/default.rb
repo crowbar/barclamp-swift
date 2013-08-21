@@ -52,12 +52,6 @@ default[:swift][:storage_ip_expr] = "node[:ipaddress]"
 ### where to find IP for public network use (for clients to contact proxies)
 default[:swift][:public_ip_expr] = "node[:ipaddress]"
 
-# expression to find a hash of possible disks to be used.
-default[:swift][:disk_enum_expr]= 'node[:block_device]'
-# expression accepting a k,v pair for evaluation. if expression returns true, then the disk will be used.
-# by default, use any sdX,hdX or cciss that is not the first one (which will hold the OS).
-default[:swift][:disk_test_expr]= 'k =~/sd[^a]/ or k=~/hd[^a]/ or k=~/cciss!c[0-9]d[1-9]+/'
-
 # An expression to classify disks into zone's and assign them a weight.
 # return
 #   - nil: the disk is not included in the ring

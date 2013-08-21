@@ -30,7 +30,6 @@ def get_uuid(disk)
   nil
 end
 
-Chef::Log.info("locating disks using #{node[:swift][:disk_enum_expr]} test: #{node[:swift][:disk_test_expr]}")
 unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
 to_use_disks = []
 unclaimed_disks.each do |k|
