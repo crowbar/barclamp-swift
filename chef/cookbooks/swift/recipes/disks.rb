@@ -108,6 +108,23 @@ found_disks.each do |disk|
   Chef::Log.info("Adding new disk #{disk[:device]} with UUID #{disk[:uuid]} to the Swift config")
   node[:swift][:devs][disk[:uuid]] = disk.dup
 end
+
+# Now clean up list of claimed disks and remove those that do not
+# exist anymore.
+node[:swift][:devs].each do |uuid,disk|
+
+  Chef::Log.info("Checking disk #{disk[:device]}")
+  # Verify that UUID still matches
+  current_uuid = get_uuid(disk[:device])
+  if current_uuid != disk[:uuid]
+    Chef::Log.warn("Disk #{disk[:device]} with UUID #{current_uuid} not matching expected UUID #{disk[:uuid]}")
+    Chef::Log.info("Setting disk #{disk[:device]} to Stale")
+    disk[:state] = "UUID_Stale"
+    node[:swift][:devs][disk[:uuid]] = disk.dup
+  end
+end
+
+# Save that data
 node.save
 
 # Take appropriate action for each disk.
