@@ -98,8 +98,6 @@
       "admin_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"admin\").address",
       "storage_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"storage\").address",
       "public_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"public\").address",
-        "disk_enum_expr": "r = Hash.new; BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node).each do |d| Chef::Log.info(\"Swift: Not claiming #{d.device}\") unless d.claim(\"Swift\") end; BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,\"Swift\").each do |d| r[d.device]=d end; r",
-      "disk_test_expr": "true",
       "disk_zone_assign_expr":  "$rack_aware=Rack_awareness::By_switch.new(node) if $rack_aware.nil? ;[ $rack_aware.node_to_zone(params) , 99]"
 
     }
