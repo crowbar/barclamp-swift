@@ -170,5 +170,28 @@ debs:
     - uwsgi
     - uwsgi-plugin-python
 
+rpms:
+  centos-6.4:
+    repos:
+      - rpm http://rdo.fedorapeople.org/openstack/openstack-grizzly/rdo-release-grizzly.rpm
+      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      # http://mirror.us.leaseweb.net/epel/6/x86_64
+      # http://rbel.frameos.org/stable/el6/x86_64
+  redhat-6.4:
+    repos:
+      - rpm http://rdo.fedorapeople.org/openstack/openstack-grizzly/rdo-release-grizzly.rpm
+      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+  pkgs:
+    - openstack-swift
+    - python-swiftclient
+    - python-keystoneclient
+    - nginx
+    - openstack-swift-account
+    - openstack-swift-proxy
+    - openstack-swift-container
+    - openstack-swift-object
+    - uwsgi
+
+
 git_repo:
   - swift https://github.com/openstack/swift.git stable/grizzly
