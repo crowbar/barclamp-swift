@@ -20,6 +20,8 @@
 define :memcached_instance do
   include_recipe "memcached"
 
+  opts = params
+
   case node[:platform]
   when "suse"
     service "memcached" do
@@ -32,7 +34,7 @@ define :memcached_instance do
       options({
         :memory => node[:memcached][:memory],
         :port => node[:memcached][:port],
-        :user => node[:memcached][:user]}.merge(params)
+        :user => node[:memcached][:user]}.merge(opts)
       )
     end
   end
