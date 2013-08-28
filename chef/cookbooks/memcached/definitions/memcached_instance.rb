@@ -21,7 +21,7 @@ define :memcached_instance do
   include_recipe "memcached"
 
   case node[:platform]
-  when "suse"
+  when "suse", "centos", "redhat"
     service "memcached" do
       action [:enable, :start]
     end

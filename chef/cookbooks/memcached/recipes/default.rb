@@ -18,7 +18,7 @@
 #
 
 case node[:platform]
-when "suse"
+when "suse", "centos", "redhat"
   package "memcached" do
     action :install
   end
@@ -37,7 +37,7 @@ end
 
 template "/etc/memcached.conf" do
   case node[:platform]
-  when "suse"
+  when "suse", "centos", "redhat"
     source "memcached.sysconfig.erb"
     path "/etc/sysconfig/memcached"
   else
