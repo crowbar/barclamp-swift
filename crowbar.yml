@@ -130,6 +130,10 @@ locale_additions:
         edit_deployment: 
           deployment: Deployment
 
+gems:
+  pkgs:
+    - uwsgi
+
 debs:
   ubuntu-12.04:
     repos:
