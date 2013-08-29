@@ -193,6 +193,7 @@ rpms:
     - uwsgi
     - memcached
     - xfsprogs
+    - python-dns
 
 
 git_repo:
