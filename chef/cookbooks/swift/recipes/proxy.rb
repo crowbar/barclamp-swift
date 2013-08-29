@@ -62,7 +62,14 @@ proxy_config[:storage_domain] = node[:swift][:middlewares][:cname_lookup][:stora
 proxy_config[:storage_domain_remap] = node[:swift][:middlewares][:domain_remap][:storage_domain]
 proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
 
-%w{curl memcached python-dnspython}.each do |pkg|
+case node[:platform]
+  when "centos", "redhat"
+    pkg_list=%w{curl memcached python-dns}
+  else
+    pkg_list=%w{curl memcached python-dnspython}
+end
+
+pkg_list.each do |pkg|
   package pkg do
     action :install
   end 
@@ -70,7 +77,7 @@ end
 
 unless node[:swift][:use_gitrepo]
   case node[:platform]
-  when "suse"
+  when "suse", "centos", "redhat"
     package "openstack-swift-proxy"
   else
     package "swift-proxy"
@@ -91,7 +98,7 @@ if node[:swift][:middlewares][:s3][:enabled]
       creates "#{s3_path}/swift3.egg-info"
     end
   else
-    if node[:platform] == "suse"
+    if %w(redhat centos suse).include?(node.platform)
       package "python-swift3"
     else
       package("swift-plugin-s3")
@@ -300,7 +307,7 @@ if node[:swift][:frontend]=='native'
   end
   service "swift-proxy" do
     case node[:platform]
-    when "suse"
+    when "suse", "centos", "redhat"
       service_name "openstack-swift-proxy"
       supports :status => true, :restart => true
     else
@@ -311,13 +318,19 @@ if node[:swift][:frontend]=='native'
 elsif node[:swift][:frontend]=='apache'
 
   service "swift-proxy" do
-    service_name "openstack-swift-proxy" if node[:platform] == "suse"
+    service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
     supports :status => true, :restart => true
     action [ :disable, :stop ]
   end
 
+  case node[:platform]
+  when "centos", "redhat"
+    nginx_pkg_list=%w{nginx uwsgi uwsgi-plugin-python}
+  else
+    nginx_pkg_list=%w{nginx-extras uwsgi uwsgi-plugin-python}
+  end
 
-  %w{nginx-extras uwsgi uwsgi-plugin-python}.each do |pkg|
+  nginx_pkg_list.each do |pkg|
     package pkg do
       action :install
     end
@@ -335,7 +348,7 @@ elsif node[:swift][:frontend]=='apache'
   service "uwsgi" do
     supports :status => true, :restart => true
     action [ :start, :enable ]
-    subscribes :restart, "template[/etc/swift/proxy-server.conf]"
+    subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf")
   end
 
 
@@ -390,13 +403,11 @@ end
 
 
 case node[:platform]
-when "suse"
+when "suse", "redhat", "centos"
   service "swift-proxy" do
-    service_name "openstack-swift-proxy" if node[:platform] == "suse"
+    service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
     action [:enable, :start]
-    subscribes(:restart,
-               resources(:template => "/etc/swift/proxy-server.conf"),
-               :immediately)
+    subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
   end
 else
   bash "restart swift proxy things" do

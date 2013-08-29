@@ -22,7 +22,7 @@ include_recipe 'swift::rsync'
 
 unless node[:swift][:use_gitrepo]
   case node[:platform]
-  when "suse"
+  when "suse", "centos", "redhat"
     %w{openstack-swift-container
        openstack-swift-object
        openstack-swift-account}.each do |pkg|
