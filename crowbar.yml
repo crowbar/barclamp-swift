@@ -192,6 +192,7 @@ rpms:
     - openstack-swift-object
     - uwsgi
     - memcached
+    - xfsprogs
 
 
 git_repo:
