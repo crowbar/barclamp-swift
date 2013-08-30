@@ -4,7 +4,7 @@
 #       allows crc checksumming etc.
 service rsync
 {
-        disable = yes
+        disable = no
         flags           = IPv6
         socket_type     = stream
         wait            = no

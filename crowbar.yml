@@ -131,8 +131,7 @@ locale_additions:
           deployment: Deployment
 
 gems:
-  pkgs:
-    - uwsgi
+  - uwsgi
 
 debs:
   ubuntu-12.04:

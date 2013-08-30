@@ -325,8 +325,48 @@ elsif node[:swift][:frontend]=='apache'
 
   case node[:platform]
   when "centos", "redhat"
-    nginx_pkg_list=%w{nginx uwsgi uwsgi-plugin-python}
+    uwsgi_guid="nginx"
+    uwsgi_uid="swift"
+    uwsgi_default_ini="/etc/uwsgi/default.ini"
+    uwsgi_service_xml="/etc/uwsgi/swift-proxy.xml"
+    nginx_site_path="/etc/nginx/conf.d/swift-proxy.conf"
+    nginx_pkg_list=%w{nginx}
+    
+    #installing uwsgi using pip
+    begin
+      provisioner = search(:node, "roles:provisioner-server").first
+      provisioner_addr = provisioner[:fqdn]
+      provisioner_port = provisioner[:provisioner][:web_port]
+      pip_cmd = "pip install --index-url http://#{provisioner_addr}:#{provisioner_port}/files/pip_cache/simple/"
+    rescue
+      pip_cmd="pip install"
+    end
+    package("python-virtualenv")
+    package("python-devel")
+    package("python-pip")
+    execute "pip_install_uwsgi" do
+      cwd "/tmp/"
+      command "#{pip_cmd} uwsgi"
+    end
+    cookbook_file "/etc/init.d/uwsgi" do
+      source "uwsgi.init"
+      owner "root"
+      group "root"
+      mode "0755"
+    end
+    %w{/etc/uwsgi /var/log/uwsgi /var/run/uwsgi}.each do |dir|
+       directory "#{dir}" do
+        owner 'root'
+        group 'root'
+        action :create
+      end
+    end
   else
+    uwsgi_guid="www-data"
+    uwsgi_uid="swift"
+    uwsgi_default_ini="/usr/share/uwsgi/conf/default.ini"
+    uwsgi_service_xml="/etc/uwsgi/apps-enabled/swift-proxy.xml"
+    nginx_site_path="/etc/nginx/sites-enabled/swift-proxy.conf"
     nginx_pkg_list=%w{nginx-extras uwsgi uwsgi-plugin-python}
   end
 
@@ -335,7 +375,11 @@ elsif node[:swift][:frontend]=='apache'
       action :install
     end
   end
-
+  if %w(redhat centos).include?(node.platform)
+    file "/etc/nginx/conf.d/default.conf" do
+      action :delete
+    end
+  end
 
   link "/etc/nginx/sites-enabled/default" do
     action :delete
@@ -343,16 +387,16 @@ elsif node[:swift][:frontend]=='apache'
 
   service "nginx" do
     supports :status => true, :restart => true
-    action [ :start, :enable ]
+    action [ :enable ]
   end
   service "uwsgi" do
     supports :status => true, :restart => true
-    action [ :start, :enable ]
+    action [ :enable ]
     subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf")
   end
 
 
-  template "/etc/nginx/sites-enabled/swift-proxy.conf" do
+  template "#{nginx_site_path}" do
     source "nginx-swift-proxy.conf.erb"
     mode 0644
     notifies :restart, resources(:service => "nginx")
@@ -376,23 +420,25 @@ elsif node[:swift][:frontend]=='apache'
     )
     notifies :restart, resources(:service => "uwsgi")
   end
-
-  template "/usr/share/uwsgi/conf/default.ini" do
-    source "uwsgi-default.ini.erb"
-    mode 0644
-    variables(
-      :uid => "swift",
-      :gid => "www-data",
-      :workers => 5
-    )
-    notifies :restart, resources(:service => "uwsgi")
+  unless %w(redhat centos).include?(node.platform)
+    template "#{uwsgi_default_ini}" do
+      source "uwsgi-default.ini.erb"
+      mode 0644
+      variables(
+        :uid => "#{uwsgi_uid}",
+        :gid => "#{uwsgi_guid}",
+        :workers => 5
+      )
+      notifies :restart, resources(:service => "uwsgi")
+    end
   end
-  template "/etc/uwsgi/apps-enabled/swift-proxy.xml" do
-    source "uwsgi-swift-proxy.xml.erb"
+  template "#{uwsgi_service_xml}" do
+    source "uwsgi-swift-proxy.xml.erb" unless %w(redhat centos).include?(node.platform)
+    source "uwsgi-swift-proxy-centos.xml.erb" if %w(redhat centos).include?(node.platform)
     mode 0644
     variables(
-      :uid => "swift",
-      :gid => "www-data",
+      :uid => "#{uwsgi_uid}",
+      :gid => "#{uwsgi_guid}",
       :processes => 4,
       :virtualenv => venv_path
     )
