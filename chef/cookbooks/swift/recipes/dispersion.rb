@@ -73,7 +73,7 @@ execute "populate-dispersion" do
   user node[:swift][:user]
   action :run
   ignore_failure true
-  only_if "swift -V 2.0 -U #{service_tenant}:#{service_user} -K '#{service_password}' -A #{keystone_auth_url} stat dispersion_objects 2>&1 | grep 'Container.*not found'"
+  only_if "swift -V 2.0 --os-tenant-name #{service_tenant} --os-username #{service_user} --os-password '#{service_password}' --os-auth-url #{keystone_auth_url} --os-endpoint-type internalURL stat dispersion_objects 2>&1 | grep 'Container.*not found'"
 end
 
 template "/etc/swift/dispersion.conf" do
