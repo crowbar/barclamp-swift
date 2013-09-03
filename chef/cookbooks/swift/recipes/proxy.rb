@@ -452,7 +452,11 @@ case node[:platform]
 when "suse", "redhat", "centos"
   service "swift-proxy" do
     service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
-    action [:enable, :start]
+    if node[:swift][:frontend]=='native'
+      action [:enable, :start]
+    else
+      action [:disable, :stop]
+    end
     subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
   end
 else
