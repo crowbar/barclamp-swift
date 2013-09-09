@@ -233,7 +233,7 @@ class SwiftService < ServiceObject
     @logger.info("starting dispersion-report on node #{node}, report run uuid #{report_run['uuid']}")
 
     pid = fork do
-      command_line = "sudo -u #{swift_user} swift-dispersion-report 2>/dev/null"
+      command_line = "sudo -u #{swift_user} EVENTLET_NO_GREENDNS=yes swift-dispersion-report -j 2>/dev/null"
       Process.waitpid run_remote_chef_client(node, command_line, report_run["results.json"])
 
       report_run["ended"] = Time.now.utc.to_i
