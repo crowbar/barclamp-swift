@@ -91,6 +91,7 @@ locale_additions:
           partitions: Partitions
           min_part_hours: Minimum Partitions per Hour
           replicas: Replicas
+          replication_interval: Replication interval (in seconds)
           cluster_hash: Cluster Hash
           cluster_admin_pw: Cluster Admin Password
           user: User

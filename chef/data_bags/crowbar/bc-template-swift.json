@@ -50,6 +50,7 @@
           "enabled": false
         }
       },
+      "replication_interval": 60,
       "gitrepo": "http://github.com/openstack/swift.git",
       "git_instance": "",
       "git_refspec": "stable/grizzly",

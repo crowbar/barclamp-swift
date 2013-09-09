@@ -40,6 +40,7 @@ use = egg:swift#container
 log_level = <%= @debug? "DEBUG": "INFO" %>
 
 [container-replicator]
+interval = <%= node[:swift][:replication_interval] %>
 
 [container-updater]
 

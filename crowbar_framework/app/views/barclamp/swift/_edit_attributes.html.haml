@@ -28,6 +28,10 @@
       %input#replicas{:type => "text", :name => "replicas", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["replicas"], :onchange => "update_value('replicas', 'replicas', 'integer')"}
 
     %p
+      %label{ :for => :replication_interval }= t('.replication_interval')
+      %input#replication_interval{:type => "text", :name => "replication_interval", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["replication_interval"], :onchange => "update_value('replication_interval', 'replication_interval', 'integer')"}
+
+    %p
       %label{ :for => :cluster_hash }= t('.cluster_hash')
       %input#cluster_hash{:type => "text", :name => "cluster_hash", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["cluster_hash"], :onchange => "update_value('cluster_hash', 'cluster_hash', 'string')"}
 
