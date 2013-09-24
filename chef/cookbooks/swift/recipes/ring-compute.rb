@@ -3,9 +3,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,11 +54,11 @@ disk_assign_expr = node[:swift][:disk_zone_assign_expr]
 hash = node[:swift][:cluster_hash]
 
 log ("cluster config: replicas:#{replicas} zones:#{zones} hash:#{hash}")
-nodes.each { |node|    
+nodes.each { |node|
   storage_ip = Swift::Evaluator.get_ip_by_type(node, :storage_ip_expr)
   target_nodes << storage_ip
-  log ("Looking at node: #{storage_ip}") {level :debug} 
-  disks=node[:swift][:devs] 
+  log ("Looking at node: #{storage_ip}") {level :debug}
+  disks=node[:swift][:devs]
   next if disks.nil?
   disks.each {|uuid,disk|
     Chef::Log.info("Swift - considering #{node[:fqdn]}:#{disk[:name]}")
@@ -67,7 +67,7 @@ nodes.each { |node|
     z_o, w_o = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "object", :disk=>disk, :target_node=>node)
     z_c,w_c = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "container", :disk=>disk, :target_node=>node)
     z_a,w_a = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "account", :disk=>disk, :target_node=>node)
-    
+
     log("obj: #{z_o}/#{w_o} container: #{z_c}/#{w_c} account: #{z_a}/#{w_a}. count: #{$DISK_CNT}") {level :info}
     d = {:ip => storage_ip, :dev_name=> disk[:name], :port => 6000}
     if z_o
@@ -77,15 +77,15 @@ nodes.each { |node|
     d = d.dup
     if z_c
       d[:port] = 6001; d[:zone]=z_c ; d[:weight]=w_c
-    disks_c << d   
-    end      
-    d = d.dup     
+    disks_c << d
+    end
+    d = d.dup
     if z_a
        d[:port] = 6002; d[:zone]=z_a ; d[:weight]=w_a
-      disks_a << d  
+      disks_a << d
     end
-       
-    
+
+
   }
 }
 
@@ -118,7 +118,6 @@ swift_ringfile "object.builder" do
   virtualenv venv_prefix
   action [:apply, :rebalance]
 end
-
 
 
 target_proxies = []
