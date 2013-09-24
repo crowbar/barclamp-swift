@@ -52,6 +52,7 @@ replicas = node[:swift][:replicas]
 zones = node[:swift][:zones]
 disk_assign_expr = node[:swift][:disk_zone_assign_expr]
 hash = node[:swift][:cluster_hash]
+builder_ip = Swift::Evaluator.get_ip_by_type(node, :storage_ip_expr)
 
 log ("cluster config: replicas:#{replicas} zones:#{zones} hash:#{hash}")
 nodes.each { |node|
@@ -119,39 +120,38 @@ swift_ringfile "object.builder" do
   action [:apply, :rebalance]
 end
 
-
-target_proxies = []
 proxy_nodes = search(:node, "roles:swift-proxy#{env_filter}")
 proxy_nodes.each do |p|
   storage_ip = Swift::Evaluator.get_ip_by_type(p, :storage_ip_expr)
-  target_proxies << storage_ip
+  target_nodes << storage_ip
 end
 
-target_nodes = target_nodes + target_proxies
 target_nodes.uniq!
-log ("nodes to notify: #{target_nodes.join ' '}") {level :debug}
+Chef::Log.debug("nodes to notify: #{target_nodes.join ' '}")
+
 target_nodes.each {|t|
-  if node[:fqdn]!=t[:fqdn]
-    execute "push account ring-to #{t}" do
-      command "rsync account.ring.gz #{node[:swift][:user]}@#{t}::ring"
-      cwd "/etc/swift"
-      ignore_failure true
-      action :nothing
-      subscribes :run, resources(:swift_ringfile =>"account.builder")
-    end
-    execute "push container ring-to #{t}" do
-      command "rsync container.ring.gz #{node[:swift][:user]}@#{t}::ring"
-      cwd "/etc/swift"
-      ignore_failure true
-      action :nothing
-      subscribes :run, resources(:swift_ringfile =>"container.builder")
-    end
-    execute "push object ring-to #{t}" do
-      command "rsync object.ring.gz #{node[:swift][:user]}@#{t}::ring"
-      cwd "/etc/swift"
-      ignore_failure true
-      action :nothing
-      subscribes :run, resources(:swift_ringfile =>"object.builder")
-    end
-   end
+  # No point in pushing it to ourselves
+  next if t == builder_ip
+
+  execute "push account ring-to #{t}" do
+    command "rsync account.ring.gz #{node[:swift][:user]}@#{t}::ring"
+    cwd "/etc/swift"
+    ignore_failure true
+    action :nothing
+    subscribes :run, resources(:swift_ringfile =>"account.builder")
+  end
+  execute "push container ring-to #{t}" do
+    command "rsync container.ring.gz #{node[:swift][:user]}@#{t}::ring"
+    cwd "/etc/swift"
+    ignore_failure true
+    action :nothing
+    subscribes :run, resources(:swift_ringfile =>"container.builder")
+  end
+  execute "push object ring-to #{t}" do
+    command "rsync object.ring.gz #{node[:swift][:user]}@#{t}::ring"
+    cwd "/etc/swift"
+    ignore_failure true
+    action :nothing
+    subscribes :run, resources(:swift_ringfile =>"object.builder")
+  end
 }
