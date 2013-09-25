@@ -23,7 +23,7 @@ define :memcached_instance do
   opts = params
 
   case node[:platform]
-  when "suse"
+  when "suse", "centos", "redhat"
     service "memcached" do
       action [:enable, :start]
     end

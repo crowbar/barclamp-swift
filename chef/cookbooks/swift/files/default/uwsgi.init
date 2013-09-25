@@ -1,0 +1,156 @@
+#!/bin/bash
+#
+# uwsgi - This script starts and stops all configured uwsgi applications
+#
+# chkconfig:   - 85 15
+# description: uWSGI is a program to run applications adhering to the
+#              Web Server Gateway Interface.
+# processname: uwsgi
+# config:      /etc/sysconfig/uwsgi
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "$NETWORKING" = "no" ] && exit 0
+
+uwsgi="/usr/bin/uwsgi"
+prog=$(basename "$uwsgi")
+UWSGI_CONF_DIR="/etc/uwsgi"
+UWSGI_LOG_DIR="/var/log/uwsgi"
+PIDFILE_DIR="/var/run/uwsgi"
+UWSGI_ARGS="--master --die-on-term"
+
+if [ -f /etc/sysconfig/uwsgi ]; then
+    . /etc/sysconfig/uwsgi
+fi
+
+each_action() {
+    action=$1
+    configs=$(find "$UWSGI_CONF_DIR" \
+                   -maxdepth 1 \
+                   -type f \
+                   -regextype posix-extended \
+                   -iregex '.*\.(ini|json|xml|yaml|yml)$')
+
+    code=0
+    if [ -n "$configs" ]; then
+        for f in $configs; do
+            case "$action" in
+                condrestart|try-restart)
+                    rh_status "$f" 2>/dev/null && restart "$f"
+                    ;;
+                force-reload|restart)
+                    stop "$f"
+                    start "$f"
+                    ;;
+                reload)
+                    reload "$f"
+                    ;;
+                start)
+                    start "$f"
+                    ;;
+                status)
+                    rh_status "$f"
+                    ;;
+                status_q)
+                    rh_status "$f" >/dev/null 2>&1
+                    ;;
+                stop)
+                    stop "$f"
+                    ;;
+            esac
+            retval=$?
+        done
+
+        if [ $retval -gt $code ]; then
+            code=$retval
+        fi
+    fi
+
+    return $code
+}
+
+args_for() {
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+    args="${UWSGI_ARGS} --pidfile ${pidfile} --daemonize ${UWSGI_LOG_DIR}/uwsgi-${instance}.log"
+    case "$1" in
+        *.ini)        args="$args --ini $f";;
+        *.json)       args="$args --json $f";;
+        *.xml)        args="$args --xmlconfig $f";;
+        *.yml|*.yaml) args="$args --yaml $f";;
+    esac
+
+    echo "$args"
+}
+
+instance_for() {
+    config_file="$1"
+    instance=$(basename "$config_file")
+    instance=${instance%.*}
+    echo "$instance"
+}
+
+pidfile_for() {
+    instance=$(instance_for "$1")
+    echo "${PIDFILE_DIR}/uwsgi-${instance}.pid"
+}
+
+reload() {
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+
+    echo -n "Reloading uWSGI for ${instance}... "
+    killproc -p "$pidfile" "$prog" -HUP
+    retval=$?
+    echo
+    return $retval
+}
+
+start() {
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+    args="$(args_for "$config_file")"
+
+    echo -n "Starting uWSGI for ${instance}... "
+    daemon --pidfile="$pidfile" $uwsgi $args
+    retval=$?
+    echo
+    return $retval
+}
+
+rh_status() {
+    config_file="$1"
+    status -p "$(pidfile_for "$config_file")" "$prog"
+}
+
+stop() {
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+
+    echo -n "Stopping uWSGI for ${instance}... "
+    killproc -p "$pidfile" "$prog"
+    retval=$?
+    echo
+    return $retval
+}
+
+case $1 in
+    condrestart|force_reload|reload|restart|start|status|status_q|stop|try-restart)
+        each_action "$1"
+        ;;
+    *)
+        echo "Usage: $0 {condrestart|reload|restart|start|status|stop}"
+        exit 2
+        ;;
+esac
+
+exit $?

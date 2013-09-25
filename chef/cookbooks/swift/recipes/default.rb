@@ -23,7 +23,7 @@ unless node[:swift][:use_gitrepo]
   package "curl"
 
   case node[:platform]
-  when "suse"
+  when "suse", "centos", "redhat"
     package "openstack-swift"
   else
     package "swift"

@@ -22,7 +22,7 @@ include_recipe 'swift::rsync'
 
 unless node[:swift][:use_gitrepo]
   case node[:platform]
-  when "suse"
+  when "suse", "centos", "redhat"
     %w{openstack-swift-container
        openstack-swift-object
        openstack-swift-account}.each do |pkg|
@@ -32,7 +32,7 @@ unless node[:swift][:use_gitrepo]
     end
   else
     %w{swift-container swift-object swift-account}.each do |pkg|
-      pkg = "openstack-#{pkg}" if node[:platform] == "suse"
+      pkg = "openstack-#{pkg}" if %w(redhat centos suse).include?(node.platform)
       package pkg do
         action :install
       end
@@ -84,7 +84,7 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
         virtualenv venv_path
       end
     end
-    x = "openstack-#{x}" if node[:platform] == "suse"
+    x = "openstack-#{x}" if %w(redhat centos suse).include?(node.platform)
     service x do
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
         restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"
