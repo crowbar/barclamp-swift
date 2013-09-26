@@ -106,6 +106,7 @@
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
+      "schema-revision": 1,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
