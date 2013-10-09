@@ -116,7 +116,7 @@ def scan_ring_desc(input)
       
       when :dev_info  #              0     1 192.168.124.131  6002      sdb1 100.00          0 -100.00
       Chef::Log.debug "reading dev info:" + line
-      line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s+([-0-9.]+)\s*$/
+      line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
       if $~.nil? 
         raise "failed to parse: #{line}"
       else
