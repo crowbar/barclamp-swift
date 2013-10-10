@@ -80,7 +80,7 @@
           %input#git_refspec{:type => "text", :name => "git_refspec", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["s3"]["git_refspec"], :onchange => "update_value('middlewares/s3/git_refspec', 'git_refspec', 'string')"}
         %p
           %label{ :for => :use_gitrepo }= t('.middlewares.use_gitrepo')
-          = select_tag :use_gitrepo, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["s3"]["use_gitrepo"].to_s), :onchange => "update_value('middlewares/s3/use_gitrepo', 'use_gitrepo', 'boolean')"
+          = select_tag :use_gitrepo, options_for_select([['false','false'], ['true', 'true']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["s3"]["use_gitrepo"].to_s), :onchange => "update_value('middlewares/s3/use_gitrepo', 'use_gitrepo', 'boolean')"
         %p
           %label{ :for => :use_gitbarclamp }= t('.middlewares.use_gitbarclamp')
           = select_tag :use_gitbarclamp, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["s3"]["use_gitbarclamp"].to_s), :onchange => "update_value('middlewares/s3/use_gitbarclamp', 'use_gitbarclamp', 'boolean')"
