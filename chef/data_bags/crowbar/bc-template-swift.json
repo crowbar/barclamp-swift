@@ -34,7 +34,7 @@
         "s3": {
           "gitrepo": "http://github.com/fujita/swift3",
           "git_refspec": "195e6c76ff46a8f00621a56d4e13b500becc2c9a",
-          "use_gitrepo": true,
+          "use_gitrepo": false,
           "use_gitbarclamp": true,
           "enabled": false
         },
