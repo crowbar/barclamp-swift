@@ -81,6 +81,9 @@
 
       %label.section-header{ :for => :middlewares_staticweb_div }= t('.middlewares.staticweb')
       %div.section{ :id => :middlewares_staticweb_div }
+      %p
+        %label{ :for => :staticweb }= t('.middlewares.staticweb')
+      %div.container
         %p
           %label{ :for => :enable_staticweb }= t('.middlewares.enabled')
           = select_tag :enable_staticweb, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["staticweb"]["enabled"].to_s), :onchange => "update_value('middlewares/staticweb/enabled', 'enable_staticweb', 'boolean')"
