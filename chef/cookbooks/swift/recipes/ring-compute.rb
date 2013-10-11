@@ -3,9 +3,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,13 +52,14 @@ replicas = node[:swift][:replicas]
 zones = node[:swift][:zones]
 disk_assign_expr = node[:swift][:disk_zone_assign_expr]
 hash = node[:swift][:cluster_hash]
+builder_ip = Swift::Evaluator.get_ip_by_type(node, :storage_ip_expr)
 
 log ("cluster config: replicas:#{replicas} zones:#{zones} hash:#{hash}")
-nodes.each { |node|    
+nodes.each { |node|
   storage_ip = Swift::Evaluator.get_ip_by_type(node, :storage_ip_expr)
   target_nodes << storage_ip
-  log ("Looking at node: #{storage_ip}") {level :debug} 
-  disks=node[:swift][:devs] 
+  log ("Looking at node: #{storage_ip}") {level :debug}
+  disks=node[:swift][:devs]
   next if disks.nil?
   disks.each {|uuid,disk|
     Chef::Log.info("Swift - considering #{node[:fqdn]}:#{disk[:name]}")
@@ -67,7 +68,7 @@ nodes.each { |node|
     z_o, w_o = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "object", :disk=>disk, :target_node=>node)
     z_c,w_c = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "container", :disk=>disk, :target_node=>node)
     z_a,w_a = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "account", :disk=>disk, :target_node=>node)
-    
+
     log("obj: #{z_o}/#{w_o} container: #{z_c}/#{w_c} account: #{z_a}/#{w_a}. count: #{$DISK_CNT}") {level :info}
     d = {:ip => storage_ip, :dev_name=> disk[:name], :port => 6000}
     if z_o
@@ -77,15 +78,15 @@ nodes.each { |node|
     d = d.dup
     if z_c
       d[:port] = 6001; d[:zone]=z_c ; d[:weight]=w_c
-    disks_c << d   
-    end      
-    d = d.dup     
+    disks_c << d
+    end
+    d = d.dup
     if z_a
        d[:port] = 6002; d[:zone]=z_a ; d[:weight]=w_a
-      disks_a << d  
+      disks_a << d
     end
-       
-    
+
+
   }
 }
 
@@ -119,40 +120,38 @@ swift_ringfile "object.builder" do
   action [:apply, :rebalance]
 end
 
-
-
-target_proxies = []
 proxy_nodes = search(:node, "roles:swift-proxy#{env_filter}")
 proxy_nodes.each do |p|
   storage_ip = Swift::Evaluator.get_ip_by_type(p, :storage_ip_expr)
-  target_proxies << storage_ip
+  target_nodes << storage_ip
 end
 
-target_nodes = target_nodes + target_proxies
 target_nodes.uniq!
-log ("nodes to notify: #{target_nodes.join ' '}") {level :debug}
+Chef::Log.debug("nodes to notify: #{target_nodes.join ' '}")
+
 target_nodes.each {|t|
-  if node[:fqdn]!=t[:fqdn]
-    execute "push account ring-to #{t}" do
-      command "rsync account.ring.gz #{node[:swift][:user]}@#{t}::ring"
-      cwd "/etc/swift"
-      ignore_failure true
-      action :nothing
-      subscribes :run, resources(:swift_ringfile =>"account.builder")
-    end
-    execute "push container ring-to #{t}" do
-      command "rsync container.ring.gz #{node[:swift][:user]}@#{t}::ring"
-      cwd "/etc/swift"
-      ignore_failure true
-      action :nothing
-      subscribes :run, resources(:swift_ringfile =>"container.builder")
-    end
-    execute "push object ring-to #{t}" do
-      command "rsync object.ring.gz #{node[:swift][:user]}@#{t}::ring"
-      cwd "/etc/swift"
-      ignore_failure true
-      action :nothing
-      subscribes :run, resources(:swift_ringfile =>"object.builder")
-    end
-   end
+  # No point in pushing it to ourselves
+  next if t == builder_ip
+
+  execute "push account ring-to #{t}" do
+    command "rsync account.ring.gz #{node[:swift][:user]}@#{t}::ring"
+    cwd "/etc/swift"
+    ignore_failure true
+    action :nothing
+    subscribes :run, resources(:swift_ringfile =>"account.builder")
+  end
+  execute "push container ring-to #{t}" do
+    command "rsync container.ring.gz #{node[:swift][:user]}@#{t}::ring"
+    cwd "/etc/swift"
+    ignore_failure true
+    action :nothing
+    subscribes :run, resources(:swift_ringfile =>"container.builder")
+  end
+  execute "push object ring-to #{t}" do
+    command "rsync object.ring.gz #{node[:swift][:user]}@#{t}::ring"
+    cwd "/etc/swift"
+    ignore_failure true
+    action :nothing
+    subscribes :run, resources(:swift_ringfile =>"object.builder")
+  end
 }
