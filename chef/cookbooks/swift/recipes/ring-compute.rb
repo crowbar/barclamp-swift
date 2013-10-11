@@ -26,8 +26,10 @@ include_recipe 'swift::rsync'
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
 nodes = search(:node, "roles:swift-storage#{env_filter}")
 
-venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
-venv_prefix = node[:swift][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+if node[:swift][:use_gitrepo]
+  venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
+  venv_prefix = node[:swift][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+end
 
 =begin
   http://swift.openstack.org/howto_installmultinode.html
