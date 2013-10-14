@@ -278,7 +278,7 @@ node[:memcached][:name] = "swift-proxy"
 memcached_instance "swift-proxy" do
 end
 
-venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
+venv_path = node[:swift][:use_virtualenv] && node[:swift][:use_gitrepo] ? "/opt/swift/.venv" : nil
 
 ## make sure to fetch ring files from the ring compute node
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
