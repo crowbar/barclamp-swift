@@ -62,7 +62,14 @@ proxy_config[:storage_domain] = node[:swift][:middlewares][:cname_lookup][:stora
 proxy_config[:storage_domain_remap] = node[:swift][:middlewares][:domain_remap][:storage_domain]
 proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
 
-%w{curl memcached python-dnspython}.each do |pkg|
+case node[:platform]
+  when "centos", "redhat"
+    pkg_list=%w{curl memcached python-dns}
+  else
+    pkg_list=%w{curl memcached python-dnspython}
+end
+
+pkg_list.each do |pkg|
   package pkg do
     action :install
   end 
@@ -70,7 +77,7 @@ end
 
 unless node[:swift][:use_gitrepo]
   case node[:platform]
-  when "suse"
+  when "suse", "centos", "redhat"
     package "openstack-swift-proxy"
   else
     package "swift-proxy"
@@ -91,7 +98,7 @@ if node[:swift][:middlewares][:s3][:enabled]
       creates "#{s3_path}/swift3.egg-info"
     end
   else
-    if node[:platform] == "suse"
+    if %w(redhat centos suse).include?(node.platform)
       package "python-swift3"
     else
       package("swift-plugin-s3")
@@ -117,11 +124,7 @@ case proxy_config[:auth_method]
        keystone = node
      end
 
-     unless node[:swift][:use_gitrepo]
-       package "python-keystone" do
-         action :install
-       end 
-     else
+     if node[:swift][:use_gitrepo]
        if node[:swift][:use_virtualenv]
          pfs_and_install_deps "keystone" do
            cookbook "keystone"
@@ -300,7 +303,7 @@ if node[:swift][:frontend]=='native'
   end
   service "swift-proxy" do
     case node[:platform]
-    when "suse"
+    when "suse", "centos", "redhat"
       service_name "openstack-swift-proxy"
       supports :status => true, :restart => true
     else
@@ -311,18 +314,68 @@ if node[:swift][:frontend]=='native'
 elsif node[:swift][:frontend]=='apache'
 
   service "swift-proxy" do
-    service_name "openstack-swift-proxy" if node[:platform] == "suse"
+    service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
     supports :status => true, :restart => true
     action [ :disable, :stop ]
   end
 
+  case node[:platform]
+  when "centos", "redhat"
+    uwsgi_guid="nginx"
+    uwsgi_uid="swift"
+    uwsgi_default_ini="/etc/uwsgi/default.ini"
+    uwsgi_service_xml="/etc/uwsgi/swift-proxy.xml"
+    nginx_site_path="/etc/nginx/conf.d/swift-proxy.conf"
+    nginx_pkg_list=%w{nginx}
+    
+    #installing uwsgi using pip
+    begin
+      provisioner = search(:node, "roles:provisioner-server").first
+      provisioner_addr = provisioner[:fqdn]
+      provisioner_port = provisioner[:provisioner][:web_port]
+      pip_cmd = "pip install --index-url http://#{provisioner_addr}:#{provisioner_port}/files/pip_cache/simple/"
+    rescue
+      pip_cmd="pip install"
+    end
+    package("python-virtualenv")
+    package("python-devel")
+    package("python-pip")
+    execute "pip_install_uwsgi" do
+      cwd "/tmp/"
+      command "#{pip_cmd} uwsgi"
+    end
+    cookbook_file "/etc/init.d/uwsgi" do
+      source "uwsgi.init"
+      owner "root"
+      group "root"
+      mode "0755"
+    end
+    %w{/etc/uwsgi /var/log/uwsgi /var/run/uwsgi}.each do |dir|
+       directory "#{dir}" do
+        owner 'root'
+        group 'root'
+        action :create
+      end
+    end
+  else
+    uwsgi_guid="www-data"
+    uwsgi_uid="swift"
+    uwsgi_default_ini="/usr/share/uwsgi/conf/default.ini"
+    uwsgi_service_xml="/etc/uwsgi/apps-enabled/swift-proxy.xml"
+    nginx_site_path="/etc/nginx/sites-enabled/swift-proxy.conf"
+    nginx_pkg_list=%w{nginx-extras uwsgi uwsgi-plugin-python}
+  end
 
-  %w{nginx-extras uwsgi uwsgi-plugin-python}.each do |pkg|
+  nginx_pkg_list.each do |pkg|
     package pkg do
       action :install
     end
   end
-
+  if %w(redhat centos).include?(node.platform)
+    file "/etc/nginx/conf.d/default.conf" do
+      action :delete
+    end
+  end
 
   link "/etc/nginx/sites-enabled/default" do
     action :delete
@@ -330,16 +383,16 @@ elsif node[:swift][:frontend]=='apache'
 
   service "nginx" do
     supports :status => true, :restart => true
-    action [ :start, :enable ]
+    action [ :enable ]
   end
   service "uwsgi" do
     supports :status => true, :restart => true
-    action [ :start, :enable ]
-    subscribes :restart, "template[/etc/swift/proxy-server.conf]"
+    action [ :enable ]
+    subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf")
   end
 
 
-  template "/etc/nginx/sites-enabled/swift-proxy.conf" do
+  template "#{nginx_site_path}" do
     source "nginx-swift-proxy.conf.erb"
     mode 0644
     notifies :restart, resources(:service => "nginx")
@@ -363,23 +416,25 @@ elsif node[:swift][:frontend]=='apache'
     )
     notifies :restart, resources(:service => "uwsgi")
   end
-
-  template "/usr/share/uwsgi/conf/default.ini" do
-    source "uwsgi-default.ini.erb"
-    mode 0644
-    variables(
-      :uid => "swift",
-      :gid => "www-data",
-      :workers => 5
-    )
-    notifies :restart, resources(:service => "uwsgi")
+  unless %w(redhat centos).include?(node.platform)
+    template "#{uwsgi_default_ini}" do
+      source "uwsgi-default.ini.erb"
+      mode 0644
+      variables(
+        :uid => "#{uwsgi_uid}",
+        :gid => "#{uwsgi_guid}",
+        :workers => 5
+      )
+      notifies :restart, resources(:service => "uwsgi")
+    end
   end
-  template "/etc/uwsgi/apps-enabled/swift-proxy.xml" do
-    source "uwsgi-swift-proxy.xml.erb"
+  template "#{uwsgi_service_xml}" do
+    source "uwsgi-swift-proxy.xml.erb" unless %w(redhat centos).include?(node.platform)
+    source "uwsgi-swift-proxy-centos.xml.erb" if %w(redhat centos).include?(node.platform)
     mode 0644
     variables(
-      :uid => "swift",
-      :gid => "www-data",
+      :uid => "#{uwsgi_uid}",
+      :gid => "#{uwsgi_guid}",
       :processes => 4,
       :virtualenv => venv_path
     )
@@ -390,13 +445,15 @@ end
 
 
 case node[:platform]
-when "suse"
+when "suse", "redhat", "centos"
   service "swift-proxy" do
-    service_name "openstack-swift-proxy" if node[:platform] == "suse"
-    action [:enable, :start]
-    subscribes(:restart,
-               resources(:template => "/etc/swift/proxy-server.conf"),
-               :immediately)
+    service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
+    if node[:swift][:frontend]=='native'
+      action [:enable, :start]
+      subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
+    else
+      action [:disable, :stop]
+    end
   end
 else
   bash "restart swift proxy things" do

@@ -46,7 +46,11 @@ crowbar swift proposal show smoketest >"$prop_file"
 swift_user=$(grep keystone_service_user $prop_file | sed 's/[:,"]//g' | awk '{print $2}')
 swift_pass=$(grep keystone_service_password $prop_file | sed 's/[:,"]//g' | awk '{print $2}')
 
-apt-get -y install python-swiftclient
+if [ -f /etc/redhat-release ]; then
+  sudo yum --assumeyes install python-swiftclient
+else
+  sudo apt-get install -y python-swiftclient
+fi
 
 do_swift() {
     local swiftargs=(--os-username "$swift_user"

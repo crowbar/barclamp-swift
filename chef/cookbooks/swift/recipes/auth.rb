@@ -21,7 +21,7 @@
 #TODO(agordeev) PFS?
 
 case node[:platform]
-when "suse"
+when "suse", "centos", "redhat"
   package "openstack-swift-account"
 else
   unless node[:swift][:use_gitrepo]
