@@ -41,7 +41,7 @@ fi
 
 prop_file="$LOGDIR/swift-proposal.json"
 
-crowbar swift proposal show smoketest >"$prop_file"
+crowbar swift proposal show `crowbar swift proposal list` >"$prop_file"
 
 swift_user=$(grep keystone_service_user $prop_file | sed 's/[:,"]//g' | awk '{print $2}')
 swift_pass=$(grep keystone_service_password $prop_file | sed 's/[:,"]//g' | awk '{print $2}')
