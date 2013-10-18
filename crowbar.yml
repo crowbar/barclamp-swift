@@ -203,5 +203,4 @@ rpms:
 
 
 git_repo:
-  - swift https://github.com/openstack/swift.git milestone-proposed
-  # - swift https://github.com/openstack/swift.git stable/havana
+  - swift https://github.com/openstack/swift.git stable/havana
