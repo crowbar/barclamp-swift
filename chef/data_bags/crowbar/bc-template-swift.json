@@ -52,7 +52,7 @@
       },
       "gitrepo": "http://github.com/openstack/swift.git",
       "git_instance": "",
-      "git_refspec": "stable/grizzly",
+      "git_refspec": "stable/havana",
       "use_gitrepo": false,
       "use_gitbarclamp": false,
       "use_pip_cache": false,
