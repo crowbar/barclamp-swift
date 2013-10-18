@@ -116,21 +116,23 @@ def scan_ring_desc(input)
       
       when :dev_info  #              0     1 192.168.124.131  6002      sdb1 100.00          0 -100.00
       Chef::Log.debug "reading dev info:" + line
-      line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
-      if $~.nil? 
+      line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
+      if $~.nil?
         raise "failed to parse: #{line}"
       else
-        Chef::Log.debug "matched: #{$~[0]}" 
+        Chef::Log.debug "matched: #{$~[0]}"
       end
       dev = RingInfo::RingDeviceInfo.new
       dev.id = $1
       dev.region = $2
       dev.zone = $3
-      dev.ip = $4
+      dev.ip=$4
       dev.port = $5
-      dev.name = $6
-      dev.weight = $7
-      dev.partitions = $8
+      replication_ip = $6
+      replication_port = $7
+      dev.name = $8
+      dev.weight = $9
+      dev.partitions = $10
       r.add_device dev
     end
   }
