@@ -137,8 +137,8 @@ pips:
 debs:
   ubuntu-12.04:
     repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/havana main
       - deb http://ppa.launchpad.net/nginx/stable/ubuntu precise main
   pkgs:
     - curl
@@ -177,14 +177,16 @@ debs:
 rpms:
   centos-6.4:
     repos:
-      - rpm http://rdo.fedorapeople.org/openstack/openstack-grizzly/rdo-release-grizzly.rpm
-      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
+      # - rpm http://rdo.fedorapeople.org/openstack/openstack-havana/rdo-release-havana.rpm
+      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
       # http://mirror.us.leaseweb.net/epel/6/x86_64
       # http://rbel.frameos.org/stable/el6/x86_64
   redhat-6.4:
     repos:
-      - rpm http://rdo.fedorapeople.org/openstack/openstack-grizzly/rdo-release-grizzly.rpm
-      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
+      # - rpm http://rdo.fedorapeople.org/openstack/openstack-havana/rdo-release-havana.rpm
+      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
   pkgs:
     - openstack-swift
     - python-swiftclient
@@ -201,4 +203,4 @@ rpms:
 
 
 git_repo:
-  - swift https://github.com/openstack/swift.git stable/grizzly
+  - swift https://github.com/openstack/swift.git stable/havana
