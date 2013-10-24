@@ -177,16 +177,10 @@ debs:
 rpms:
   centos-6.4:
     repos:
-      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
-      # - rpm http://rdo.fedorapeople.org/openstack/openstack-havana/rdo-release-havana.rpm
-      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
-      # http://mirror.us.leaseweb.net/epel/6/x86_64
-      # http://rbel.frameos.org/stable/el6/x86_64
+      - rpm http://rdo.fedorapeople.org/openstack/openstack-havana/rdo-release-havana.rpm
   redhat-6.4:
     repos:
-      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
-      # - rpm http://rdo.fedorapeople.org/openstack/openstack-havana/rdo-release-havana.rpm
-      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
+      - rpm http://rdo.fedorapeople.org/openstack/openstack-havana/rdo-release-havana.rpm
   pkgs:
     - openstack-swift
     - python-swiftclient
