@@ -35,14 +35,6 @@
       %label{ :for => :cluster_admin_pw }= t('.cluster_admin_pw')
       %input#cluster_admin_pw{:type => "text", :name => "cluster_admin_pw", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["cluster_admin_pw"], :onchange => "update_value('cluster_admin_pw', 'cluster_admin_pw', 'string')"}
 
-    %p
-      %label{ :for => :user }= t('.user')
-      %input#user{:type => "text", :name => "user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["user"], :onchange => "update_value('user', 'user', 'string')"}
-
-    %p
-      %label{ :for => :group }= t('.group')
-      %input#group{:type => "text", :name => "group", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["group"], :onchange => "update_value('group', 'group', 'string')"}
-
     -# %p
       %label{ :for => :slog_account }= t('.slog_account')
       %input#slog_account{:type => "text", :name => "slog_account", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_account"], :onchange => "update_value('slog_account', 'slog_account', 'string')"}
