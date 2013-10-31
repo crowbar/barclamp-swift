@@ -229,7 +229,8 @@ class SwiftService < ServiceObject
     swift_db.save
     release_lock(lock)
 
-    swift_user = proposal["attributes"][@bc_name]["user"]
+    nobj = NodeObject.find_node_by_name(node)
+    swift_user = nobj[@bc_name]["user"]
     @logger.info("starting dispersion-report on node #{node}, report run uuid #{report_run['uuid']}")
 
     pid = fork do
