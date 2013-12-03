@@ -95,6 +95,8 @@ log_level = <%= @debug? "DEBUG": "INFO" %>
 use = egg:swift#keystoneauth
 operator_roles = Member,admin
 reseller_prefix=<%= @reseller_prefix %>
+log_facility = LOG_LOCAL0
+log_level = <%= @debug? "DEBUG": "INFO" %>
 
 # NOTE(chmou): s3token middleware is not updated yet to use only
 # username and password.
