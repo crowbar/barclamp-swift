@@ -42,13 +42,13 @@ setup_console_handler = true
   case @auth_method
     when "swauth"
       auth = "swauth"
-      @swauth = true and !@hide_auth
+      @swauth = true
     when "keystone"
       auth = "auth_token keystoneauth"
-      @keystone = true and !@hide_auth
+      @keystone = true
     when "tempauth"
       auth = "tempauth"
-      @tempauth = true and !@hide_auth
+      @tempauth = true
   end
   middlewares = node[:swift][:middlewares].keys.select{|mw| node[:swift][:middlewares][mw][:enabled]}
   ratelimit = middlewares.delete("ratelimit")

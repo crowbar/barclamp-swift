@@ -47,7 +47,6 @@ proxy_config[:group] = node[:swift][:group]
 proxy_config[:user] = node[:swift][:user]
 proxy_config[:debug] = node[:swift][:debug]
 proxy_config[:admin_host] = admin_host
-proxy_config[:hide_auth] = false
 ### middleware items
 proxy_config[:clock_accuracy] = node[:swift][:middlewares][:ratelimit][:clock_accuracy]
 proxy_config[:max_sleep_time_seconds] = node[:swift][:middlewares][:ratelimit][:max_sleep_time_seconds]
