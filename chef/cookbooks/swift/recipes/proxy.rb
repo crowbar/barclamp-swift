@@ -43,7 +43,6 @@ swift_protocol = node[:swift][:ssl][:enabled] ? 'https' : 'http'
 # bucket to collect all the config items that end up in the proxy config template
 proxy_config = {}
 proxy_config[:auth_method] = node[:swift][:auth_method]
-proxy_config[:group] = node[:swift][:group]
 proxy_config[:user] = node[:swift][:user]
 proxy_config[:debug] = node[:swift][:debug]
 proxy_config[:admin_host] = admin_host

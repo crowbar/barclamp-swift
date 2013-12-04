@@ -29,10 +29,8 @@ key_file = <%= @ssl_keyfile %>
 bind_port = 8080
 workers = 1
 user = <%= @user %>
-group = <%= @group %>
 log_facility = LOG_LOCAL0
 log_level = <%= @debug? "DEBUG": "INFO" %>
-log_requests = true
 setup_console_handler = true
 
 [pipeline:main]
