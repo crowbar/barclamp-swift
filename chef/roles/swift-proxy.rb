@@ -23,6 +23,3 @@ run_list(
     "recipe[swift::proxy]",
     "recipe[swift::monitor]"
 )
-
-override_attributes "swift" => { "account_management" => "false" }
-

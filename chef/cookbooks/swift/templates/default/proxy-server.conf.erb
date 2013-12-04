@@ -58,7 +58,11 @@ pipeline = catch_errors healthcheck cache <%= ratelimit %> <%= auth %> <%= middl
 
 [app:proxy-server]
 use = egg:swift#proxy
-<% if @account_management == "true" %>allow_account_management = true<% end %>
+
+# If set to 'true' any authorized user may create and delete accounts; if
+# 'false' no one, even authorized, can.
+# allow_account_management = false
+
 <% if @keystone %>account_autocreate = true<% end %>
 log_name = proxy-server
 log_facility = LOG_LOCAL5

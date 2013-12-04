@@ -123,7 +123,6 @@ case proxy_config[:auth_method]
    when "swauth"
      package "python-swauth"
      proxy_config[:admin_key] =node[:swift][:cluster_admin_pw]
-     proxy_config[:account_management] = node[:swift][:account_management]
 
    when "keystone" 
 
