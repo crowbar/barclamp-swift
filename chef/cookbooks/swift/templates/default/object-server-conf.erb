@@ -50,6 +50,7 @@ use = egg:swift#recon
 #recon_lock_path = /var/lock
 
 [object-replicator]
+interval = <%= node[:swift][:replication_interval] %>
 
 [object-updater]
 

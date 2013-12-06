@@ -110,6 +110,7 @@
             "min_part_hours": { "type": "int", "required": true },
             "partitions": { "type": "int", "required": true },            
             "auth_method": { "type": "str", "required": true, "pattern": "/^keystone$/" },
+            "replication_interval": { "type": "int", "required": true },
             "keystone_instance": { "type": "str", "required": false },            
             "keystone_service_user": { "type": "str", "required": true },
             "keystone_service_password": { "type": "str" },
@@ -144,6 +145,7 @@
             "crowbar-status": { "type": "str" },
             "crowbar-failed": { "type": "str" },
             "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
             "element_states": {
               "type": "map",
               "mapping": {

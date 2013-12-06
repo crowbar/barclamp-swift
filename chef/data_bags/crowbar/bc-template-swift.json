@@ -50,6 +50,7 @@
           "enabled": false
         }
       },
+      "replication_interval": 60,
       "gitrepo": "http://github.com/openstack/swift.git",
       "git_instance": "",
       "git_refspec": "stable/grizzly",
@@ -105,6 +106,7 @@
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
+      "schema-revision": 1,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
