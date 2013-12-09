@@ -87,20 +87,14 @@ class SwiftService < ServiceObject
         "swift-storage" => []
     }
 
-    if nodes.size == 1
+    if nodes.size > 0
+      storage_nodes     = nodes.select { |n| n if n.intended_role == "storage" } || nodes
+      controller        = nodes.detect { |n| n if n.intended_role == "controller"} || nodes.shift
       base["deployment"]["swift"]["elements"] = {
-        "swift-proxy" => [ nodes.first[:fqdn] ],
-        "swift-dispersion" => [ nodes.first[:fqdn] ],
-        "swift-ring-compute" => [ nodes.first[:fqdn] ],
-        "swift-storage" => [ nodes.first[:fqdn] ]
-      }
-    elsif nodes.size > 1
-      head = nodes.shift
-      base["deployment"]["swift"]["elements"] = {
-        "swift-dispersion" => [ head[:fqdn] ],
-        "swift-proxy" => [ head[:fqdn] ],
-        "swift-ring-compute" => [ head[:fqdn] ],
-        "swift-storage" => nodes.map { |x| x[:fqdn] }
+        "swift-dispersion"      => [ controller[:fqdn] ],
+        "swift-proxy"           => [ controller[:fqdn] ],
+        "swift-ring-compute"    => [ controller[:fqdn] ],
+        "swift-storage"         => storage_nodes.map { |x| x[:fqdn] }
       }
     end
 
