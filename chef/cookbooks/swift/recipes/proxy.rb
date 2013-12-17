@@ -108,9 +108,7 @@ end
 
 case proxy_config[:auth_method]
    when "swauth"
-     package "python-swauth" do
-       action :install
-     end 
+     package "python-swauth"
      proxy_config[:admin_key] =node[:swift][:cluster_admin_pw]
      proxy_config[:account_management] = node[:swift][:account_management]
 
@@ -138,6 +136,8 @@ case proxy_config[:auth_method]
            cnode keystone
          end
        end
+     else
+       package "python-keystoneclient"
      end
      
      keystone_host = keystone[:fqdn]
