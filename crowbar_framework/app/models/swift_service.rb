@@ -88,7 +88,8 @@ class SwiftService < ServiceObject
     }
 
     if nodes.size > 0
-      storage_nodes     = nodes.select { |n| n if n.intended_role == "storage" } || nodes
+      storage_nodes     = nodes.select { |n| n if n.intended_role == "storage" }
+      storage_nodes     = nodes if storage_nodes.empty?
       controller        = nodes.detect { |n| n if n.intended_role == "controller"} || nodes.shift
       base["deployment"]["swift"]["elements"] = {
         "swift-dispersion"      => [ controller[:fqdn] ],
