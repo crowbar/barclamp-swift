@@ -57,7 +57,7 @@
       "use_gitbarclamp": true,
       "use_pip_cache": true,
       "use_virtualenv": true,
-      "frontend": "apache",
+      "frontend": "uwsgi",
       "pfs_deps": [
         "curl",
         "gcc",

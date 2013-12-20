@@ -10,7 +10,7 @@
       = select_tag :keystone_delay_auth_decision, options_for_select([['true', 'true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_delay_auth_decision"].to_s), :onchange => "update_value('keystone_delay_auth_decision', 'keystone_delay_auth_decision', 'boolean')"
     %p
       %label{ :for => :frontend }= t('.frontend')
-      = select_tag :frontend, options_for_select([['apache','apache'], ['native', 'native']], @proposal.raw_data['attributes'][@proposal.barclamp]["frontend"]), :onchange => "update_value('frontend', 'frontend', 'string')"
+      = select_tag :frontend, options_for_select([['uwsgi','uwsgi'], ['native', 'native']], @proposal.raw_data['attributes'][@proposal.barclamp]["frontend"]), :onchange => "update_value('frontend', 'frontend', 'string')"
     %p
       %label{ :for => :zones }= t('.zones')
       %input#zones{:type => "text", :name => "zones", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["zones"], :onchange => "update_value('zones', 'zones', 'integer')"}
