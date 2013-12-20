@@ -40,7 +40,7 @@ module SwiftBarclampHelper
   def frontends_for_swift(selected)
     options_for_select(
       [
-        ["apache","apache"], 
+        ["uwsgi", "uwsgi"],
         ["native", "native"]
       ],
       selected.to_s
