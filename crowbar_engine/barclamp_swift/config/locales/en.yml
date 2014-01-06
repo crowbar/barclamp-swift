@@ -1,0 +1,39 @@
+# Copyright 2013, Dell
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+en:
+  barclamp:
+    swift:
+      edit_attributes:
+        attributes: Attributes
+        zones: Zones
+        partitions: Partitions
+        min_part_hours: Minimum Partitions per Hour
+        replicas: Replicas
+        cluster_hash: Cluster Hash
+        cluster_admin_pw: Cluster Admin Password
+        user: User
+        group: Group
+        debug: Debug
+        auth_method: Authentication method
+        keystone_instance: Keystone instance
+        keystone_service_user: Keystone Service User
+        keystone_service_password: Keystone Service Password
+        install_slog: Install sLogging support
+        slog_account: sLogging swift account
+        slog_user: sLogging swift user
+        slog_passwd: sLogging swift user's password
+      edit_deployment:
+        deployment: Deployment
+
