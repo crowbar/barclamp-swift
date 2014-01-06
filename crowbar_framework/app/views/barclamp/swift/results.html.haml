@@ -1,0 +1,11 @@
+= stylesheet_link_tag @bc_name
+
+%h1.divided= t('.title', :report_run => @report_run['uuid'])
+.info
+  %dl
+    = dl_item(t("barclamp.#{@bc_name}.dashboard.report_run.node"), @report_run['node'])
+    = dl_item(t("barclamp.#{@bc_name}.dashboard.report_run.started"), Time.at(@report_run['started']).to_s())
+    = dl_item(t("barclamp.#{@bc_name}.dashboard.report_run.ended"), Time.at(@report_run['ended']).to_s())
+
+= link_to t('.raw_json'), "#{@report_run['uuid']}.json"
+= render :file => @report_run['results.html']

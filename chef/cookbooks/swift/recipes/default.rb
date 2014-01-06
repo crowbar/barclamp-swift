@@ -16,19 +16,38 @@
 # Author: andi abes
 #
 
-package "curl"
+swift_path = "/opt/swift"
+venv_path = node[:swift][:use_virtualenv] ? "#{swift_path}/.venv" : nil
 
-case node[:platform]
-when "suse"
-  package "openstack-swift"
+unless node[:swift][:use_gitrepo]
+  package "curl"
+
+  case node[:platform]
+  when "suse", "centos", "redhat"
+    package "openstack-swift"
+  else
+    package "swift"
+  end
 else
-  package "swift"
+
+  pfs_and_install_deps @cookbook_name do
+    path swift_path
+    virtualenv venv_path
+    wrap_bins [ "swift", "swift-dispersion-report", "swift-dispersion-populate" ]
+  end
+
+  create_user_and_dirs(@cookbook_name) do
+    user_name node[:swift][:user]
+    dir_group node[:swift][:group]
+  end
 end
 
-directory "/etc/swift" do
-  owner node[:swift][:user]
-  group node[:swift][:group]
-  mode "0755"
+["/etc/swift", "/var/lock/swift", "/var/cache/swift"].each do |d|
+  directory d do
+    owner node[:swift][:user]
+    group node[:swift][:group]
+    mode "0755"
+  end
 end
 
 template "/etc/swift/swift.conf" do
@@ -39,13 +58,4 @@ template "/etc/swift/swift.conf" do
        :swift_cluster_hash => node[:swift][:cluster_hash]
  })
 end
-
-[ "cache","lock"].each do |d|
-  directory "/var/#{d}/swift" do
-    owner node[:swift][:user]
-    group node[:swift][:group]
-    mode "0755"
-  end
-end
-
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2011, Dell
+# Copyright 2012, Dell
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,21 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Author: andi abes
-#
 
-name "swift-proxy-acct"
-
-description <<AAE
-Provides the proxy and authentication components to swift. 
-This proxy role enables account management, thus it should be deployed with security considerations in mind
-AAE
-
+name "swift-dispersion"
+description "provides the health check service to swift"
 run_list(
-    "recipe[swift::default]",
-    "recipe[swift::proxy]",
-    "recipe[swift::monitor]"
+    "recipe[swift::dispersion]"
 )
-
-override_attributes "swift" => { "account_management" => "true" }
 

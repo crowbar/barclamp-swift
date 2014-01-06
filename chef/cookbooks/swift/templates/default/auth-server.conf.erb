@@ -18,7 +18,7 @@
 
 [auth-server]
 default_cluster_url = https://127.0.0.1:8080/v1
-user = swift
+user = <%= @user %>
 cert_file = /etc/swift/cert.crt
 key_file = /etc/swift/cert.key
 super_admin_key = <%= @admin_key %>

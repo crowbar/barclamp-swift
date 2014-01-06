@@ -16,36 +16,31 @@
 # Author: andi abes
 #
 uid = <%= @uid %>
-gid = <%= @gid  %>
-log file = /var/log/rsyncd.log
-pid file = /var/run/rsyncd.pid
-
-uid = swift
-gid = swift
+gid = <%= @gid %>
 log file = /var/log/rsyncd.log
 pid file = /var/run/rsyncd.pid
 address =  <%= @storage_net_ip %>
 
 [account]
-max connections = 2
+max connections = 64
 path = /srv/node/
 read only = false
 lock file = /var/lock/swift/account.lock
 
 [container]
-max connections = 2
+max connections = 64
 path = /srv/node/
 read only = false
 lock file = /var/lock/swift/container.lock
 
 [object]
-max connections = 2
+max connections = 64
 path = /srv/node/
 read only = false
 lock file = /var/lock/swift/object.lock
 
 [ring]
-max connections =2
+max connections = 64
 path = /etc/swift
 read only = false
 lock file = /var/lock/swift/ring.lock

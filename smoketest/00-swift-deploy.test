@@ -21,9 +21,65 @@ die () { local _res=$1; shift; echo "$@"; exit $_res; }
 [[ $DEBUG ]] && set -x
 set -e
 
-. "$HOME/.openrc"
-apt-get install python-swiftclient
-keystone endpoint-list |grep -q swift || \
-    die "Cannot find endpoint for Swift in Keystone."
+echo "Findind swift-proxy..."
+proxy_ip=$(knife_node_find 'roles:swift-proxy' IP)
+echo "Findind swift-dispersion..."
+dispersion_ip=$(knife_node_find 'roles:swift-dispersion' IP)
+echo "Findind keystone..."
+keystone_ip=$(knife_node_find 'roles:keystone-server' IP)
 
-# Rest of test is nonfunctional for now.
+if ! [[ $proxy_ip ]]; then
+    die 1 "Could not find swift-proxy."
+fi
+
+if ! [[ $keystone_ip ]]; then
+    die 1 "Could not find keystone."
+fi
+if ! [[ $dispersion_ip ]]; then
+    die 1 "Could not find swift-dispersion."
+fi
+
+prop_file="$LOGDIR/swift-proposal.json"
+
+crowbar swift proposal show `crowbar swift proposal list` >"$prop_file"
+
+swift_user=$(grep keystone_service_user $prop_file | sed 's/[:,"]//g' | awk '{print $2}')
+swift_pass=$(grep keystone_service_password $prop_file | sed 's/[:,"]//g' | awk '{print $2}')
+
+if [ -f /etc/redhat-release ]; then
+  sudo yum --assumeyes install python-swiftclient
+else
+  sudo apt-get install -y python-swiftclient
+fi
+
+do_swift() {
+    local swiftargs=(--os-username "$swift_user"
+    --os-password "$swift_pass"
+    --os-tenant-name service
+    --os-auth-url "http://$keystone_ip:5000/v2.0")
+    swift ${swiftargs[@]} $1 $2 $3 || return 1
+}
+
+echo "Testing Swift functionality..."
+do_swift post testdir || die 1 "Could not create a container in Swift"
+testfile=$(mktemp "$LOGDIR/swift-testfile-XXXXX")
+outfile=$(mktemp "$LOGDIR/swift-outfile-XXXXX")
+dd if=/dev/urandom "of=$testfile" bs=64K count=1
+file=$(do_swift upload testdir "$testfile" || \
+    die 1 "Could not store random information into Swift")
+do_swift download testdir "$file" "-o $outfile" || \
+    die 1 "Could not get our random data back from Swift"
+do_swift delete testdir "$file" || \
+    die 1 "Could not delete our random data back from Swift"
+do_swift delete testdir || \
+    die 1 "Could not delete container from Swift"
+if [[ $(do_swift list testdir) ]]; then
+    die 1 "Container list should be empty"
+fi
+echo "Swift deploy passed."
+
+echo "Getting dispersion report..."
+ssh root@$dispersion_ip sudo -u swift swift-dispersion-report || \
+    die 1 "Could not get dispersion report"
+
+exit $overall_failure

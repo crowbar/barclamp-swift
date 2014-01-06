@@ -1,0 +1,29 @@
+# <%= @service_name %>
+#
+# The swift <%= @service_name %> server.
+
+description     "SWIFT <%= @service_name %> Server"
+author          "dell crowbar <crowbar@admin.node>"
+
+
+start on runlevel [2345]
+stop on runlevel [016]
+
+pre-start script
+  <% if @virtualenv %>
+  . <%=  File.join(@virtualenv,"bin/activate") %>
+  <% end %>
+
+  if [ -f "/etc/swift/<%= @comp_name %>-server.conf" ]; then
+    exec <%= @path %>/bin/swift-init <%= @service_name %> start
+  else
+    exit 1
+  fi
+end script
+
+post-stop script
+  <% if @virtualenv %>
+    . <%=  File.join(@virtualenv,"bin/activate") %>
+  <% end %>
+  exec <%= @path %>/bin/swift-init <%= @service_name %> stop
+end script

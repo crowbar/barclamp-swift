@@ -4,9 +4,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,28 +30,33 @@ def get_uuid(disk)
   nil
 end
 
-Chef::Log.info("locating disks using #{node[:swift][:disk_enum_expr]} test: #{node[:swift][:disk_test_expr]}")
+unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
 to_use_disks = []
-all_disks = eval(node[:swift][:disk_enum_expr])
-all_disks.each { |k,v|
-  b = binding()
-  to_use_disks << k if eval(node[:swift][:disk_test_expr]) && ::File.exists?("/dev/#{k}")
-}
-
-Chef::Log.info("Swift will use these disks: #{to_use_disks.join(" ")}")
+unclaimed_disks.each do |k|
+  to_use_disks << k
+end
+claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node, "Swift")
+claimed_disks.each do |k|
+  to_use_disks << k
+end
 
 node[:swift] ||= Mash.new
 node[:swift][:devs] ||= Mash.new
 found_disks=[]
 wait_for_format = false
-to_use_disks.each do |k|
+to_use_disks.each do |d|
 
-  target_suffix= k + "1" # by default, will use format first partition.
-  target_dev = "/dev/#{k}"
-  target_dev_part = "/dev/#{target_suffix}"
+  k = d.device
+  disk_name = k.gsub(/!/, "/")  # "cciss!c0d0"
+  partition_suffix = "1" # by default, will use format first partition.
+  partition_suffix = "p1" if k =~ /cciss/
+  target_dev = "/dev/#{disk_name}"
+  target_dev_part = "/dev/#{disk_name}#{partition_suffix}"
 
   disk = Hash.new
   disk[:device] = target_dev_part
+  disk[:device_disk_name] = k
+  disk[:device_disk_partition] = k + partition_suffix
   disk[:uuid] = get_uuid(target_dev_part)
 
   # Test to see if there is a partition table on the disk.
@@ -74,6 +79,7 @@ to_use_disks.each do |k|
     next
   elsif disk[:uuid].nil?
     # No filesystem.  Format that bad boy and claim it as our own.
+    d.claim("Swift")
     Chef::Log.info("Swift - formatting #{target_dev_part}")
     ::Kernel.exec "mkfs.xfs -i size=1024 -f #{target_dev_part}" unless ::Process.fork
     disk[:state] = "Fresh"
@@ -93,11 +99,32 @@ end
 found_disks.each do |disk|
   # Disk was freshly created.  Grab its UUID and create a mount point.
   disk[:uuid] = get_uuid(disk[:device])
+  # notify udev that there is a new UUID
+  ::Kernel.system("echo change > /sys/block/#{disk[:device_disk_name]}/#{disk[:device_disk_partition]}/uevent")
+  ::Kernel.system("/sbin/udevadm settle")
+
   disk[:state] = "Operational"
   disk[:name] = disk[:uuid].delete('-')
   Chef::Log.info("Adding new disk #{disk[:device]} with UUID #{disk[:uuid]} to the Swift config")
   node[:swift][:devs][disk[:uuid]] = disk.dup
 end
+
+# Now clean up list of claimed disks and remove those that do not
+# exist anymore.
+node[:swift][:devs].each do |uuid,disk|
+
+  Chef::Log.info("Checking disk #{disk[:device]}")
+  # Verify that UUID still matches
+  current_uuid = get_uuid(disk[:device])
+  if current_uuid != disk[:uuid]
+    Chef::Log.warn("Disk #{disk[:device]} with UUID #{current_uuid} not matching expected UUID #{disk[:uuid]}")
+    Chef::Log.info("Setting disk #{disk[:device]} to Stale")
+    disk[:state] = "UUID_Stale"
+    node[:swift][:devs][disk[:uuid]] = disk.dup
+  end
+end
+
+# Save that data
 node.save
 
 # Take appropriate action for each disk.
@@ -115,8 +142,9 @@ node[:swift][:devs].each do |uuid,disk|
     mount "/srv/node/#{disk[:name]}"  do
       device disk[:uuid]
       device_type :uuid
-      options "noatime,nodiratime,nobarrier,logbufs=8"
+      options "noatime,nodiratime,nobarrier,nofail,logbufs=8"
       dump 0
+      pass 0
       fstype "xfs"
       action [:mount, :enable]
     end
@@ -127,6 +155,7 @@ node[:swift][:devs].each do |uuid,disk|
       device_type :uuid
       options "noatime,nodiratime,nobarrier,logbufs=8"
       dump 0
+      pass 0
       fstype "xfs"
       action [:umount, :disable]
     end

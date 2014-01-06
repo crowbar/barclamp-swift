@@ -19,18 +19,34 @@
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 template "/etc/rsyncd.conf" do
   source "rsyncd.conf.erb"
-  variables({ 
+  variables({
     :uid => node[:swift][:user],
     :gid => node[:swift][:group],
     :storage_net_ip => storage_ip
   })
 end
 
-cookbook_file "/etc/default/rsync" do
-  source "default-rsync"
+case node[:platform]
+when "suse", "centos", "redhat"
+else
+  cookbook_file "/etc/default/rsync" do
+    source "default-rsync"
+  end
 end
 
-service "rsync" do
-  action :start 
-  service_name "rsyncd" if node[:platform] == "suse"
+unless %w(redhat centos).include?(node.platform)
+  service "rsync" do
+    action :start
+    service_name "rsyncd" if %w(suse).include?(node.platform)
+  end
+else
+  package "xinetd"
+  service "xinetd" do
+    action [ :start, :enable ]
+  end
+  cookbook_file "/etc/xinetd.d/rsync" do
+    source "rsync_xinetd"
+    notifies :restart, resources(:service => "xinetd")
+  end
 end
+

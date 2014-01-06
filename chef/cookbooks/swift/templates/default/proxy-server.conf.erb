@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 # Author: andi abes
+# Author: Judd Maltin
 #
 
 #
@@ -28,8 +29,7 @@ workers = 1
 user = <%= @user %>
 group = <%= @group %>
 log_facility = LOG_LOCAL0
-log_level = DEBUG
-log_name = swift-p
+log_level = <%= @debug? "DEBUG": "INFO" %>
 log_requests = true
 setup_console_handler = true
 
@@ -42,22 +42,25 @@ setup_console_handler = true
       auth = "swauth"
       @swauth = true and !@hide_auth
     when "keystone"
-      auth = "auth_token keystone"
+      auth = "auth_token keystoneauth"
       @keystone = true and !@hide_auth
     when "tempauth"
       auth = "tempauth"
       @tempauth = true and !@hide_auth
- end
+  end
+  middlewares = node[:swift][:middlewares].keys.select{|mw| node[:swift][:middlewares][mw][:enabled]}
+  ratelimit = middlewares.delete("ratelimit")
+  auth = "swift3 s3token " + auth if middlewares.delete("s3")
 %>
-pipeline = catch_errors healthcheck cache <%= auth %> proxy-logging proxy-server
+pipeline = catch_errors healthcheck cache <%= ratelimit %> <%= auth %> <%= middlewares.join(' ') %> proxy-logging proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
 <% if @account_management == "true" %>allow_account_management = true<% end %>
 <% if @keystone %>account_autocreate = true<% end %>
 log_name = proxy-server
-log_facility = LOG_LOCAL1
-log_level = DEBUG
+log_facility = LOG_LOCAL5
+log_level = <%= @debug? "DEBUG": "INFO" %>
 access_log_name = proxy-server
 access_log_facility = LOG_LOCAL1
 access_log_level = INFO
@@ -75,43 +78,53 @@ use = egg:swift#memcache
 memcache_servers = <%= @memcached_ips %>
 log_name = cache
 
+[filter:swift3]
+use = egg:swift3#swift3
+
 <%if @swauth %>
 [filter:swauth]
 use = egg:swauth#swauth
-set default_swift_cluster = local#https://<%= @local_ip %>:8080/v1
+set default_swift_cluster = local#https://<%= @admin_host %>:8080/v1
 super_admin_key = <%= @admin_key %>
-log_level = DEBUG
+log_level = <%= @debug? "DEBUG": "INFO" %>
 <% end %>
 
 <% if @keystone %>
 
-[filter:keystone]
-paste.filter_factory = keystone.middleware.swift_auth:filter_factory
+[filter:keystoneauth]
+use = egg:swift#keystoneauth
 operator_roles = Member,admin
 reseller_prefix=<%= @reseller_prefix %>
+log_facility = LOG_LOCAL0
+log_level = <%= @debug? "DEBUG": "INFO" %>
 
 # NOTE(chmou): s3token middleware is not updated yet to use only
 # username and password.
 [filter:s3token]
 paste.filter_factory = keystone.middleware.s3_token:filter_factory
 service_port = <%= @keystone_service_port %>
-service_host = <%= @keystone_vip %>
-auth_port = <%= @keystone_auth_port %>
-auth_host = <%= @keystone_vip %>
-auth_protocol = http
+service_host = <%= @keystone_host %>
+auth_port = <%= @keystone_admin_port %>
+auth_host = <%= @keystone_host %>
+auth_protocol = <%= @keystone_protocol %>
 auth_token = <%= @keystone_admin_token %>
 admin_token = <%= @keystone_admin_token %>
 
 [filter:auth_token]
-signing_dir = /var/cache/swift
-paste.filter_factory = keystone.middleware.auth_token:filter_factory
-auth_host = <%= @keystone_vip %>
+# Delaying the auth decision is required to support token-less
+# usage for anonymous referrers ('.r:*').
+# delay_auth_decision = true
+delay_auth_decision = <%= @keystone_delay_auth_decision %>
+
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = <%= @keystone_host %>
 auth_port = <%= @keystone_admin_port %>
-auth_protocol = http
-auth_uri = http://<%= @keystone_vip %>:<%= @keystone_service_port %>/
+auth_protocol = <%= @keystone_protocol %>
+auth_uri = <%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/
 admin_tenant_name = <%= @keystone_service_tenant %>
 admin_user = <%= @keystone_service_user %>
 admin_password = <%= @keystone_service_password %>
+signing_dir = /var/cache/swift/
 
 <% end %>
 
@@ -125,6 +138,42 @@ user_test_tester3 = testing3
 bind_ip = 0.0.0.0
 <% end %>
 
+
+[filter:ratelimit]
+use = egg:swift#ratelimit
+clock_accuracy = <%= @clock_accuracy %>
+max_sleep_time_seconds = <%= @max_sleep_time_seconds %>
+log_sleep_time_seconds = <%= @log_sleep_time_seconds %>
+rate_buffer_seconds = <%= @rate_buffer_seconds %>
+account_ratelimit = <%= @account_ratelimit %>
+account_whitelist = <%= @account_whitelist %>
+account_blacklist = <%= @account_blacklist %>
+<% @container_ratelimit_size.split(',').each do |limit| -%>
+<%=  "container_ratelimit_" + limit %>
+<% end -%>
+
 [filter:proxy-logging]
 use = egg:swift#proxy_logging
 
+[filter:cname_lookup]
+use = egg:swift#cname_lookup
+lookup_depth = <%= @lookup_depth %>
+storage_domain = <%= @storage_domain %>
+
+[filter:staticweb]
+use = egg:swift#staticweb
+
+[filter:domain_remap]
+use = egg:swift#domain_remap
+storage_domain = <%= @storage_domain_remap %>
+path_root = <%= @path_root %>
+reseller_prefixes = <%= @reseller_prefix %>
+
+[filter:tempurl]
+use = egg:swift#tempurl
+
+[filter:formpost]
+use = egg:swift#formpost
+
+[filter:ceilometer]
+use = egg:ceilometer#swift

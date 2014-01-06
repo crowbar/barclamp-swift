@@ -25,11 +25,12 @@
 
 ##
 # some internal data structs to hold ring info read from existing files
+
 class RingInfo
   attr_accessor :partitions, :replicas, :zones, :device_num, :devices, :min_part_hours
   
   class RingDeviceInfo
-    attr_accessor :id, :zone, :ip, :port, :name, :weight, :partitions
+    attr_accessor :id, :region, :zone, :ip, :port, :name, :weight, :partitions
     
     def initialize
       Chef::Log.debug "new device"
@@ -66,11 +67,12 @@ end
 
 def load_current_resource
   name = @new_resource.name
+  virtualenv = @new_resource.virtualenv || nil
   name = "/etc/swift/#{name}"
   @current_resource = Chef::Resource::SwiftRingfile.new(name)
   @ring_test = nil  
   Chef::Log.info("parsing ring-file for #{name}")
-  IO.popen("swift-ring-builder #{name}") { |pipe|
+  IO.popen("#{virtualenv} swift-ring-builder #{name}") { |pipe|
     ring_txt=pipe.readlines
     Chef::Log.debug("raw ring info:#{ring_txt}")
     @ring_test = scan_ring_desc ring_txt
@@ -114,20 +116,23 @@ def scan_ring_desc(input)
       
       when :dev_info  #              0     1 192.168.124.131  6002      sdb1 100.00          0 -100.00
       Chef::Log.debug "reading dev info:" + line
-      line =~ /^\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s+([-0-9.]+)\s*$/
-      if $~.nil? 
+      line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
+      if $~.nil?
         raise "failed to parse: #{line}"
       else
-        Chef::Log.debug "matched: #{$~[0]}" 
+        Chef::Log.debug "matched: #{$~[0]}"
       end
       dev = RingInfo::RingDeviceInfo.new
       dev.id = $1
-      dev.zone = $2
-      dev.ip = $3
-      dev.port = $4
-      dev.name = $5
-      dev.weight = $6
-      dev.partitions = $7
+      dev.region = $2
+      dev.zone = $3
+      dev.ip=$4
+      dev.port = $5
+      replication_ip = $6
+      replication_port = $7
+      dev.name = $8
+      dev.weight = $9
+      dev.partitions = $10
       r.add_device dev
     end
   }
@@ -165,6 +170,7 @@ end
 
 action :apply do
   name = @new_resource.name
+  virtualenv = @new_resource.virtualenv || nil
   cur=@ring_test
   Chef::Log.info("current content of: #{name} #{(cur.nil? ? "-not there" : cur.to_s)}")
   
@@ -176,24 +182,25 @@ action :apply do
     sleep 0.1
   end
   
-  @to_add.each { |d|
+  @to_add.each do |d|
     execute "add disk #{d[:ip]}:#{d[:port]}/#{d[:dev_name]} to #{name}" do
-      command "swift-ring-builder #{name} add z#{d[:zone]}-#{d[:ip]}:#{d[:port]}/#{d[:dev_name]} #{d[:weight]}"
+      command "#{virtualenv} swift-ring-builder #{name} add z#{d[:zone]}-#{d[:ip]}:#{d[:port]}/#{d[:dev_name]} #{d[:weight]}"
       cwd "/etc/swift"
     end
-  }
+  end
   
-  @to_rem.each {|d|
+  @to_rem.each do |d|
     execute "remove disk #{d.id} from #{name}" do
-      command "swift-ring-builder #{name} remove d#{d.id} "
+      command "#{virtualenv} swift-ring-builder #{name} remove d#{d.id} "
       cwd "/etc/swift"
     end   
-  }  
+  end
 end
 
 
 action :rebalance do
-  name = @current_resource.name   
+  name = @current_resource.name
+  virtualenv = @new_resource.virtualenv || nil
   dirty = false
   
   ring_data_mtime= ::File.new(name).mtime   if ::File.exist?(name)
@@ -206,7 +213,7 @@ action :rebalance do
   Chef::Log.info("current status for: #{name} is #{dirty ? "dirty" : "not-dirty"} #{ring_name} #{ring_data_mtime.to_i}/#{ring_file_mtime.to_i}")
  
   execute "rebalance ring for #{name}" do    
-    command "swift-ring-builder #{name} rebalance"
+    command "#{virtualenv} swift-ring-builder #{name} rebalance"
     cwd "/etc/swift"
     returns [0,1]  # returns 1 if it didn't do anything, 2 on 
   end if dirty
@@ -215,7 +222,7 @@ action :rebalance do
   if !::File.exist?(ring_name) then 
     dirty = true
     execute "writeout ring for #{name}" do
-      command "swift-ring-builder #{name} write_ring"
+      command "#{virtualenv} swift-ring-builder #{name} write_ring"
       cwd "/etc/swift"
       returns [0,1]  ## returns 1 if it didn't do anything, 2 on error.
     end
@@ -227,13 +234,14 @@ end
 
 
 def create_ring
-  name = @new_resource.name    
-  mh = @new_resource.min_part_hours ? @new_resource.min_part_hours : 1 
+  name = @new_resource.name
+  virtualenv = @new_resource.virtualenv || nil
+  mh = @new_resource.min_part_hours ? @new_resource.min_part_hours : 1
   parts = @new_resource.partitions ? @new_resource.partitions : 18
   replicas = @new_resource.replicas ? @new_resource.replicas : 3
   
   execute "create #{name} ring" do
-    command "swift-ring-builder #{name} create #{parts}  #{replicas} #{mh}"
+    command "#{virtualenv} swift-ring-builder #{name} create #{parts}  #{replicas} #{mh}"
     creates "/etc/swift/#{name}"
     cwd "/etc/swift"
   end
