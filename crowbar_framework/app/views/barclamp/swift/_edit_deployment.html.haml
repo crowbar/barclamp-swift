@@ -1,15 +1,1 @@
-
-%p
-  = render :partial => "barclamp/node_selector"
-
-:javascript
-  $(document).ready(function(){
-    var constraints = {  
-      "swift-storage": { "unique": false, "count": -1 },
-      "swift-proxy": { "unique": false, "count": -1 }, 
-      "swift-dispersion": {"unique": false, "count": 1 },
-      "swift-ring-compute": {"unique": false, "count": 1 }
-    };
-    node_selector($('#drag_drop'), constraints);
-  });
-
+= render :partial => "barclamp/node_selector", :locals => { :constraints => swift_role_contraints }

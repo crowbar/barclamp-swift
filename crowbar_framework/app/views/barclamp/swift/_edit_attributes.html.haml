@@ -1,143 +1,74 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header @dep_raw, true
 
-%input#proposal_attributes{:type => "hidden", :name => "proposal_attributes", :value => @proposal.raw_data['attributes'][@proposal.barclamp].to_json}
-%p
-  %label{:for => "proposal_attributes"}= t('.attributes')
-  = link_to "Raw", proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
-  %div.container
-    = render_instance_selector("keystone", :keystone_instance, t('.keystone_instance'), "keystone_instance", @proposal)
-    %p
-      %label{ :for => :keystone_delay_auth_decision }= t('.keystone_delay_auth_decision')
-      = select_tag :keystone_delay_auth_decision, options_for_select([['true', 'true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_delay_auth_decision"].to_s), :onchange => "update_value('keystone_delay_auth_decision', 'keystone_delay_auth_decision', 'boolean')"
-    %p
-      %label{ :for => :frontend }= t('.frontend')
-      = select_tag :frontend, options_for_select([['apache','apache'], ['native', 'native']], @proposal.raw_data['attributes'][@proposal.barclamp]["frontend"]), :onchange => "update_value('frontend', 'frontend', 'string')"
-    %p
-      %label{ :for => :zones }= t('.zones')
-      %input#zones{:type => "text", :name => "zones", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["zones"], :onchange => "update_value('zones', 'zones', 'integer')"}
+  .panel-body
+    = instance_field :keystone
+    = boolean_field :keystone_delay_auth_decision
+    = select_field :frontend, :collection => :frontends_for_swift
+    = integer_field :zones
+    = integer_field :partitions
+    = integer_field :min_part_hours
+    = integer_field :replicas
+    = integer_field :replication_interval
+    = string_field :cluster_hash
+    = password_field :cluster_admin_pw
+    = boolean_field :debug
 
-    %p
-      %label{ :for => :partitions }= t('.partitions')
-      %input#partitions{:type => "text", :name => "partitions", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["partitions"], :onchange => "update_value('partitions', 'partitions', 'integer')"}
+    %fieldset
+      %legend
+        = t(".middlewares.s3.header")
 
-    %p
-      %label{ :for => :min_part_hours }= t('.min_part_hours')
-      %input#min_part_hours{:type => "text", :name => "min_part_hours", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["min_part_hours"], :onchange => "update_value('min_part_hours', 'min_part_hours', 'integer')"}
+      = boolean_field %w(middlewares s3 enabled), "data-showit" => "true", "data-showit-target" => "#s3_container", "data-showit-direct" => "true"
 
-    %p
-      %label{ :for => :replicas }= t('.replicas')
-      %input#replicas{:type => "text", :name => "replicas", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["replicas"], :onchange => "update_value('replicas', 'replicas', 'integer')"}
+      #s3_container
+        = string_field %w(middlewares s3 gitrepo)
+        = string_field %w(middlewares s3 git_refspec)
+        = boolean_field %w(middlewares s3 use_gitrepo)
+        = boolean_field %w(middlewares s3 use_gitbarclamp)
 
-    %p
-      %label{ :for => :replication_interval }= t('.replication_interval')
-      %input#replication_interval{:type => "text", :name => "replication_interval", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["replication_interval"], :onchange => "update_value('replication_interval', 'replication_interval', 'integer')"}
+    %fieldset
+      %legend
+        = t(".middlewares.staticweb.header")
 
-    %p
-      %label{ :for => :cluster_hash }= t('.cluster_hash')
-      %input#cluster_hash{:type => "text", :name => "cluster_hash", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["cluster_hash"], :onchange => "update_value('cluster_hash', 'cluster_hash', 'string')"}
+      = boolean_field %w(middlewares staticweb enabled)
 
-    %p
-      %label{ :for => :cluster_admin_pw }= t('.cluster_admin_pw')
-      %input#cluster_admin_pw{:type => "text", :name => "cluster_admin_pw", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["cluster_admin_pw"], :onchange => "update_value('cluster_admin_pw', 'cluster_admin_pw', 'string')"}
+    %fieldset
+      %legend
+        = t(".middlewares.tempurl.header")
 
-    -# %p
-      %label{ :for => :slog_account }= t('.slog_account')
-      %input#slog_account{:type => "text", :name => "slog_account", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_account"], :onchange => "update_value('slog_account', 'slog_account', 'string')"}
+      = boolean_field %w(middlewares tempurl enabled)
 
-    -# %p
-      %label{ :for => :slog_user }= t('.slog_user')
-      %input#slog_user{:type => "text", :name => "slog_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_user"], :onchange => "update_value('slog_user', 'slog_user', 'string')"}
+    %fieldset
+      %legend
+        = t(".middlewares.formpost.header")
 
-    -# %p
-      %label{ :for => :slog_passwd }= t('.slog_passwd')
-      %input#slog_passwd{:type => "text", :name => "slog_passwd", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["slog_passwd"], :onchange => "update_value('slog_passwd', 'slog_passwd', 'string')"}
+      = boolean_field %w(middlewares formpost enabled)
 
-    %p
-      %label{ :for => :debug }= t('.debug')
-      = select_tag :debug, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["debug"].to_s), :onchange => "update_value('debug', 'debug', 'boolean')"
-    %label.section-header{ :for => :middlewares }= t('.middlewares.label')
-    %div.section{ :id => 'middlewares' }
+    %fieldset
+      %legend
+        = t(".middlewares.domain_remap.header")
 
-      %label.section-header{ :for => :middlewares_s3_div }= t('.middlewares.s3')
-      %div.section{ :id => :middlewares_s3_div }
-        %p
-          %label{ :for => :enable_s3 }= t('.middlewares.enabled')
-          = select_tag :enable_s3, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["s3"]["enabled"].to_s), :onchange => "update_value('middlewares/s3/enabled', 'enable_s3', 'boolean')"
-        %p
-          %label{ :for => :gitrepo }= t('.middlewares.gitrepo')
-          %input#gitrepo{:type => "text", :name => "gitrepo", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["s3"]["gitrepo"], :onchange => "update_value('middlewares/s3/gitrepo', 'gitrepo', 'string')"}
-        %p
-          %label{ :for => :git_refspec }= t('.middlewares.git_refspec')
-          %input#git_refspec{:type => "text", :name => "git_refspec", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["s3"]["git_refspec"], :onchange => "update_value('middlewares/s3/git_refspec', 'git_refspec', 'string')"}
-        %p
-          %label{ :for => :use_gitrepo }= t('.middlewares.use_gitrepo')
-          = select_tag :use_gitrepo, options_for_select([['false','false'], ['true', 'true']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["s3"]["use_gitrepo"].to_s), :onchange => "update_value('middlewares/s3/use_gitrepo', 'use_gitrepo', 'boolean')"
-        %p
-          %label{ :for => :use_gitbarclamp }= t('.middlewares.use_gitbarclamp')
-          = select_tag :use_gitbarclamp, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["s3"]["use_gitbarclamp"].to_s), :onchange => "update_value('middlewares/s3/use_gitbarclamp', 'use_gitbarclamp', 'boolean')"
+      = boolean_field %w(middlewares domain_remap enabled), "data-showit" => "true", "data-showit-target" => "#domain_remap_container", "data-showit-direct" => "true"
 
-      %label.section-header{ :for => :middlewares_staticweb_div }= t('.middlewares.staticweb')
-      %div.section{ :id => :middlewares_staticweb_div }
-      %p
-        %label{ :for => :staticweb }= t('.middlewares.staticweb')
-      %div.container
-        %p
-          %label{ :for => :enable_staticweb }= t('.middlewares.enabled')
-          = select_tag :enable_staticweb, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["staticweb"]["enabled"].to_s), :onchange => "update_value('middlewares/staticweb/enabled', 'enable_staticweb', 'boolean')"
+      #domain_remap_container
+        = string_field %w(middlewares domain_remap path_root)
+        = string_field %w(middlewares domain_remap storage_domain)
 
-      %label.section-header{ :for => :middlewares_tempurl_div }= t('.middlewares.tempurl')
-      %div.section{ :id => :middlewares_tempurl_div }
-        %p
-          %label{ :for => :enable_tempurl }= t('.middlewares.enabled')
-          = select_tag :enable_tempurl, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["tempurl"]["enabled"].to_s), :onchange => "update_value('middlewares/tempurl/enabled', 'enable_tempurl', 'boolean')"
+    %fieldset
+      %legend
+        = t(".middlewares.ratelimit.header")
 
-      %label.section-header{ :for => :middlewares_formpost_div }= t('.middlewares.formpost')
-      %div.section{ :id => :middlewares_formpost_div }
-        %p
-          %label{ :for => :enable_formpost }= t('.middlewares.enabled')
-          = select_tag :enable_formpost, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["formpost"]["enabled"].to_s), :onchange => "update_value('middlewares/formpost/enabled', 'enable_formpost', 'boolean')"
+      = boolean_field %w(middlewares ratelimit enabled), "data-showit" => "true", "data-showit-target" => "#ratelimit_container", "data-showit-direct" => "true"
 
-      %label.section-header{ :for => :middlewares_domain_remap_div }= t('.middlewares.domain_remap')
-      %div.section{ :id => :middlewares_domain_remap_div }
-        %p
-          %label{ :for => :enable_domain_remap }= t('.middlewares.enabled')
-          = select_tag :enable_domain_remap, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["domain_remap"]["enabled"].to_s), :onchange => "update_value('middlewares/domain_remap/enabled', 'enable_domain_remap', 'boolean')"
-        %p
-          %label{ :for => :path_root }= t('.middlewares.path_root')
-          %input#path_root{:type => "text", :name => "path_root", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["domain_remap"]["path_root"], :onchange => "update_value('middlewares/domain_remap/path_root', 'path_root', 'string')"}
-        %p
-          %label{ :for => :storage_domain }= t('.middlewares.storage_domain')
-          %input#storage_domain{:type => "text", :name => "storage_domain", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["domain_remap"]["storage_domain"], :onchange => "update_value('middlewares/domain_remap/storage_domain', 'storage_domain', 'string')"}
+      #ratelimit_container
+        = integer_field %w(middlewares ratelimit clock_accuracy)
+        = integer_field %w(middlewares ratelimit max_sleep_time_seconds)
+        = integer_field %w(middlewares ratelimit log_sleep_time_seconds)
+        = integer_field %w(middlewares ratelimit rate_buffer_seconds)
+        = integer_field %w(middlewares ratelimit account_ratelimit)
+        = string_field %w(middlewares ratelimit account_whitelist)
+        = string_field %w(middlewares ratelimit account_blacklist)
+        = string_field %w(middlewares ratelimit container_ratelimit_size)
 
-      %label.section-header{ :for => :middlewares_ratelimit_div }= t('.middlewares.ratelimit')
-      %div.section{ :id => :middlewares_ratelimit_div }
-      %p
-        %label{ :for => :ratelimit }= t('.middlewares.ratelimit')
-      %div.container
-        %p
-          %label{ :for => :enable_ratelimit }= t('.middlewares.enabled')
-          = select_tag :enable_ratelimit, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["ratelimit"]["enabled"].to_s), :onchange => "update_value('middlewares/ratelimit/enabled', 'enable_ratelimit', 'boolean')"
-        %p
-          %label{ :for => :clock_accuracy }= t('.middlewares.clock_accuracy')
-          %input#clock_accuracy{:type => "text", :name => "clock_accuracy", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["ratelimit"]["clock_accuracy"], :onchange => "update_value('middlewares/ratelimit/clock_accuracy', 'clock_accuracy', 'integer')"}
-        %p
-          %label{ :for => :max_sleep_time_seconds }= t('.middlewares.max_sleep_time_seconds')
-          %input#max_sleep_time_seconds{:type => "text", :name => "max_sleep_time_seconds", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["ratelimit"]["max_sleep_time_seconds"], :onchange => "update_value('middlewares/ratelimit/max_sleep_time_seconds', 'max_sleep_time_seconds', 'integer')"}
-        %p
-          %label{ :for => :log_sleep_time_seconds }= t('.middlewares.log_sleep_time_seconds')
-          %input#log_sleep_time_seconds{:type => "text", :name => "log_sleep_time_seconds", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["ratelimit"]["log_sleep_time_seconds"], :onchange => "update_value('middlewares/ratelimit/log_sleep_time_seconds', 'log_sleep_time_seconds', 'integer')"}
-        %p
-          %label{ :for => :rate_buffer_seconds }= t('.middlewares.rate_buffer_seconds')
-          %input#rate_buffer_seconds{:type => "text", :name => "rate_buffer_seconds", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["ratelimit"]["rate_buffer_seconds"], :onchange => "update_value('middlewares/ratelimit/rate_buffer_seconds', 'rate_buffer_seconds', 'integer')"}
-        %p
-          %label{ :for => :account_ratelimit }= t('.middlewares.account_ratelimit')
-          %input#account_ratelimit{:type => "text", :name => "account_ratelimit", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["ratelimit"]["account_ratelimit"], :onchange => "update_value('middlewares/ratelimit/account_ratelimit', 'account_ratelimit', 'integer')"}
-        %p
-          %label{ :for => :account_whitelist }= t('.middlewares.account_whitelist')
-          %input#account_whitelist{:type => "text", :name => "account_whitelist", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["ratelimit"]["account_whitelist"], :onchange => "update_value('middlewares/ratelimit/account_whitelist', 'account_whitelist', 'string')"}
-        %p
-          %label{ :for => :account_blacklist }= t('.middlewares.account_blacklist')
-          %input#account_blacklist{:type => "text", :name => "account_blacklist", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["ratelimit"]["account_blacklist"], :onchange => "update_value('middlewares/ratelimit/account_blacklist', 'account_blacklist', 'string')"}
-        %p
-          %label{ :for => :container_ratelimit_size }= t('.middlewares.container_ratelimit_size')
-          %input#container_ratelimit_size{:type => "text", :name => "container_ratelimit_size", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["middlewares"]["ratelimit"]["container_ratelimit_size"], :onchange => "update_value('middlewares/ratelimit/container_ratelimit_size', 'container_ratelimit_size', 'string')"}
-    = render 'barclamp/git/pfsdeps.html.haml'
+    = render "barclamp/git/pfsdeps"
