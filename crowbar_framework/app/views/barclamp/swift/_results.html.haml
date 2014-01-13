@@ -1,15 +1,20 @@
-.report_results
-  - json.keys.sort.each do |key_name|
-    %h2= key_name
-    %table.data.box.report_suite
+.panel.panel-default
+  - json.sort.each do |key_name, key_values|
+    .panel-heading
+      %h2
+        = key_name
+
+    %table.table.table-hover.table-middle
       %thead
         %tr
-          %th.r_key= t '.report.r_key'
-          %th.r_value= t '.report.r_value'
+          %th.col-xs-4
+            = t(".report.r_key")
+          %th.col-xs-8
+            = t(".report.r_value")
       %tbody
-        - json[key_name].sort.each do |k,v|
+        - key_values.sort.each do |k, v|
           %tr
             %td.key
-              %span= k.to_s()
+              = k.to_s
             %td.value
-              %span= v.to_s()
+              = v.to_s

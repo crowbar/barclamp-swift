@@ -7,32 +7,39 @@ en:
         success: "Sucessfully started dispersion report on node %{node}"
         failure: "Failed to run dispersion report on node %{node}: %{error}"
         duplicate: "There's already an active dispersion report run"
+        no_node: "Please select a node that got to generate a report"
+
+      clear:
+        success: All non-running and stale dispersion report runs were cleared
 
       dashboard:
         title: Swift Dispersion
-        n_report_runs: "%{n} report run(s)"
+        reports: Reports
         no_report_runs: No report runs
-
-        run:
-          label: Run swift dispersion report on node
-          do:  Go!
-          no_nodes: No nodes with installed dispersion tools available
-        clear:
-          do: Clear
-          success: All non-running and stale dispersion report runs were cleared
 
         report_run:
           node: Node
           started: Started
           ended: Ended
-          status: Status
-          status_:
+          state: Status
+          status:
             running: Collecting
             passed: Ready
             failed: Error
 
+        run:
+          label: Run swift dispersion report on node
+          do: Create
+        clear:
+          do: Clear
+
+
+        report_runs:
+          one: "%{count} report run"
+          other: "%{count} report runs"
+
       results:
-        title: "Results of dispersion report %{report_run}"
+        title: Results of dispersion report
         raw_json: Raw JSON
         report:
           r_key: Key
