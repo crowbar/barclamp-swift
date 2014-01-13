@@ -89,5 +89,5 @@ default[:swift][:install_slog_from_dev] = false
 
 
 
-default[:keystone][:frontend] = 'apache'
+default[:swift][:frontend] = 'apache'
 
