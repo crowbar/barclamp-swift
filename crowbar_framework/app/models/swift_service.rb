@@ -19,8 +19,8 @@ class SwiftService < ServiceObject
   end
 
   def initialize(thelogger)
+    super(thelogger)
     @bc_name = "swift"
-    @logger = thelogger
   end
 
 # Turn off multi proposal support till it really works and people ask for it.
@@ -260,39 +260,30 @@ class SwiftService < ServiceObject
   end
 
   def validate_proposal_after_save proposal
-    super
+    validate_one_for_role proposal, "swift-dispersion"
+    validate_one_for_role proposal, "swift-proxy"
+    validate_one_for_role proposal, "swift-ring-compute"
+    validate_at_least_n_for_role proposal, "swift-storage", 1
 
     if proposal["attributes"][@bc_name]["use_gitrepo"]
-      gitService = GitService.new(@logger)
-      gits = gitService.list_active[1].to_a
-      if not gits.include?proposal["attributes"][@bc_name]["git_instance"]
-        raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "git"))
-      end
+      validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
     end
 
-    errors = []
-
     if proposal["attributes"]["swift"]["replicas"] <= 0
-      errors << "Need at least 1 replica"
+      validation_error("Need at least 1 replica")
     end
 
     elements = proposal["deployment"]["swift"]["elements"]
 
-    if not elements.has_key?("swift-storage") or elements["swift-storage"].length < 1
-      errors << "Need at least one swift-storage node"
-    end
-
     if elements["swift-storage"].length < proposal["attributes"]["swift"]["zones"]
       if elements["swift-storage"].length == 1
-        errors << "Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage node was set for #{proposal["attributes"]["swift"]["zones"]} zones"
+        validation_error("Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage node was set for #{proposal["attributes"]["swift"]["zones"]} zones")
       else
-        errors << "Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage nodes were set for #{proposal["attributes"]["swift"]["zones"]} zones"
+        validation_error("Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage nodes were set for #{proposal["attributes"]["swift"]["zones"]} zones")
       end
     end
 
-    if errors.length > 0
-      raise Chef::Exceptions::ValidationFailed.new(errors.join("\n"))
-    end
+    super
   end
 
 end
