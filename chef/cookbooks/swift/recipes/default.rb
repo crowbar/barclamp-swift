@@ -29,6 +29,8 @@ unless node[:swift][:use_gitrepo]
     package "swift"
   end
 
+else
+
   ["/etc/swift", "/var/lock/swift"].each do |d|
     directory d do
       owner node[:swift][:user]
@@ -42,8 +44,6 @@ unless node[:swift][:use_gitrepo]
     group node[:swift][:group]
     mode "0700"
   end
-
-else
 
   pfs_and_install_deps @cookbook_name do
     path swift_path
