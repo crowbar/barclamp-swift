@@ -26,7 +26,7 @@ module SwiftBarclampHelper
       },
       "swift-proxy" => {
         "unique" => false,
-        "count" => -1
+        "count" => 1
       },
       "swift-dispersion" => {
         "unique" => false,
