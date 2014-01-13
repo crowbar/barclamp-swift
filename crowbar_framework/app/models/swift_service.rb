@@ -48,36 +48,13 @@ class SwiftService < ServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
-    base["attributes"][@bc_name]["git_instance"] = ""
-    begin
-      gitService = GitService.new(@logger)
-      gits = gitService.list_active[1]
-      if gits.empty?
-        # No actives, look for proposals
-        gits = gitService.proposals[1]
-      end
-      unless gits.empty?
-        base["attributes"][@bc_name]["git_instance"] = gits[0]
-      end
-    rescue
-      @logger.info("#{@bc_name} create_proposal: no git found")
+    base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
+    base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone", true)
+
+    unless base["attributes"][@bc_name]["keystone_instance"].blank?
+      base["attributes"]["swift"]["auth_method"] = "keystone"
     end
 
-    base["attributes"]["swift"]["keystone_instance"] = ""
-    begin
-      keystoneService = KeystoneService.new(@logger)
-      keystones = keystoneService.list_active[1]
-      if keystones.empty?
-        # No actives, look for proposals
-        keystones = keystoneService.proposals[1]
-      end
-      if !keystones.empty?
-	base["attributes"]["swift"]["keystone_instance"] = keystones[0]
-        base["attributes"]["swift"]["auth_method"] = "keystone"
-      end
-    rescue
-      @logger.info("Swift create_proposal: no keystone found - will use swauth")
-    end
     base["attributes"]["swift"]["keystone_service_password"] = '%012d' % rand(1e12)
 
 
