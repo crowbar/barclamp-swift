@@ -28,7 +28,22 @@ unless node[:swift][:use_gitrepo]
   else
     package "swift"
   end
+
 else
+
+  ["/etc/swift", "/var/lock/swift"].each do |d|
+    directory d do
+      owner node[:swift][:user]
+      group node[:swift][:group]
+      mode "0755"
+    end
+  end
+
+  directory "/var/cache/swift" do
+    owner node[:swift][:user]
+    group node[:swift][:group]
+    mode "0700"
+  end
 
   pfs_and_install_deps @cookbook_name do
     path swift_path
@@ -39,14 +54,6 @@ else
   create_user_and_dirs(@cookbook_name) do
     user_name node[:swift][:user]
     dir_group node[:swift][:group]
-  end
-end
-
-["/etc/swift", "/var/lock/swift", "/var/cache/swift"].each do |d|
-  directory d do
-    owner node[:swift][:user]
-    group node[:swift][:group]
-    mode "0755"
   end
 end
 
