@@ -42,9 +42,8 @@ class SwiftService < ServiceObject
   def create_proposal
     base = super
 
-    rand_d = rand(100000)    
-    base[:attributes][:swift][:cluster_hash] = "%x" % rand_d
-    
+    base[:attributes][:swift][:cluster_hash] = "%x%s" %  [rand(100000),rand(100000)]
+
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
