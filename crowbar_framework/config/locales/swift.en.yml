@@ -49,8 +49,8 @@ en:
         keystone_delay_auth_decision: Allow Public Containers (performance penalty)
         frontend: Frontend
         zones: Zones
-        partitions: Partitions
-        min_part_hours: Minimum Partitions per Hour
+        partitions: Create 2^X Logical Partitions
+        min_part_hours: Minimum Hours before Partition is reassigned
         replicas: Replicas
         replication_interval: Replication interval (in seconds)
         cluster_hash: Cluster Hash
