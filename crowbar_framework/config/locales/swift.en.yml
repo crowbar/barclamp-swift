@@ -67,6 +67,9 @@ en:
           staticweb:
             header: StaticWeb
             enabled: Enabled
+          ceilometer:
+            header: Ceilometer
+            enabled: Enabled
           tempurl:
             header: TempURL
             enabled: Enabled

@@ -12,6 +12,9 @@
         "concurrency": 25
       },
       "middlewares": {
+        "ceilometer": {
+          "enabled": false
+        },
         "staticweb": {
           "enabled": false
         },

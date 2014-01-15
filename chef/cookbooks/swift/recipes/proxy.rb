@@ -106,6 +106,14 @@ if node[:swift][:middlewares][:s3][:enabled]
   end
 end
 
+# setup ceilometer middleware only if ceilometer server is configured here
+if node[:swift][:middlewares][:ceilometer][:enabled]
+  ceilometer-server-node = search(:node, "roles:ceilometer-server AND name:#{node.name}") || []
+  if ceilometer-server-node.empty?
+    node[:swift][:middlewares].delete("ceilometer")
+  end
+end
+
 case proxy_config[:auth_method]
    when "swauth"
      package "python-swauth"
