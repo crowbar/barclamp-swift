@@ -58,7 +58,20 @@ class SwiftController < BarclampController
     @report = @service_object.get_report_run_by_uuid(params[:id])
     raise_not_found if not @report or @report["status"] == "running"
 
-    if File.exist? Rails.root.join(@report["results.json"])
+    generate_for(@report)
+
+    respond_to do |format|
+      format.html { render :template => "barclamp/swift/results" }
+      format.json { render :file => Rails.root.join(@report["results.json"]) }
+    end
+  end
+
+  protected
+
+  def generate_for(report)
+    return if File.exist? Rails.root.join(@report["results.html"])
+
+    begin
       json = JSON.parse(
         IO.read(
           Rails.root.join(@report["results.json"])
@@ -74,15 +87,14 @@ class SwiftController < BarclampController
           )
         )
       end
-    end
-
-    respond_to do |format|
-      format.html { render :template => "barclamp/swift/results" }
-      format.json { render :file => Rails.root.join(@report["results.json"]) }
+    rescue => e
+      logger.info sprintf(
+        "Failed to generate %s report: %s",
+        @report["uuid"],
+        e.message
+      )
     end
   end
-
-  protected
 
   def reports_list
     @service_object.get_dispersion_reports.map do |report|
