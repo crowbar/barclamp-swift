@@ -1,5 +1,6 @@
+#
 # Copyright 2011-2013, Dell
-# Copyright 2013, SUSE LINUX Products GmbH
+# Copyright 2013-2014, SUSE LINUX Products GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# Author: Dell Crowbar Team
-# Author: SUSE LINUX Products GmbH
 #
 
 module SwiftBarclampHelper
@@ -47,5 +45,46 @@ module SwiftBarclampHelper
       ],
       selected.to_s
     )
+  end
+
+  def nodes_for_swift(selected)
+    options_for_select(
+      ready_nodes.map { |node|
+        [
+          node.alias,
+          node.name
+        ]
+      },
+      selected.to_s
+    )
+  end
+
+  def swift_report_status_for(report)
+    led_class = case report["status"]
+      when "passed"
+        "led green"
+      when "failed"
+        "led red"
+      else
+        "led in_process"
+    end
+
+    status_link = if report["status"] == "running"
+      t(report["status"], :scope => "barclamp.swift.dashboard.report_run.status")
+    else
+      link_to(
+        t(report["status"], :scope => "barclamp.swift.dashboard.report_run.status"),
+        swift_show_report_path(:id => report["uuid"])
+      )
+    end
+
+    [
+      content_tag(
+        :span,
+        "",
+        :class => led_class
+      ),
+      status_link
+    ].join("\n")
   end
 end
