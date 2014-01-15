@@ -29,4 +29,6 @@
         %td
           = l(@report["ended"], :format => :short)
 
-= render :file => Rails.root.join(@report["results.html"]).to_s
+- if File.exist? Rails.root.join(@report["results.html"])
+  = render :file => Rails.root.join(@report["results.html"]).to_s
+
