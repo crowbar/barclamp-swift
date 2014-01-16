@@ -108,8 +108,8 @@ end
 
 # setup ceilometer middleware only if ceilometer server is configured
 if node[:swift][:middlewares][:ceilometer][:enabled]
-  ceilometer-server-node = search(:node, "roles:ceilometer-server") || []
-  if ceilometer-server-node.empty?
+  ceilometer_server_node = search(:node, "roles:ceilometer-server") || []
+  if ceilometer_server_node.empty?
     node[:swift][:middlewares].delete("ceilometer")
   else
     package "python-ceilometer"
