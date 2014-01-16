@@ -35,6 +35,14 @@
 
     %fieldset
       %legend
+        = t(".middlewares.ceilometer.header")
+
+      = boolean_field %w(middlewares ceilometer enabled)
+      %span.help-block
+        = t('.middlewares.ceilometer.hint')
+
+    %fieldset
+      %legend
         = t(".middlewares.tempurl.header")
 
       = boolean_field %w(middlewares tempurl enabled)

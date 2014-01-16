@@ -74,6 +74,10 @@ en:
           staticweb:
             header: StaticWeb
             enabled: Enabled
+          ceilometer:
+            header: Ceilometer
+            enabled: Enabled
+            hint: If enabled, this middleware will only be active when Ceilometer is deployed.
           tempurl:
             header: TempURL
             enabled: Enabled
