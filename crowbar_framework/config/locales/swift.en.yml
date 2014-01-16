@@ -70,7 +70,7 @@ en:
           ceilometer:
             header: Ceilometer
             enabled: Enabled
-            hint: Middleware will be enabled once Ceilometer service is deployed.
+            hint: If enabled, this middleware will only be active when Ceilometer is deployed.
           tempurl:
             header: TempURL
             enabled: Enabled
