@@ -292,6 +292,8 @@ else # if generate_certs
     Chef::Log.fatal(message)
     raise message
   end
+  # we do not check for existence of keyfile, as the private key is allowed
+  # to be in the certfile
 end # if generate_certs
 
 ## Find other nodes that are swift-auth nodes, and make sure 
