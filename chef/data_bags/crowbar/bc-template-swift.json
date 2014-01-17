@@ -53,6 +53,11 @@
           "enabled": false
         }
       },
+      "ssl": {
+          "certfile": "/etc/swift/cert.crt",
+          "keyfile": "/etc/swift/cert.key",
+          "generate_certs": false,
+      },
       "replication_interval": 60,
       "gitrepo": "http://github.com/openstack/swift.git",
       "git_instance": "",
@@ -101,7 +106,7 @@
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
-      "schema-revision": 2,
+      "schema-revision": 3,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],

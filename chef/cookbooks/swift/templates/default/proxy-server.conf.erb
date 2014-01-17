@@ -22,8 +22,8 @@
 
 
 [DEFAULT]
-cert_file = /etc/swift/cert.crt
-key_file = /etc/swift/cert.key
+cert_file = <%= @ssl_certfile %>
+key_file = <%= @ssl_keyfile %>
 bind_port = 8080
 workers = 1
 user = <%= @user %>
