@@ -79,4 +79,15 @@
         = string_field %w(middlewares ratelimit account_blacklist)
         = string_field %w(middlewares ratelimit container_ratelimit_size)
 
+    %fieldset
+      %legend
+        = t(".ssl.header")
+
+      = boolean_field %w(ssl generate_certs), "data-showit" => "false", "data-showit-target" => "#ssl_container", "data-showit-direct" => "true"
+
+      #ssl_container
+        = string_field %w(ssl certfile)
+        = string_field %w(ssl keyfile)
+        = boolean_field %w(ssl insecure)
+
     = render "barclamp/git/pfsdeps"

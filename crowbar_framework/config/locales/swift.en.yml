@@ -101,3 +101,9 @@ en:
             account_whitelist: Account whitelist
             account_blacklist: Account blacklist
             container_ratelimit_size: Container ratelimit size
+          ssl:
+            header: SSL Support
+            certfile: SSL Certificate File
+            keyfile: SSL (Private) Key File
+            generate_certs: Generate (self-signed) certificates (implies insecure)
+            insecure: SSL Certificate is insecure (for instance, self-signed)
