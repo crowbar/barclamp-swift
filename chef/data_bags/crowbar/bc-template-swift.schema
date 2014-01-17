@@ -105,7 +105,8 @@
             "ssl": { "type": "map", "required": true, "mapping": {
               "certfile": { "type" : "str", "required" : true },
               "keyfile": { "type" : "str", "required" : true },
-              "generate_certs": { "type" : "bool", "required" : true }
+              "generate_certs": { "type" : "bool", "required" : true },
+              "insecure": { "type" : "bool", "required" : true }
             }},
             "gitrepo": { "type": "str", "required": true },
             "git_instance": { "type": "str", "required": true },

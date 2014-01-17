@@ -57,6 +57,7 @@
           "certfile": "/etc/swift/cert.crt",
           "keyfile": "/etc/swift/cert.key",
           "generate_certs": false,
+          "insecure": false
       },
       "replication_interval": 60,
       "gitrepo": "http://github.com/openstack/swift.git",
