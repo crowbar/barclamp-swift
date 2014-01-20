@@ -87,9 +87,7 @@ default[:swift][:keystone_delay_auth_decision] = false
 
 default[:swift][:install_slog_from_dev] = false
 
-
-
-default[:swift][:frontend] = 'apache'
+default[:swift][:frontend] = 'uwsgi'
 
 default[:swift][:ssl][:certfile] = "/etc/swift/cert.crt"
 default[:swift][:ssl][:keyfile] = "/etc/swift/cert.key"
