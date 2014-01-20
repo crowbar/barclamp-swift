@@ -17,6 +17,15 @@
 
     %fieldset
       %legend
+        = t(".ssl.header")
+
+      = boolean_field %w(ssl generate_certs),  "data-sslprefix" => "ssl", "data-sslcert" => "/etc/swift/cert.crt", "data-sslkey" => "/etc/swift/cert.key"
+      = string_field %w(ssl certfile)
+      = string_field %w(ssl keyfile)
+      = boolean_field %w(ssl insecure)
+
+    %fieldset
+      %legend
         = t(".middlewares.s3.header")
 
       = boolean_field %w(middlewares s3 enabled), "data-showit" => "true", "data-showit-target" => "#s3_container", "data-showit-direct" => "true"
@@ -78,14 +87,5 @@
         = string_field %w(middlewares ratelimit account_whitelist)
         = string_field %w(middlewares ratelimit account_blacklist)
         = string_field %w(middlewares ratelimit container_ratelimit_size)
-
-    %fieldset
-      %legend
-        = t(".ssl.header")
-
-      = boolean_field %w(ssl generate_certs),  "data-sslprefix" => "ssl"
-      = string_field %w(ssl certfile)
-      = string_field %w(ssl keyfile)
-      = boolean_field %w(ssl insecure)
 
     = render "barclamp/git/pfsdeps"
