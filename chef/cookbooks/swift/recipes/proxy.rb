@@ -61,6 +61,8 @@ proxy_config[:lookup_depth] = node[:swift][:middlewares][:cname_lookup][:lookup_
 proxy_config[:storage_domain] = node[:swift][:middlewares][:cname_lookup][:storage_domain]
 proxy_config[:storage_domain_remap] = node[:swift][:middlewares][:domain_remap][:storage_domain]
 proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
+proxy_config[:ssl_certfile] = node[:swift][:ssl][:certfile]
+proxy_config[:ssl_keyfile] = node[:swift][:ssl][:keyfile]
 
 case node[:platform]
   when "centos", "redhat"
@@ -237,21 +239,62 @@ case proxy_config[:auth_method]
      ## uses defaults...
 end
                   
+if node[:swift][:ssl][:generate_certs]
+  package "openssl"
+  ruby_block "generate_certs for swift" do
+      block do
+        unless ::File.exists? node[:swift][:ssl][:certfile] and ::File.exists? node[:swift][:ssl][:keyfile]
+          require "fileutils"
 
-######
-# extract some keystone goodness
-## note that trying to use the <bash> resource fails in odd ways...
-execute "create auth cert" do
-  cwd "/etc/swift"
-  creates "/etc/swift/cert.crt"
-  group node[:swift][:group]
-  user node[:swift][:user]
-  command <<-EOH
-  /usr/bin/openssl req -new -x509 -days 365 -nodes -out cert.crt -keyout cert.key -batch &>/dev/null 0</dev/null
-  chmod 640 cert.key
-  EOH
-  not_if  {::File.exist?("/etc/swift/cert.crt") } 
-end
+          Chef::Log.info("Generating SSL certificate for swift...")
+
+          [:certfile, :keyfile].each do |k|
+            dir = File.dirname(node[:swift][:ssl][k])
+            FileUtils.mkdir_p(dir) unless File.exists?(dir)
+          end
+
+          # Generate private key
+          %x(openssl genrsa -out #{node[:swift][:ssl][:keyfile]} 4096)
+          if $?.exitstatus != 0
+            message = "SSL private key generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+          FileUtils.chown "root", node[:swift][:group], node[:swift][:ssl][:keyfile]
+          FileUtils.chmod 0640, node[:swift][:ssl][:keyfile]
+
+          # Generate certificate signing requests (CSR)
+          conf_dir = File.dirname node[:swift][:ssl][:certfile]
+          ssl_csr_file = "#{conf_dir}/signing_key.csr"
+          ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
+          %x(openssl req -new -key #{node[:swift][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
+          if $?.exitstatus != 0
+            message = "SSL certificate signed requests generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+
+          # Generate self-signed certificate with above CSR
+          %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:swift][:ssl][:keyfile]} -out #{node[:swift][:ssl][:certfile]})
+          if $?.exitstatus != 0
+            message = "SSL self-signed certificate generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+
+          File.delete ssl_csr_file  # Nobody should even try to use this
+        end # unless files exist
+    end # block
+  end # ruby_block
+else # if generate_certs
+  unless ::File.exists? node[:swift][:ssl][:certfile]
+    message = "Certificate \"#{node[:swift][:ssl][:certfile]}\" is not present."
+    Chef::Log.fatal(message)
+    raise message
+  end
+  # we do not check for existence of keyfile, as the private key is allowed
+  # to be in the certfile
+end # if generate_certs
 
 ## Find other nodes that are swift-auth nodes, and make sure 
 ## we use their memcached!

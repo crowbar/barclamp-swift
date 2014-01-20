@@ -91,3 +91,7 @@ default[:swift][:install_slog_from_dev] = false
 
 default[:swift][:frontend] = 'apache'
 
+default[:swift][:ssl][:certfile] = "/etc/swift/cert.crt"
+default[:swift][:ssl][:keyfile] = "/etc/swift/cert.key"
+default[:swift][:ssl][:generate_certs] = true
+default[:swift][:ssl][:insecure] = false
