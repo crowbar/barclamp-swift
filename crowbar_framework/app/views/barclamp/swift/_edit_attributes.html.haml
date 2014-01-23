@@ -64,6 +64,12 @@
 
     %fieldset
       %legend
+        = t(".middlewares.bulk.header")
+
+      = boolean_field %w(middlewares bulk enabled)
+
+    %fieldset
+      %legend
         = t(".middlewares.domain_remap.header")
 
       = boolean_field %w(middlewares domain_remap enabled), "data-showit" => "true", "data-showit-target" => "#domain_remap_container", "data-showit-direct" => "true"
