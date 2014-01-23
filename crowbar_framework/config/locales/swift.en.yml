@@ -84,6 +84,9 @@ en:
           formpost:
             header: FormPOST
             enabled: Enabled
+          bulk:
+            header: Bulk
+            enabled: Enabled
           domain_remap:
             header: Domain Remap
             enabled: Enabled
