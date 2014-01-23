@@ -51,6 +51,14 @@
           "account_blacklist": "",
           "container_ratelimit_size": "100=100,200=50,500=20",
           "enabled": false
+        },
+        "bulk": {
+          "enabled": true,
+          "max_containers_per_extraction": 10000
+          "max_failed_extractions": 1000
+          "max_deletes_per_request": 10000
+          "max_failed_deletes": 1000
+          "yield_frequency": 10
         }
       },
       "ssl": {
@@ -107,7 +115,7 @@
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
-      "schema-revision": 3,
+      "schema-revision": 4,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],

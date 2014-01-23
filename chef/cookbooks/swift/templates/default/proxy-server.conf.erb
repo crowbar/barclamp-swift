@@ -52,7 +52,7 @@ setup_console_handler = true
   ratelimit = middlewares.delete("ratelimit")
   auth = "swift3 s3token " + auth if middlewares.delete("s3")
 %>
-pipeline = catch_errors healthcheck cache <%= ratelimit %> <%= auth %> <%= middlewares.join(' ') %> proxy-logging proxy-server
+pipeline = catch_errors healthcheck cache <%= ratelimit %> <%= auth %> <%= middlewares.join(' ') %> container-quotas account-quotas proxy-logging proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
@@ -177,3 +177,17 @@ use = egg:swift#formpost
 
 [filter:ceilometer]
 use = egg:ceilometer#swift
+
+[filter:bulk]
+use = egg:swift#bulk
+max_containers_per_extraction = <%= @max_failed_extractions %>
+max_failed_extractions = <%= @max_failed_extractions %>
+max_deletes_per_request = <%= @max_deletes_per_request %>
+max_failed_deletes = <%= @max_failed_deletes %>
+yield_frequency = <%= @yield_frequency %>
+
+[filter:container-quotas]
+use = egg:swift#container_quotas
+
+[filter:account-quotas]
+use = egg:swift#account_quotas

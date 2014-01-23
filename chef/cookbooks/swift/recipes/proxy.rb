@@ -63,6 +63,11 @@ proxy_config[:storage_domain_remap] = node[:swift][:middlewares][:domain_remap][
 proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
 proxy_config[:ssl_certfile] = node[:swift][:ssl][:certfile]
 proxy_config[:ssl_keyfile] = node[:swift][:ssl][:keyfile]
+proxy_config[:max_containers_per_extraction] = node[:swift][:middlewares][:bulk][:max_containers_per_extraction]
+proxy_config[:max_failed_extractions] = node[:swift][:middlewares][:bulk][:max_failed_extractions]
+proxy_config[:max_deletes_per_request] = node[:swift][:middlewares][:bulk][:max_deletes_per_request]
+proxy_config[:max_failed_deletes] = node[:swift][:middlewares][:bulk][:max_failed_deletes]
+proxy_config[:yield_frequency] = node[:swift][:middlewares][:bulk][:yield_frequency]
 
 case node[:platform]
   when "centos", "redhat"
