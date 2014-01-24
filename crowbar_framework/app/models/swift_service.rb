@@ -277,7 +277,7 @@ class SwiftService < ServiceObject
     middlewares = proposal["attributes"]["swift"]["middlewares"]
     if (middlewares["tempurl"]["enabled"] || middlewares["staticweb"]["enabled"] || middlewares["formpost"]["enabled"])
       unless proposal["attributes"]["swift"]["keystone_delay_auth_decision"]
-        validation_error("For selected middlewares, 'Allow Public Containers' (keystone_delay_auth_decision) must be set")
+        validation_error("Public containers must be allowed (keystone_delay_auth_decision attribute) when one of the FormPOST, StaticWeb and TempURL middlewares is enabled.")
       end
     end
 
