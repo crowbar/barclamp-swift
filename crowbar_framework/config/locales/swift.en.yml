@@ -54,6 +54,7 @@ en:
       edit_attributes:
         keystone_instance: Keystone instance
         keystone_delay_auth_decision: Allow Public Containers (performance penalty)
+        allow_versions: Enable Object Versioning
         frontend: Frontend
         zones: Zones
         partitions: Create 2^X Logical Partitions

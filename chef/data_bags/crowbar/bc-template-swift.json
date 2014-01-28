@@ -99,6 +99,7 @@
       "keystone_instance": "proposal",
       "keystone_service_user": "swift",
       "keystone_delay_auth_decision": false,
+      "allow_versions": false,
       "reseller_prefix" : "AUTH_",
       "debug": false,
       "use_slog" : false,
@@ -115,7 +116,7 @@
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
-      "schema-revision": 4,
+      "schema-revision": 5,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
