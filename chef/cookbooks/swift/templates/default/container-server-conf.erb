@@ -38,6 +38,7 @@ use = egg:swift#recon
 [app:container-server]
 use = egg:swift#container
 log_level = <%= @debug? "DEBUG": "INFO" %>
+allow_versions = <%= node[:swift][:allow_versions] %>
 
 [container-replicator]
 interval = <%= node[:swift][:replication_interval] %>

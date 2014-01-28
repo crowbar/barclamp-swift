@@ -6,6 +6,7 @@
   .panel-body
     = instance_field :keystone
     = boolean_field :keystone_delay_auth_decision
+    = boolean_field :allow_versions
     = select_field :frontend, :collection => :frontends_for_swift
     = integer_field :zones
     = integer_field :partitions
