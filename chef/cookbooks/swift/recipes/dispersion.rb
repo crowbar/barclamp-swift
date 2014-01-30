@@ -91,7 +91,7 @@ execute "populate-dispersion" do
 end
 
 template "/etc/swift/dispersion.conf" do
-  source     "disperse.conf.erb"
+  source     "dispersion.conf.erb"
   mode       "0600"
   group       node[:swift][:group]
   owner       node[:swift][:user]

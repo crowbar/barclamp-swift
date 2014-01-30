@@ -1,0 +1,18 @@
+[dispersion]
+auth_url = <%= @auth_url %>
+auth_user = <%= node["swift"]["dispersion"]["service_tenant"] %>:<%= node["swift"]["dispersion"]["service_user"] %>
+auth_key = <%= node["swift"]["dispersion"]["service_password"] %>
+# auth_url = http://saio:5000/v2.0/
+# auth_user = test:tester
+# auth_key = testing
+auth_version = 2.0
+# endpoint_type = publicURL
+# keystone_api_insecure = no
+#
+# swift_dir = /etc/swift
+dispersion_coverage = <%= node["swift"]["dispersion"]["dispersion_coverage"] %>
+retries = <%= node["swift"]["dispersion"]["retries"] %>
+concurrency = <%= node["swift"]["dispersion"]["concurrency"] %>
+container_report = no
+# object_report = yes
+# dump_json = no
