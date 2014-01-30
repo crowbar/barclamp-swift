@@ -115,7 +115,7 @@ end
 
 # enable ceilometer middleware if ceilometer is configured
 node[:swift][:middlewares]["ceilometer"] = {
-  "enabled"   => node.roles.include? "ceilometer-swift-proxy-middleware"
+  "enabled" => (node.roles.include? "ceilometer-swift-proxy-middleware")
 }
 
 case proxy_config[:auth_method]
