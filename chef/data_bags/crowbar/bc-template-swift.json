@@ -61,7 +61,7 @@
       "ssl": {
           "certfile": "/etc/swift/cert.crt",
           "keyfile": "/etc/swift/cert.key",
-          "generate_certs": false,
+          "generate_certs": true,
           "insecure": false
       },
       "replication_interval": 60,
