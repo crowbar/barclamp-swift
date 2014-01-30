@@ -59,6 +59,7 @@
         }
       },
       "ssl": {
+          "enabled": false,
           "certfile": "/etc/swift/cert.crt",
           "keyfile": "/etc/swift/cert.key",
           "generate_certs": true,
@@ -113,7 +114,7 @@
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
-      "schema-revision": 6,
+      "schema-revision": 7,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],

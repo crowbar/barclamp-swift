@@ -22,8 +22,10 @@
 
 
 [DEFAULT]
+<%if @ssl_enabled -%>
 cert_file = <%= @ssl_certfile %>
 key_file = <%= @ssl_keyfile %>
+<% end -%>
 bind_port = 8080
 workers = 1
 user = <%= @user %>
@@ -84,7 +86,7 @@ use = egg:swift3#swift3
 <%if @swauth %>
 [filter:swauth]
 use = egg:swauth#swauth
-set default_swift_cluster = local#https://<%= @admin_host %>:8080/v1
+set default_swift_cluster = local#<%= @swift_protocol %>://<%= @admin_host %>:8080/v1
 super_admin_key = <%= @admin_key %>
 log_level = <%= @debug? "DEBUG": "INFO" %>
 <% end %>

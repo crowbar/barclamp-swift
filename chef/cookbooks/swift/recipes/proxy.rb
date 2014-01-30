@@ -29,15 +29,15 @@ admin_host = node[:fqdn]
 # use the IP address except for SSL, where we always prefer a hostname
 # (for certificate validation).
 # In the case of swift, we always configure SSL.
-use_ssl = true
 public_host = node[:crowbar][:public_name]
 if public_host.nil? or public_host.empty?
-  unless use_ssl
+  unless node[:swift][:ssl][:enabled]
     public_host = public_ip
   else
     public_host = 'public.'+node[:fqdn]
   end
 end
+swift_protocol = node[:swift][:ssl][:enabled] ? 'https' : 'http'
 
 ### 
 # bucket to collect all the config items that end up in the proxy config template
@@ -61,6 +61,8 @@ proxy_config[:lookup_depth] = node[:swift][:middlewares][:cname_lookup][:lookup_
 proxy_config[:storage_domain] = node[:swift][:middlewares][:cname_lookup][:storage_domain]
 proxy_config[:storage_domain_remap] = node[:swift][:middlewares][:domain_remap][:storage_domain]
 proxy_config[:path_root] = node[:swift][:middlewares][:domain_remap][:path_root]
+proxy_config[:protocol] = swift_protocol
+proxy_config[:ssl_enabled] = node[:swift][:ssl][:enabled]
 proxy_config[:ssl_certfile] = node[:swift][:ssl][:certfile]
 proxy_config[:ssl_keyfile] = node[:swift][:ssl][:keyfile]
 proxy_config[:max_containers_per_extraction] = node[:swift][:middlewares][:bulk][:max_containers_per_extraction]
@@ -226,9 +228,9 @@ case proxy_config[:auth_method]
          port keystone_admin_port
          endpoint_service "swift"
          endpoint_region "RegionOne"
-         endpoint_publicURL "https://#{public_host}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
-         endpoint_adminURL "https://#{admin_host}:8080/v1/"
-         endpoint_internalURL "https://#{admin_host}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
+         endpoint_publicURL "#{swift_protocol}://#{public_host}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
+         endpoint_adminURL "#{swift_protocol}://#{admin_host}:8080/v1/"
+         endpoint_internalURL "#{swift_protocol}://#{admin_host}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
          #  endpoint_global true
          #  endpoint_enabled true
         action :add_endpoint_template
@@ -387,12 +389,22 @@ elsif node[:swift][:frontend]=='uwsgi'
     )
   end
 
+  if node[:swift][:ssl][:enabled]
+    uwsgi_instances = {
+      :https => "0.0.0.0:8080,/etc/swift/cert.crt,/etc/swift/cert.key"
+    }
+  else
+    uwsgi_instances = {
+      :http => "0.0.0.0:8080"
+    }
+  end
+
   uwsgi "swift-proxy" do
     options({
       :chdir => "/usr/lib/cgi-bin/swift/",
       :callable => :application,
       :module => :proxy,
-      :protocol => :https,
+      :protocol => swift_protocol,
       :user => :swift,
       :vacuum => true,
       :"no-orphans" => true,
@@ -406,9 +418,7 @@ elsif node[:swift][:frontend]=='uwsgi'
       :harakiri => 60,
       :log => "/var/log/swift-proxy-uwsgi.log"
     })
-    instances ({
-      :https => "0.0.0.0:8080,/etc/swift/cert.crt,/etc/swift/cert.key"
-    })
+    instances (uwsgi_instances)
     service_name "swift-proxy-uwsgi"
   end
 

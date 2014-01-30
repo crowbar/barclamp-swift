@@ -103,6 +103,7 @@ en:
             container_ratelimit_size: Container ratelimit size
         ssl:
           header: SSL Support
+          enabled: Protocol
           certfile: SSL Certificate File
           keyfile: SSL (Private) Key File
           generate_certs: Generate (self-signed) certificates (implies insecure)
