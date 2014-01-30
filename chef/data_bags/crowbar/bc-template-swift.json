@@ -62,7 +62,7 @@
           "enabled": false,
           "certfile": "/etc/swift/cert.crt",
           "keyfile": "/etc/swift/cert.key",
-          "generate_certs": true,
+          "generate_certs": false,
           "insecure": false
       },
       "replication_interval": 60,
