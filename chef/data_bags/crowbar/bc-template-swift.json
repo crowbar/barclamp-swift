@@ -12,9 +12,6 @@
         "concurrency": 25
       },
       "middlewares": {
-        "ceilometer": {
-          "enabled": false
-        },
         "staticweb": {
           "enabled": false
         },
@@ -116,7 +113,7 @@
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
-      "schema-revision": 5,
+      "schema-revision": 6,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
