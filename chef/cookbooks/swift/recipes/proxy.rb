@@ -114,10 +114,8 @@ if node[:swift][:middlewares][:s3][:enabled]
 end
 
 # enable ceilometer middleware if ceilometer is configured
-env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-ceilometer_node = search(:node, "roles:ceilometer-swift-proxy-middleware#{env_filter}") || []
-node[:swift][:middlewares]["ceilometer"]        = {
-  "enabled"   => ceilometer_node.size > 0
+node[:swift][:middlewares]["ceilometer"] = {
+  "enabled"   => node.roles.include? "ceilometer-swift-proxy-middleware"
 }
 
 case proxy_config[:auth_method]

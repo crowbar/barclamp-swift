@@ -4,7 +4,6 @@ def upgrade ta, td, a, d
 end
 
 def downgrade ta, td, a, d
-  a["middlewares"]["ceilometer"] = {}
-  a["middlewares"]["ceilometer"]["enabled"] = ta["middlewares"]["ceilometer"]["enabled"]
+  a["middlewares"]["ceilometer"] = ta["middlewares"]["ceilometer"]
   return a, d
 end
