@@ -69,16 +69,16 @@ class SwiftController < BarclampController
   protected
 
   def generate_for(report)
-    return if File.exist? Rails.root.join(@report["results.html"])
+    return if File.exist? Rails.root.join(report["results.html"])
 
     begin
       json = JSON.parse(
         IO.read(
-          Rails.root.join(@report["results.json"])
+          Rails.root.join(report["results.json"])
         )
       )
 
-      File.open(Rails.root.join(@report["results.html"]), "w") do |out|
+      File.open(Rails.root.join(report["results.html"]), "w") do |out|
         out.write(
           render_to_string(
             :template => "barclamp/swift/_results.html",
@@ -90,7 +90,7 @@ class SwiftController < BarclampController
     rescue => e
       logger.info sprintf(
         "Failed to generate %s report: %s",
-        @report["uuid"],
+        report["uuid"],
         e.message
       )
     end
