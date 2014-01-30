@@ -180,7 +180,7 @@ use = egg:ceilometer#swift
 
 [filter:bulk]
 use = egg:swift#bulk
-max_containers_per_extraction = <%= @max_failed_extractions %>
+max_containers_per_extraction = <%= @max_containers_per_extraction %>
 max_failed_extractions = <%= @max_failed_extractions %>
 max_deletes_per_request = <%= @max_deletes_per_request %>
 max_failed_deletes = <%= @max_failed_deletes %>
