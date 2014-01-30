@@ -113,15 +113,10 @@ if node[:swift][:middlewares][:s3][:enabled]
   end
 end
 
-# setup ceilometer middleware only if ceilometer server is configured
-if node[:swift][:middlewares][:ceilometer][:enabled]
-  ceilometer_server_node = search(:node, "roles:ceilometer-server") || []
-  if ceilometer_server_node.empty?
-    node[:swift][:middlewares].delete("ceilometer")
-  else
-    package "python-ceilometer"
-  end
-end
+# enable ceilometer middleware if ceilometer is configured
+node[:swift][:middlewares]["ceilometer"] = {
+  "enabled"   => node.roles.include? "ceilometer-swift-proxy-middleware"
+}
 
 case proxy_config[:auth_method]
    when "swauth"
