@@ -21,10 +21,13 @@
       %legend
         = t(".ssl.header")
 
-      = boolean_field %w(ssl generate_certs),  "data-sslprefix" => "ssl", "data-sslcert" => "/etc/swift/cert.crt", "data-sslkey" => "/etc/swift/cert.key"
-      = string_field %w(ssl certfile)
-      = string_field %w(ssl keyfile)
-      = boolean_field %w(ssl insecure)
+      = boolean_field %w(ssl enabled), :collection => :ssl_protocols_for_swift, "data-sslprefix" => "ssl", "data-sslcert" => "/etc/swift/cert.crt", "data-sslkey" => "/etc/swift/cert.key"
+
+      #ssl_container
+        = boolean_field %w(ssl generate_certs)
+        = string_field %w(ssl certfile)
+        = string_field %w(ssl keyfile)
+        = boolean_field %w(ssl insecure)
 
     %fieldset
       %legend

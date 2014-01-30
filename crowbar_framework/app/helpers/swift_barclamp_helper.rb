@@ -47,6 +47,16 @@ module SwiftBarclampHelper
     )
   end
 
+  def ssl_protocols_for_swift(selected)
+    options_for_select(
+      [
+        ["HTTP", "false"],
+        ["HTTPS", "true"]
+      ],
+      selected.to_s
+    )
+  end
+
   def nodes_for_swift(selected)
     options_for_select(
       ready_nodes.map { |node|
