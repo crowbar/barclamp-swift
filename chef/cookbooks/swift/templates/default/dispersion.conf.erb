@@ -7,7 +7,7 @@ auth_key = <%= node["swift"]["dispersion"]["service_password"] %>
 # auth_key = testing
 auth_version = 2.0
 # endpoint_type = publicURL
-# keystone_api_insecure = no
+keystone_api_insecure = <%= @keystone_insecure ? "yes" : "no" %>
 #
 # swift_dir = /etc/swift
 dispersion_coverage = <%= node["swift"]["dispersion"]["dispersion_coverage"] %>
