@@ -67,12 +67,21 @@ log_level = <%= @debug? "DEBUG": "INFO" %>
     when "tempauth"
       auth = "tempauth"
   end
+
   middlewares = node[:swift][:middlewares].keys.select{|mw| node[:swift][:middlewares][mw][:enabled]}
-  ratelimit = middlewares.delete("ratelimit")
   auth = "swift3 s3token " + auth if middlewares.delete("s3")
+
+  staticweb = middlewares.delete("staticweb")
+  tempurl = middlewares.delete("tempurl")
+  formpost = middlewares.delete("formpost")
+  domain_remap = middlewares.delete("domain_remap")
+  cname_lookup = middlewares.delete("cname_lookup")
+  ratelimit = middlewares.delete("ratelimit")
+  bulk = middlewares.delete("bulk")
+  ceilometer = middlewares.delete("ceilometer")
 %>
 [pipeline:main]
-pipeline = catch_errors healthcheck cache <%= ratelimit %> <%= auth %> <%= middlewares.join(' ') %> container-quotas account-quotas proxy-logging proxy-server
+pipeline = catch_errors healthcheck proxy-logging cache <%= bulk %> slo <%= ratelimit %> <%= cname_lookup %> <%= domain_remap %> <%= tempurl %> <%= formpost %> <%= auth %> <%= staticweb %> container-quotas account-quotas proxy-logging <%= ceilometer %> <%= middlewares.join(' ') %> proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
