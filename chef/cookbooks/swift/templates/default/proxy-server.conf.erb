@@ -63,7 +63,7 @@ log_level = <%= @debug? "DEBUG": "INFO" %>
     when "swauth"
       auth = "swauth"
     when "keystone"
-      auth = "auth_token keystoneauth"
+      auth = "authtoken keystoneauth"
     when "tempauth"
       auth = "tempauth"
   end
@@ -266,7 +266,7 @@ user_test_tester3 = testing3
 # there you can change it to: authtoken keystoneauth
 #
 
-[filter:auth_token]
+[filter:authtoken]
 paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
 auth_host = <%= @keystone_host %>
 auth_port = <%= @keystone_admin_port %>
