@@ -71,14 +71,23 @@ compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
 if (!compute_nodes.nil? and compute_nodes.length > 0 )
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
   log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") {level :debug}  
+
   %w{container account object}.each { |ring| 
     execute "pull #{ring} ring" do
       command "rsync #{node[:swift][:user]}@#{compute_node_addr}::ring/#{ring}.ring.gz ."
       cwd "/etc/swift"
+      ignore_failure true
     end
   }
     
   svcs.each { |x|
+    ring = x.gsub("swift-", "").gsub(/-.*/, "")
+    unless %w{container account object}.include? ring
+      message = "Internal error: cannot find ring matching service \"#{x}\""
+      Chef::Log.fatal(message)
+      raise message
+    end
+
     if node[:swift][:use_gitrepo]
       swift_service x do
         virtualenv venv_path
@@ -94,6 +103,7 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       end
       supports :status => true, :restart => true
       action [:enable, :start]
+      only_if { ::File.exists? "/etc/swift/#{ring}.ring.gz" }
     end
   }
 end
