@@ -58,18 +58,14 @@ log_level = <%= @debug? "DEBUG": "INFO" %>
 # eventlet_debug = false
 
 <% 
-  @swauth = @tempauth = @keystone = false
   auth = ""
   case @auth_method
     when "swauth"
       auth = "swauth"
-      @swauth = true
     when "keystone"
       auth = "auth_token keystoneauth"
-      @keystone = true
     when "tempauth"
       auth = "tempauth"
-      @tempauth = true
   end
   middlewares = node[:swift][:middlewares].keys.select{|mw| node[:swift][:middlewares][mw][:enabled]}
   ratelimit = middlewares.delete("ratelimit")
@@ -120,7 +116,7 @@ log_requests = true
 #
 # If set to 'true' authorized accounts that do not yet exist within the Swift
 # cluster will be automatically created.
-account_autocreate = <%= @keystone ? "true" : "false" %>
+account_autocreate = <%= @auth_method == "keystone" ? "true" : "false" %>
 #
 # If set to a positive value, trying to create a container when the account
 # already has at least this maximum containers will result in a 403 Forbidden.
@@ -209,7 +205,6 @@ account_autocreate = <%= @keystone ? "true" : "false" %>
 # usually indicates administrative responsibilities.
 # swift_owner_headers = x-container-read, x-container-write, x-container-sync-key, x-container-sync-to, x-account-meta-temp-url-key, x-account-meta-temp-url-key-2
 
-<% if @tempauth %>
 [filter:tempauth]
 use = egg:swift#tempauth
 # You can override the default log routing for this filter here:
@@ -260,9 +255,7 @@ user_admin_admin = admin .admin .reseller_admin
 user_test_tester = testing .admin
 user_test2_tester2 = testing2 .admin
 user_test_tester3 = testing3
-<% end %>
 
-<% if @keystone %>
 # To enable Keystone authentication you need to have the auth token
 # middleware first to be configured. Here is an example below, please
 # refer to the keystone's documentation for details about the
@@ -296,20 +289,6 @@ operator_roles = Member,admin
 reseller_prefix=<%= @reseller_prefix %>
 log_facility = LOG_LOCAL0
 log_level = <%= @debug? "DEBUG": "INFO" %>
-
-# NOTE(chmou): s3token middleware is not updated yet to use only
-# username and password.
-[filter:s3token]
-paste.filter_factory = keystone.middleware.s3_token:filter_factory
-service_port = <%= @keystone_service_port %>
-service_host = <%= @keystone_host %>
-auth_port = <%= @keystone_admin_port %>
-auth_host = <%= @keystone_host %>
-auth_protocol = <%= @keystone_protocol %>
-auth_token = <%= @keystone_admin_token %>
-admin_token = <%= @keystone_admin_token %>
-
-<% end %>
 
 [filter:healthcheck]
 use = egg:swift#healthcheck
@@ -540,16 +519,27 @@ use = egg:swift#slo
 [filter:account-quotas]
 use = egg:swift#account_quotas
 
+### External filters
+
 [filter:swift3]
 use = egg:swift3#swift3
 
-<%if @swauth %>
+# NOTE(chmou): s3token middleware is not updated yet to use only
+# username and password.
+[filter:s3token]
+paste.filter_factory = keystone.middleware.s3_token:filter_factory
+service_port = <%= @keystone_service_port %>
+service_host = <%= @keystone_host %>
+auth_port = <%= @keystone_admin_port %>
+auth_host = <%= @keystone_host %>
+auth_protocol = <%= @keystone_protocol %>
+auth_token = <%= @keystone_admin_token %>
+admin_token = <%= @keystone_admin_token %>
+
 [filter:swauth]
 use = egg:swauth#swauth
 set default_swift_cluster = local#<%= @swift_protocol %>://<%= @admin_host %>:8080/v1
 super_admin_key = <%= @admin_key %>
-log_level = <%= @debug? "DEBUG": "INFO" %>
-<% end %>
 
 [filter:ceilometer]
 use = egg:ceilometer#swift
