@@ -56,7 +56,6 @@ config["swift_account_hash"] = node["swift"]["reseller_prefix"]+ "_" +  node["sw
 roles = node['roles']
 config["proxy"] =  roles.include?("swift-proxy")
 config["storage"] = true if roles.include?("swift-storage")
-config["hide_auth"] = false #true unless config["proxy"]
 
 
 log("node role is #{config['storage'] ? 'storage' : 'not store'} is #{config['proxy'] ? 'proxy': 'not proxy'}") { level :warn }

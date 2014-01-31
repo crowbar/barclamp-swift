@@ -43,11 +43,9 @@ swift_protocol = node[:swift][:ssl][:enabled] ? 'https' : 'http'
 # bucket to collect all the config items that end up in the proxy config template
 proxy_config = {}
 proxy_config[:auth_method] = node[:swift][:auth_method]
-proxy_config[:group] = node[:swift][:group]
 proxy_config[:user] = node[:swift][:user]
 proxy_config[:debug] = node[:swift][:debug]
 proxy_config[:admin_host] = admin_host
-proxy_config[:hide_auth] = false
 ### middleware items
 proxy_config[:clock_accuracy] = node[:swift][:middlewares][:ratelimit][:clock_accuracy]
 proxy_config[:max_sleep_time_seconds] = node[:swift][:middlewares][:ratelimit][:max_sleep_time_seconds]
@@ -110,7 +108,7 @@ if node[:swift][:middlewares][:s3][:enabled]
     if %w(redhat centos suse).include?(node.platform)
       package "python-swift3"
     else
-      package("swift-plugin-s3")
+      package "swift-plugin-s3"
     end
   end
 end
@@ -124,10 +122,8 @@ case proxy_config[:auth_method]
    when "swauth"
      package "python-swauth"
      proxy_config[:admin_key] =node[:swift][:cluster_admin_pw]
-     proxy_config[:account_management] = node[:swift][:account_management]
 
    when "keystone" 
-
      env_filter = " AND keystone_config_environment:keystone-config-#{node[:swift][:keystone_instance]}"
      keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
      if keystones.length > 0
@@ -234,8 +230,7 @@ case proxy_config[:auth_method]
          #  endpoint_global true
          #  endpoint_enabled true
         action :add_endpoint_template
-    end
-
+     end
 
    when "tempauth"
      ## uses defaults...

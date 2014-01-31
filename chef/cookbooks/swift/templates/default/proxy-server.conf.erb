@@ -29,10 +29,8 @@ key_file = <%= @ssl_keyfile %>
 bind_port = 8080
 workers = 1
 user = <%= @user %>
-group = <%= @group %>
 log_facility = LOG_LOCAL0
 log_level = <%= @debug? "DEBUG": "INFO" %>
-log_requests = true
 setup_console_handler = true
 
 [pipeline:main]
@@ -42,13 +40,13 @@ setup_console_handler = true
   case @auth_method
     when "swauth"
       auth = "swauth"
-      @swauth = true and !@hide_auth
+      @swauth = true
     when "keystone"
       auth = "auth_token keystoneauth"
-      @keystone = true and !@hide_auth
+      @keystone = true
     when "tempauth"
       auth = "tempauth"
-      @tempauth = true and !@hide_auth
+      @tempauth = true
   end
   middlewares = node[:swift][:middlewares].keys.select{|mw| node[:swift][:middlewares][mw][:enabled]}
   ratelimit = middlewares.delete("ratelimit")
@@ -58,7 +56,11 @@ pipeline = catch_errors healthcheck cache <%= ratelimit %> <%= auth %> <%= middl
 
 [app:proxy-server]
 use = egg:swift#proxy
-<% if @account_management == "true" %>allow_account_management = true<% end %>
+
+# If set to 'true' any authorized user may create and delete accounts; if
+# 'false' no one, even authorized, can.
+# allow_account_management = false
+
 <% if @keystone %>account_autocreate = true<% end %>
 log_name = proxy-server
 log_facility = LOG_LOCAL5

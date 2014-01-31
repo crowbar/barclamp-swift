@@ -65,10 +65,6 @@ default[:swift][:public_ip_expr] = "node[:ipaddress]"
 #   :disk=> disk partition information as created in disks.rb,contains: :name (e.g sdb) :size either :remaining (= all the disk) or an actual byte count.
 default[:swift][:disk_zone_assign_expr] = '$DISK_CNT||=0; $DISK_CNT= $DISK_CNT+1 ;[ $DISK_CNT % node[:swift][:zones] , 99]'
 
-
-# should proxy server account management be enabled
-default[:swift][:account_management] = "true"
-
 ####
 # new parameters for diablo
 
