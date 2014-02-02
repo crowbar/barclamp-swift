@@ -1,6 +1,6 @@
 def upgrade ta, td, a, d
   a["middlewares"]["ceilometer"] = {}
-  a["middlewares"]["ceilometer"]["enabled"] = ta["middlewares"]["ceilometer"]["enabled"]
+  a["middlewares"]["ceilometer"]["enabled"] = ta["middlewares"]["ceilometer"]["enabled"] rescue false
   return a, d
 end
 
