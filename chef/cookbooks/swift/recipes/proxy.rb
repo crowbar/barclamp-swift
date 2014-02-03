@@ -388,7 +388,7 @@ elsif node[:swift][:frontend]=='uwsgi'
 
   if node[:swift][:ssl][:enabled]
     uwsgi_instances = {
-      :https => "0.0.0.0:8080,/etc/swift/cert.crt,/etc/swift/cert.key"
+      :https => "0.0.0.0:8080,#{node[:swift][:ssl][:certfile]},#{node[:swift][:ssl][:keyfile]}"
     }
   else
     uwsgi_instances = {
