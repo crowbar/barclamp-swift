@@ -48,6 +48,8 @@ swift_pass=$(grep keystone_service_password $prop_file | sed 's/[:,"]//g' | awk 
 
 if [ -f /etc/redhat-release ]; then
   sudo yum --assumeyes install python-swiftclient
+elif [ -f /etc/SuSE-release ]; then
+  sudo zypper -n in python-swiftclient
 else
   sudo apt-get install -y python-swiftclient
 fi
