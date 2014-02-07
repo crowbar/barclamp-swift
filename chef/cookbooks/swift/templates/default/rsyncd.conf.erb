@@ -25,22 +25,22 @@ address =  <%= @storage_net_ip %>
 max connections = 64
 path = /srv/node/
 read only = false
-lock file = /var/lock/swift/account.lock
+lock file = /var/run/swift/account.lock
 
 [container]
 max connections = 64
 path = /srv/node/
 read only = false
-lock file = /var/lock/swift/container.lock
+lock file = /var/run/swift/container.lock
 
 [object]
 max connections = 64
 path = /srv/node/
 read only = false
-lock file = /var/lock/swift/object.lock
+lock file = /var/run/swift/object.lock
 
 [ring]
 max connections = 64
 path = /etc/swift
 read only = false
-lock file = /var/lock/swift/ring.lock
+lock file = /var/run/swift/ring.lock
