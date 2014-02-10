@@ -40,6 +40,12 @@ claimed_disks.each do |k|
   to_use_disks << k
 end
 
+if to_use_disks.empty?
+  message = "No disk available for swift"
+  Chef::Log.fatal(message)
+  raise message
+end
+
 node[:swift] ||= Mash.new
 node[:swift][:devs] ||= Mash.new
 found_disks=[]
