@@ -287,7 +287,7 @@ admin_user = <%= @keystone_service_user %>
 admin_password = <%= @keystone_service_password %>
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
 # cache = swift.cache
-signing_dir = /var/cache/swift/
+signing_dir = /var/cache/swift/keystone-signing
 
 [filter:keystoneauth]
 use = egg:swift#keystoneauth
