@@ -52,7 +52,6 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
       :gid => node[:swift][:group],
       :storage_net_ip => storage_ip,
       :server_num => 1,  ## could allow multiple servers on the same machine
-      :admin_key => node[:swift][:cluster_admin_pw],
       :debug => node[:swift][:debug]      
     })    
   end

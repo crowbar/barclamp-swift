@@ -73,13 +73,11 @@ keystone_register "add #{service_user}:#{service_tenant} user admin role" do
   action :add_access
 end
 
+dispersion_cmd="swift-dispersion-populate"
 if keystone_insecure
   swift_cmd="swift --insecure"
-  ##swift-dispersion-populate is not support for passing "insecure" also, so actualy it wont work in case of self-signed certs
-  dispersion_cmd="swift-dispersion-populate"
 else
   swift_cmd="swift"
-  dispersion_cmd="swift-dispersion-populate"
 end
 
 execute "populate-dispersion" do
@@ -91,12 +89,13 @@ execute "populate-dispersion" do
 end
 
 template "/etc/swift/dispersion.conf" do
-  source     "disperse.conf.erb"
+  source     "dispersion.conf.erb"
   mode       "0600"
   group       node[:swift][:group]
   owner       node[:swift][:user]
   variables(
-    :auth_url => keystone_auth_url
+    :auth_url => keystone_auth_url,
+    :keystone_insecure => keystone_insecure
   )
   #only_if "swift-recon --md5 | grep -q '0 error'"
   #notifies :run, "execute[populate-dispersion]", :immediately
