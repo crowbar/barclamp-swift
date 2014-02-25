@@ -91,6 +91,7 @@
       "keystone_delay_auth_decision": false,
       "reseller_prefix" : "AUTH_",
       "debug": false,
+      "local_disks": true,
       "use_slog" : false,
       "slog_account": "system_stats",
       "slog_user": "swift_sys",

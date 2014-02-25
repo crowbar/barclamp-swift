@@ -59,6 +59,14 @@ to_use_disks.each do |d|
   disk[:device_disk_partition] = k + partition_suffix
   disk[:uuid] = get_uuid(target_dev_part)
 
+  # Check physical disk label to ensure that disk is local.
+  if node[:swift][:local_disks]
+    unless ::Kernel.system ("/lib/udev/scsi_id -g -u -d #{target_dev} > /dev/null")
+     Chef::Log.info("Skipping non-local drive #{target_dev}")
+     next
+    end
+  end
+
   # Test to see if there is a partition table on the disk.
   # If not, create a shiny new GPT partition table for the disk.
   if ::Kernel.system("parted -s -m #{target_dev} print 1 |grep -q '^Error:'")
