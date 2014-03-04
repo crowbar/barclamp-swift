@@ -24,7 +24,16 @@ include_recipe 'swift::rsync'
 local_ip = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
 public_ip = Swift::Evaluator.get_ip_by_type(node, :public_ip_expr)
 
-ha_enabled = false
+ha_enabled = node[:swift][:ha][:enabled]
+
+if node[:swift][:ha][:enabled]
+  bind_host = local_ip
+  bind_port = node[:swift][:ha][:ports][:proxy]
+else
+  bind_host = "0.0.0.0"
+  bind_port = 8080
+end
+
 admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 public_host = CrowbarHelper.get_host_for_public_url(node, node[:swift][:ssl][:enabled], ha_enabled)
 swift_protocol = node[:swift][:ssl][:enabled] ? 'https' : 'http'
@@ -32,6 +41,8 @@ swift_protocol = node[:swift][:ssl][:enabled] ? 'https' : 'http'
 ### 
 # bucket to collect all the config items that end up in the proxy config template
 proxy_config = {}
+proxy_config[:bind_host] = bind_host
+proxy_config[:bind_port] = bind_port
 proxy_config[:auth_method] = node[:swift][:auth_method]
 proxy_config[:user] = node[:swift][:user]
 proxy_config[:debug] = node[:swift][:debug]
@@ -353,11 +364,11 @@ elsif node[:swift][:frontend]=='uwsgi'
 
   if node[:swift][:ssl][:enabled]
     uwsgi_instances = {
-      :https => "0.0.0.0:8080,#{node[:swift][:ssl][:certfile]},#{node[:swift][:ssl][:keyfile]}"
+      :https => "#{bind_host}:#{bind_port},#{node[:swift][:ssl][:certfile]},#{node[:swift][:ssl][:keyfile]}"
     }
   else
     uwsgi_instances = {
-      :http => "0.0.0.0:8080"
+      :http => "#{bind_host}:#{bind_port}"
     }
   end
 
@@ -414,6 +425,13 @@ EOH
       notifies :restart, resources(:service => "swift-proxy")
     end
   end
+end
+
+if ha_enabled
+  log "HA support for swift is enabled"
+  include_recipe "swift::proxy_ha"
+else
+  log "HA support for swift is disabled"
 end
 
 ### 
