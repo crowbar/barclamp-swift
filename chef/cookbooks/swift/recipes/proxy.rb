@@ -124,13 +124,7 @@ case proxy_config[:auth_method]
      proxy_config[:admin_key] =node[:swift][:cluster_admin_pw]
 
    when "keystone" 
-     env_filter = " AND keystone_config_environment:keystone-config-#{node[:swift][:keystone_instance]}"
-     keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-     if keystones.length > 0
-       keystone = keystones[0]
-     else
-       keystone = node
-     end
+     keystone_settings = SwiftHelper.keystone_settings(node)
 
      if node[:swift][:use_gitrepo]
        if node[:swift][:use_virtualenv]
@@ -150,67 +144,48 @@ case proxy_config[:auth_method]
        package "python-keystoneclient"
      end
      
-     keystone_host = keystone[:fqdn]
-     keystone_protocol = keystone["keystone"]["api"]["protocol"]
-     keystone_token = keystone["keystone"]["service"]["token"] rescue nil
-     keystone_service_port = keystone["keystone"]["api"]["service_port"] rescue nil
-     keystone_admin_port = keystone["keystone"]["api"]["admin_port"] rescue nil
-     keystone_service_tenant = keystone["keystone"]["service"]["tenant"] rescue nil
-     keystone_service_user = node["swift"]["keystone_service_user"]
-     keystone_service_password = node["swift"]["keystone_service_password"]
-     keystone_delay_auth_decision = node["swift"]["keystone_delay_auth_decision"] rescue nil
-
-     Chef::Log.info("Keystone server found at #{keystone_host}")
-     proxy_config[:keystone_protocol] = keystone_protocol
-     proxy_config[:keystone_admin_token]  = keystone_token
-     proxy_config[:keystone_host] = keystone_host
-     proxy_config[:keystone_admin_port] = keystone_admin_port
-     proxy_config[:keystone_service_port] = keystone_service_port
-     proxy_config[:keystone_service_port] = keystone_service_port
-     proxy_config[:keystone_service_tenant] = keystone_service_tenant
-     proxy_config[:keystone_service_user] = keystone_service_user
-     proxy_config[:keystone_service_password] = keystone_service_password
+     proxy_config[:keystone_settings] = keystone_settings
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
-     proxy_config[:keystone_delay_auth_decision] = keystone_delay_auth_decision
+     proxy_config[:keystone_delay_auth_decision] = node["swift"]["keystone_delay_auth_decision"]
 
      # ResellerAdmin is used by swift (see reseller_admin_role option)
      role = "ResellerAdmin"
      keystone_register "add #{role} role for swift" do
-       protocol keystone_protocol
-       host keystone_host
-       port keystone_admin_port
-       token keystone_token
+       protocol keystone_settings['protocol']
+       host keystone_settings['internal_url_host']
+       port keystone_settings['admin_port']
+       token keystone_settings['admin_token']
        role_name role
        action :add_role
      end
 
      keystone_register "register swift user" do
-       protocol keystone_protocol
-       host keystone_host
-       port keystone_admin_port
-       token keystone_token
-       user_name keystone_service_user
-       user_password keystone_service_password
-       tenant_name keystone_service_tenant
+       protocol keystone_settings['protocol']
+       host keystone_settings['internal_url_host']
+       port keystone_settings['admin_port']
+       token keystone_settings['admin_token']
+       user_name keystone_settings['service_user']
+       user_password keystone_settings['service_password']
+       tenant_name keystone_settings['service_tenant']
        action :add_user
      end
 
      keystone_register "give swift user access" do
-       protocol keystone_protocol
-       host keystone_host
-       port keystone_admin_port
-       token keystone_token
-       user_name keystone_service_user
-       tenant_name keystone_service_tenant
+       protocol keystone_settings['protocol']
+       host keystone_settings['internal_url_host']
+       port keystone_settings['admin_port']
+       token keystone_settings['admin_token']
+       user_name keystone_settings['service_user']
+       tenant_name keystone_settings['service_tenant']
        role_name "admin"
        action :add_access
      end
 
      keystone_register "register swift service" do
-       protocol keystone_protocol
-       host keystone_host
-       token keystone_token
-       port keystone_admin_port
+       protocol keystone_settings['protocol']
+       host keystone_settings['internal_url_host']
+       token keystone_settings['admin_token']
+       port keystone_settings['admin_port']
        service_name "swift"
        service_type "object-store"
        service_description "Openstack Swift Object Store Service"
@@ -218,10 +193,10 @@ case proxy_config[:auth_method]
      end                                                 
 
      keystone_register "register swift-proxy endpoint" do
-         protocol keystone_protocol
-         host keystone_host
-         token keystone_token
-         port keystone_admin_port
+         protocol keystone_settings['protocol']
+         host keystone_settings['internal_url_host']
+         token keystone_settings['admin_token']
+         port keystone_settings['admin_port']
          endpoint_service "swift"
          endpoint_region "RegionOne"
          endpoint_publicURL "#{swift_protocol}://#{public_host}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"

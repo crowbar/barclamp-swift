@@ -278,13 +278,13 @@ user_test_tester3 = testing3
 
 [filter:authtoken]
 paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
-auth_host = <%= @keystone_host %>
-auth_port = <%= @keystone_admin_port %>
-auth_protocol = <%= @keystone_protocol %>
-auth_uri = <%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/
-admin_tenant_name = <%= @keystone_service_tenant %>
-admin_user = <%= @keystone_service_user %>
-admin_password = <%= @keystone_service_password %>
+auth_host = <%= @keystone_settings['internal_url_host'] %>
+auth_port = <%= @keystone_settings['admin_port'] %>
+auth_protocol = <%= @keystone_settings['protocol'] %>
+auth_uri = <%= @keystone_settings['internal_auth_url'] %>
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+admin_user = <%= @keystone_settings['service_user'] %>
+admin_password = <%= @keystone_settings['service_password'] %>
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
 # cache = swift.cache
 signing_dir = /var/cache/swift/keystone-signing
@@ -538,13 +538,13 @@ use = egg:swift3#swift3
 # username and password.
 [filter:s3token]
 paste.filter_factory = keystone.middleware.s3_token:filter_factory
-service_port = <%= @keystone_service_port %>
-service_host = <%= @keystone_host %>
-auth_port = <%= @keystone_admin_port %>
-auth_host = <%= @keystone_host %>
-auth_protocol = <%= @keystone_protocol %>
-auth_token = <%= @keystone_admin_token %>
-admin_token = <%= @keystone_admin_token %>
+service_port = <%= @keystone_settings['service_port'] %>
+service_host = <%= @keystone_settings['internal_url_host'] %>
+auth_port = <%= @keystone_settings['admin_port'] %>
+auth_host = <%= @keystone_settings['internal_url_host'] %>
+auth_protocol = <%= @keystone_settings['protocol'] %>
+auth_token = <%= @keystone_settings['admin_token'] %>
+admin_token = <%= @keystone_settings['admin_token'] %>
 
 [filter:swauth]
 use = egg:swauth#swauth
