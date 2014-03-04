@@ -66,14 +66,6 @@ else
   swift_cmd="swift"
 end
 
-execute "populate-dispersion" do
-  command "#{dispersion_cmd}"
-  user node[:swift][:user]
-  action :run
-  ignore_failure true
-  only_if "#{swift_cmd} -V 2.0 --os-tenant-name #{service_tenant} --os-username #{service_user} --os-password '#{service_password}' --os-auth-url #{keystone_settings['admin_auth_url']} --os-endpoint-type internalURL stat dispersion_objects 2>&1 | grep 'Container.*not found'"
-end
-
 template "/etc/swift/dispersion.conf" do
   source     "dispersion.conf.erb"
   mode       "0600"
@@ -84,4 +76,12 @@ template "/etc/swift/dispersion.conf" do
   )
   #only_if "swift-recon --md5 | grep -q '0 error'"
   #notifies :run, "execute[populate-dispersion]", :immediately
+end
+
+execute "populate-dispersion" do
+  command "#{dispersion_cmd}"
+  user node[:swift][:user]
+  action :run
+  ignore_failure true
+  only_if "#{swift_cmd} -V 2.0 --os-tenant-name #{service_tenant} --os-username #{service_user} --os-password '#{service_password}' --os-auth-url #{keystone_settings['admin_auth_url']} --os-endpoint-type internalURL stat dispersion_objects 2>&1 | grep 'Container.*not found'"
 end
