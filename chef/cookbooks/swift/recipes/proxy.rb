@@ -24,19 +24,9 @@ include_recipe 'swift::rsync'
 local_ip = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
 public_ip = Swift::Evaluator.get_ip_by_type(node, :public_ip_expr)
 
-admin_host = node[:fqdn]
-# For the public endpoint, we prefer the public name. If not set, then we
-# use the IP address except for SSL, where we always prefer a hostname
-# (for certificate validation).
-# In the case of swift, we always configure SSL.
-public_host = node[:crowbar][:public_name]
-if public_host.nil? or public_host.empty?
-  unless node[:swift][:ssl][:enabled]
-    public_host = public_ip
-  else
-    public_host = 'public.'+node[:fqdn]
-  end
-end
+ha_enabled = false
+admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+public_host = CrowbarHelper.get_host_for_public_url(node, node[:swift][:ssl][:enabled], ha_enabled)
 swift_protocol = node[:swift][:ssl][:enabled] ? 'https' : 'http'
 
 ### 
