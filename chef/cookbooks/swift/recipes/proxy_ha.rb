@@ -15,7 +15,7 @@
 
 haproxy_loadbalancer "swift-proxy" do
   address "0.0.0.0"
-  port 8080
+  port node[:swift][:ports][:proxy]
   use_ssl node[:swift][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "swift", "swift-proxy", "proxy")
   action :nothing

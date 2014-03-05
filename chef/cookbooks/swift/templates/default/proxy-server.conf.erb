@@ -548,7 +548,7 @@ admin_token = <%= @keystone_settings['admin_token'] %>
 
 [filter:swauth]
 use = egg:swauth#swauth
-set default_swift_cluster = local#<%= @swift_protocol %>://<%= @admin_host %>:8080/v1
+set default_swift_cluster = local#<%= @swift_protocol %>://<%= @admin_host %>:<%= @proxy_port %>/v1
 super_admin_key = <%= @admin_key %>
 
 [filter:ceilometer]

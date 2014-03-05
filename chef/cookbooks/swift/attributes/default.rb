@@ -91,6 +91,8 @@ default[:swift][:ssl][:keyfile] = "/etc/swift/cert.key"
 default[:swift][:ssl][:generate_certs] = true
 default[:swift][:ssl][:insecure] = false
 
+default[:swift][:ports][:proxy] = 8080
+
 default[:swift][:ha][:enabled] = false
 # Ports to bind to when haproxy is used for the real ports
 default[:swift][:ha][:ports][:proxy] = 5540

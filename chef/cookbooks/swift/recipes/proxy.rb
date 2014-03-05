@@ -31,7 +31,7 @@ if node[:swift][:ha][:enabled]
   bind_port = node[:swift][:ha][:ports][:proxy]
 else
   bind_host = "0.0.0.0"
-  bind_port = 8080
+  bind_port = node[:swift][:ports][:proxy]
 end
 
 admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
@@ -47,6 +47,7 @@ proxy_config[:auth_method] = node[:swift][:auth_method]
 proxy_config[:user] = node[:swift][:user]
 proxy_config[:debug] = node[:swift][:debug]
 proxy_config[:admin_host] = admin_host
+proxy_config[:proxy_port] = node[:swift][:ports][:proxy]
 ### middleware items
 proxy_config[:clock_accuracy] = node[:swift][:middlewares][:ratelimit][:clock_accuracy]
 proxy_config[:max_sleep_time_seconds] = node[:swift][:middlewares][:ratelimit][:max_sleep_time_seconds]
@@ -200,9 +201,9 @@ case proxy_config[:auth_method]
          port keystone_settings['admin_port']
          endpoint_service "swift"
          endpoint_region "RegionOne"
-         endpoint_publicURL "#{swift_protocol}://#{public_host}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
-         endpoint_adminURL "#{swift_protocol}://#{admin_host}:8080/v1/"
-         endpoint_internalURL "#{swift_protocol}://#{admin_host}:8080/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
+         endpoint_publicURL "#{swift_protocol}://#{public_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
+         endpoint_adminURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/"
+         endpoint_internalURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
          #  endpoint_global true
          #  endpoint_enabled true
         action :add_endpoint_template
@@ -438,7 +439,7 @@ end
 # let the monitoring tools know what services should be running on this node.
 node[:swift][:monitor] = {}
 node[:swift][:monitor][:svcs] = ["swift-proxy", "memcached" ]
-node[:swift][:monitor][:ports] = {:proxy =>8080}
+node[:swift][:monitor][:ports] = {:proxy =>node[:swift][:ports][:proxy]}
 node.save
 
 ##
