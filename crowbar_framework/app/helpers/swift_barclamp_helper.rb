@@ -16,27 +16,6 @@
 #
 
 module SwiftBarclampHelper
-  def swift_role_contraints
-    {
-      "swift-storage" => {
-        "unique" => false,
-        "count" => -1
-      },
-      "swift-proxy" => {
-        "unique" => false,
-        "count" => 1
-      },
-      "swift-dispersion" => {
-        "unique" => false,
-        "count" => 1
-      },
-      "swift-ring-compute" => {
-        "unique" => false,
-        "count" => 1
-      }
-    }
-  end
-
   def frontends_for_swift(selected)
     options_for_select(
       [
