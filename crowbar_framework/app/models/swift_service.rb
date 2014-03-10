@@ -31,26 +31,24 @@ class SwiftService < ServiceObject
 
   class << self
     def role_constraints
-      @role_constraints ||= begin
-        {
-          "swift-storage" => {
-            "unique" => false,
-            "count" => -1
-          },
-          "swift-proxy" => {
-            "unique" => false,
-            "count" => 1
-          },
-          "swift-dispersion" => {
-            "unique" => false,
-            "count" => 1
-          },
-          "swift-ring-compute" => {
-            "unique" => false,
-            "count" => 1
-          }
+      {
+        "swift-storage" => {
+          "unique" => false,
+          "count" => -1
+        },
+        "swift-proxy" => {
+          "unique" => false,
+          "count" => 1
+        },
+        "swift-dispersion" => {
+          "unique" => false,
+          "count" => 1
+        },
+        "swift-ring-compute" => {
+          "unique" => false,
+          "count" => 1
         }
-      end
+      }
     end
   end
 
