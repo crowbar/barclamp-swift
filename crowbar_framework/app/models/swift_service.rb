@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class SwiftService < ServiceObject
+class SwiftService < PacemakerServiceObject
   class ServiceError < StandardError
   end
 
@@ -38,7 +38,8 @@ class SwiftService < ServiceObject
         },
         "swift-proxy" => {
           "unique" => false,
-          "count" => 1
+          "count" => 1,
+          "cluster" => true
         },
         "swift-dispersion" => {
           "unique" => false,
@@ -107,17 +108,27 @@ class SwiftService < ServiceObject
     @logger.debug("Swift apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    # Make sure that the front-end pieces have public ip addreses.
+    proxy_elements, proxy_nodes, ha_enabled = role_expand_elements(role, "swift-proxy")
+
+    vip_networks = ["admin", "public"]
+
+    dirty = false
+    dirty = prepare_role_for_ha_with_haproxy(role, ["swift", "ha", "enabled"], ha_enabled, vip_networks)
+    role.save if dirty
+
+    # All nodes must have a public IP, even if part of a cluster; otherwise
+    # the VIP can't be moved to the nodes
     net_svc = NetworkService.new @logger
-    tnodes = role.override_attributes["swift"]["elements"]["swift-proxy"]
-    tnodes.each do |n|
-      next if n.nil?
+    proxy_nodes.each do |n|
       net_svc.allocate_ip "default", "public", "host", n
     end
 
     all_nodes.each do |n|
       net_svc.allocate_ip "default", "storage", "host", n
     end
+
+    allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(proxy_elements, vip_networks)
+
     @logger.debug("Swift apply_role_pre_chef_call: leaving")
   end
 
