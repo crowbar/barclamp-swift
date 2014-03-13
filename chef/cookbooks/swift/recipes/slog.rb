@@ -61,6 +61,7 @@ config["storage"] = true if roles.include?("swift-storage")
 log("node role is #{config['storage'] ? 'storage' : 'not store'} is #{config['proxy'] ? 'proxy': 'not proxy'}") { level :warn }
 
 swift_protocol = node[:swift][:ssl][:enabled] ? 'https' : 'http'
+swift_port = node[:swift][:ports][:proxy]
 
 case node["swift"]["auth_method"]
    when "swauth"
@@ -80,7 +81,7 @@ case node["swift"]["auth_method"]
         group node[:swift][:group]
         user node[:swift][:user]
         command <<-EOH
-          /usr/bin/swauth-prep -K #{cluster_pwd} -U '.super_admin' -A #{swift_protocol}://127.0.0.1:8080/auth
+          /usr/bin/swauth-prep -K #{cluster_pwd} -U '.super_admin' -A #{swift_protocol}://127.0.0.1:#{swift_port}/auth
         EOH
         #not_if { `/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A #{swift_protocol}://127.0.0.1:8080/auth/` } 
       end
@@ -90,8 +91,8 @@ case node["swift"]["auth_method"]
         group node[:swift][:group]
         user node[:swift][:user]
         command <<-EOH
-          /usr/bin/swauth-add-account -K #{cluster_pwd} -U '.super_admin' -A #{swift_protocol}://127.0.0.1:8080/auth/  #{config['slog_account']} && 
-          /usr/bin/swauth-add-user -K #{cluster_pwd} -U '.super_admin' -A #{swift_protocol}://127.0.0.1:8080/auth/ -a #{config['slog_account']}  #{config['slog_user']} #{config['slog_passwd']}
+          /usr/bin/swauth-add-account -K #{cluster_pwd} -U '.super_admin' -A #{swift_protocol}://127.0.0.1:#{swift_port}/auth/  #{config['slog_account']} && 
+          /usr/bin/swauth-add-user -K #{cluster_pwd} -U '.super_admin' -A #{swift_protocol}://127.0.0.1:#{swift_port}/auth/ -a #{config['slog_account']}  #{config['slog_user']} #{config['slog_passwd']}
         EOH
       end
 
@@ -101,14 +102,14 @@ case node["swift"]["auth_method"]
             group node[:swift][:group]
             user node[:swift][:user]
             command <<-EOH
-              swift -K #{cluster_pwd} -U '.super_admin' -A #{swift_protocol}://127.0.0.1:8080/auth/v1.0 -U #{config['slog_account']}:#{config['slog_user']} -K #{config['slog_passwd']} post #{x}
+              swift -K #{cluster_pwd} -U '.super_admin' -A #{swift_protocol}://127.0.0.1:#{swift_port}/auth/v1.0 -U #{config['slog_account']}:#{config['slog_user']} -K #{config['slog_passwd']} post #{x}
            EOH
         end
       }
 
        ruby_block "Collect acct info" do 
         block do
-          acct_info=`/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A #{swift_protocol}://127.0.0.1:8080/auth/  #{config['swift_account']}` 
+          acct_info=`/usr/bin/swauth-list -K #{cluster_pwd}  -U '.super_admin' -A #{swift_protocol}://127.0.0.1:#{swift_port}/auth/  #{config['swift_account']}` 
           parsed_account =JSON.parse(acct_info)
           puts "stats account hash #{parsed_account['account_id']}"
           config["swift_account_hash"]= parsed_account["account_id"]
