@@ -355,7 +355,7 @@ elsif node[:swift][:frontend]=='uwsgi+nginx'
       :socket => "/tmp/swift-proxy.sock",
       :"wsgi-file" => "/usr/lib/cgi-bin/swift/proxy.py",
       :"chmod-socket" => 660,
-      :"chown-socket" => "swift:www-data",
+      :"chown-socket" => node[:swift][:chown],
   }
 
   if node[:swift][:use_virtualenv] and node[:swift][:use_gitrepo]
