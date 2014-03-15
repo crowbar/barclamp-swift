@@ -64,7 +64,7 @@ echo "Testing Swift functionality..."
 do_swift post testdir || die 1 "Could not create a container in Swift"
 testfile=$(mktemp "$LOGDIR/swift-testfile-XXXXX")
 outfile=$(mktemp "$LOGDIR/swift-outfile-XXXXX")
-file=$(basename $testfile)
+file=${testfile#/}
 dd if=/dev/urandom of=$testfile bs=64K count=1
 do_swift upload testdir $testfile || \
     die 1 "Could not store random information into Swift"
