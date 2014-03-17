@@ -42,11 +42,12 @@ unless %w(redhat centos).include?(node.platform)
 else
   package "xinetd"
   service "xinetd" do
+    supports :status => true, :restart => true, :reload => true
     action [ :start, :enable ]
   end
   cookbook_file "/etc/xinetd.d/rsync" do
     source "rsync_xinetd"
-    notifies :restart, resources(:service => "xinetd")
+    notifies :restart, resources(:service => "xinetd"), :immediately
   end
 end
 
