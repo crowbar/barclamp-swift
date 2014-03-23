@@ -10,7 +10,7 @@
       = select_tag :keystone_delay_auth_decision, options_for_select([['true', 'true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_delay_auth_decision"].to_s), :onchange => "update_value('keystone_delay_auth_decision', 'keystone_delay_auth_decision', 'boolean')"
     %p
       %label{ :for => :frontend }= t('.frontend')
-      = select_tag :frontend, options_for_select([['uwsgi','uwsgi'], ['native', 'native']], @proposal.raw_data['attributes'][@proposal.barclamp]["frontend"]), :onchange => "update_value('frontend', 'frontend', 'string')"
+      = select_tag :frontend, options_for_select([['uwsgi+nginx','uwsgi+nginx'], ['native', 'native']], @proposal.raw_data['attributes'][@proposal.barclamp]["frontend"]), :onchange => "update_value('frontend', 'frontend', 'string')"
     %p
       %label{ :for => :zones }= t('.zones')
       %input#zones{:type => "text", :name => "zones", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["zones"], :onchange => "update_value('zones', 'zones', 'integer')"}
@@ -50,6 +50,10 @@
     %p
       %label{ :for => :debug }= t('.debug')
       = select_tag :debug, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["debug"].to_s), :onchange => "update_value('debug', 'debug', 'boolean')"
+
+    %p
+      %label{ :for => :local_disks }= t('.local_disks')
+      = select_tag :local_disks, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["local_disks"].to_s), :onchange => "update_value('local_disks', 'local_disks', 'boolean')"
     %label.section-header{ :for => :middlewares }= t('.middlewares.label')
     %div.section{ :id => 'middlewares' }
 

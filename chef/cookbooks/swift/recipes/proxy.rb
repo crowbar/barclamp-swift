@@ -72,7 +72,7 @@ end
 pkg_list.each do |pkg|
   package pkg do
     action :install
-  end 
+  end
 end
 
 unless node[:swift][:use_gitrepo]
@@ -110,11 +110,11 @@ case proxy_config[:auth_method]
    when "swauth"
      package "python-swauth" do
        action :install
-     end 
+     end
      proxy_config[:admin_key] =node[:swift][:cluster_admin_pw]
      proxy_config[:account_management] = node[:swift][:account_management]
 
-   when "keystone" 
+   when "keystone"
 
      env_filter = " AND keystone_config_environment:keystone-config-#{node[:swift][:keystone_instance]}"
      keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
@@ -139,7 +139,7 @@ case proxy_config[:auth_method]
          end
        end
      end
-     
+
      keystone_host = keystone[:fqdn]
      keystone_protocol = keystone["keystone"]["api"]["protocol"]
      keystone_token = keystone["keystone"]["service"]["token"] rescue nil
@@ -205,7 +205,7 @@ case proxy_config[:auth_method]
        service_type "object-store"
        service_description "Openstack Swift Object Store Service"
        action :add_service
-     end                                                 
+     end
 
      keystone_register "register swift-proxy endpoint" do
          protocol keystone_protocol
@@ -226,7 +226,6 @@ case proxy_config[:auth_method]
    when "tempauth"
      ## uses defaults...
 end
-                  
 
 ######
 # extract some keystone goodness
@@ -240,7 +239,7 @@ execute "create auth cert" do
   /usr/bin/openssl req -new -x509 -days 365 -nodes -out cert.crt -keyout cert.key -batch &>/dev/null 0</dev/null
   chmod 640 cert.key
   EOH
-  not_if  {::File.exist?("/etc/swift/cert.crt") } 
+  not_if  {::File.exist?("/etc/swift/cert.crt") }
 end
 
 ## Find other nodes that are swift-auth nodes, and make sure 
@@ -248,14 +247,14 @@ end
 servers =""
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
 result= search(:node, "roles:swift-proxy #{env_filter}")
-if !result.nil? and (result.length > 0)  
+if !result.nil? and (result.length > 0)
   memcached_servers = result.map {|x|
-    s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)     
-    s += ":11211 "   
+    s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)
+    s += ":11211 "
   }
   log("memcached servers" + memcached_servers.join(",")) {level :debug}
   servers = memcached_servers.join(",")
-else 
+else
   log("found no swift-proxy nodes") {level :warn}
 end
 proxy_config[:memcached_ips] = servers
@@ -311,12 +310,56 @@ if node[:swift][:frontend]=='native'
     end
     action [:enable, :start]
   end
-elsif node[:swift][:frontend]=='uwsgi'
+elsif node[:swift][:frontend]=='uwsgi+nginx'
 
   service "swift-proxy" do
     service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
     supports :status => true, :restart => true
     action [ :disable, :stop ]
+  end
+
+  case node[:platform]
+    when "centos", "redhat"
+      uwsgi_guid="nginx"
+      uwsgi_uid="swift"
+      nginx_site_path="/etc/nginx/conf.d/swift-proxy.conf"
+      nginx_pkg_list=%w{nginx}
+    else
+      uwsgi_guid="www-data"
+      uwsgi_uid="swift"
+      nginx_site_path="/etc/nginx/sites-enabled/swift-proxy.conf"
+      nginx_pkg_list=%w{nginx-extras uwsgi uwsgi-plugin-python}
+  end
+
+  nginx_pkg_list.each do |pkg|
+    package pkg do
+      action :install
+    end
+  end
+  if %w(redhat centos).include?(node.platform)
+    file "/etc/nginx/conf.d/default.conf" do
+      action :delete
+    end
+  end
+  link "/etc/nginx/sites-enabled/default" do
+    action :delete
+  end
+
+  service "nginx" do
+    supports :status => true, :restart => true
+    action [ :enable ]
+  end
+
+  uwsgi_app = {
+      :pythonpath => "/usr/lib/cgi-bin/swift/",
+      :socket => "/tmp/swift-proxy.sock",
+      :"wsgi-file" => "/usr/lib/cgi-bin/swift/proxy.py",
+      :"chmod-socket" => 660,
+      :"chown-socket" => node[:swift][:chown],
+  }
+
+  if node[:swift][:use_virtualenv] and node[:swift][:use_gitrepo]
+    uwsgi_app[:virtualenv] = "/opt/swift/.venv"
   end
 
   directory "/usr/lib/cgi-bin/swift/" do
@@ -330,39 +373,41 @@ elsif node[:swift][:frontend]=='uwsgi'
     source "swift-uwsgi-service.py.erb"
     mode 0755
     variables(
-      :service => "proxy"
+        :service => "proxy"
     )
   end
 
   uwsgi "swift-proxy" do
-    options({
-      :chdir => "/usr/lib/cgi-bin/swift/",
-      :callable => :application,
-      :module => :proxy,
-      :protocol => :https,
-      :user => :swift,
-      :vacuum => true,
-      :"no-orphans" => true,
-      :"reload-on-rss" => 192,
-      :"reload-on-as" => 256,
-      :"max-requests" => 2000,
-      :"cpu-affinity" => 1,
-      :"reload-mercy" => 8,
-      :processes => 4,
-      :"buffer-size" => 65535,
-      :harakiri => 60,
-      :log => "/var/log/swift-proxy-uwsgi.log"
+    options ({
+        :plugin => :python,
+        :uid => :swift,
+        :processes => 4,
+        :harakiri => 60,
+        :"reload-merc" => 8,
+        :"cpu-affinity" => 1,
+        :"max-requests" => 2000,
+        :"reload-on-as" => 256,
+        :"reload-on-rss" => 192,
+        :"no-orphans" => true,
+        :"vacuum" => true
     })
-    instances ({
-      :https => "0.0.0.0:8080,/etc/swift/cert.crt,/etc/swift/cert.key"
-    })
+    instances(uwsgi_app)
     service_name "swift-proxy-uwsgi"
   end
 
   service "swift-proxy-uwsgi" do
     supports :status => true, :restart => true, :start => true
     action :start
-    subscribes :restart, "template[/usr/lib/cgi-bin/swift/proxy.py]"
+    subscribes :restart, resources(:template => "/usr/lib/cgi-bin/swift/proxy.py")
+  end
+
+  template "#{nginx_site_path}" do
+    source "nginx-swift-proxy.conf.erb"
+    mode 0644
+    notifies :restart, resources(:service => "nginx")
+    variables(
+        :port => 8080
+    )
   end
 
 end
@@ -390,6 +435,7 @@ EOH
     end
   end
 end
+
 
 ### 
 # let the monitoring tools know what services should be running on this node.

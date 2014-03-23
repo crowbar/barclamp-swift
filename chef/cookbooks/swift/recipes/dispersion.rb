@@ -75,20 +75,10 @@ end
 
 if keystone_insecure
   swift_cmd="swift --insecure"
-  ##swift-dispersion-populate is not support for passing "insecure" also, so actualy it wont work in case of self-signed certs
-  dispersion_cmd="swift-dispersion-populate"
 else
   swift_cmd="swift"
-  dispersion_cmd="swift-dispersion-populate"
 end
 
-execute "populate-dispersion" do
-  command "#{dispersion_cmd}"
-  user node[:swift][:user]
-  action :run
-  ignore_failure true
-  only_if "#{swift_cmd} -V 2.0 --os-tenant-name #{service_tenant} --os-username #{service_user} --os-password '#{service_password}' --os-auth-url #{keystone_auth_url} --os-endpoint-type internalURL stat dispersion_objects 2>&1 | grep 'Container.*not found'"
-end
 
 template "/etc/swift/dispersion.conf" do
   source     "disperse.conf.erb"
@@ -98,6 +88,14 @@ template "/etc/swift/dispersion.conf" do
   variables(
     :auth_url => keystone_auth_url
   )
-  #only_if "swift-recon --md5 | grep -q '0 error'"
-  #notifies :run, "execute[populate-dispersion]", :immediately
 end
+
+# Commenting execute block. We can't be ensure what on this current time swift nodes ready for populate.
+#
+#execute "swift-dispersion-populate" do
+#  user node[:swift][:user]
+#  action :run
+#  retry_delay 20
+#  retries 5
+#  only_if "#{swift_cmd} -V 2.0 --os-tenant-name #{service_tenant} --os-username #{service_user} --os-password '#{service_password}' --os-auth-url #{keystone_auth_url} --os-endpoint-type internalURL stat dispersion_objects 2>&1 | grep 'not found' && swift-racon -a | grep ECONNREFUSED"
+#end

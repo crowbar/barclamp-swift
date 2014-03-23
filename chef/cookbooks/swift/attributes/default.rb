@@ -85,7 +85,15 @@ default[:swift][:keystone_service_user] = "swift"
 default[:swift][:keystone_service_password] = "swift"
 default[:swift][:keystone_delay_auth_decision] = false
 
+default[:swift][:local_drives] = true
+
 default[:swift][:install_slog_from_dev] = false
 
 default[:keystone][:frontend] = 'uwsgi'
 
+case node[:platform]
+  when "centos", "redhat"
+    default[:swift][:chown] = 'swift:nginx'
+  else
+    default[:swift][:chown] = 'swift:www-data'
+end

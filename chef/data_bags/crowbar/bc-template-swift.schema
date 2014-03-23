@@ -118,6 +118,7 @@
             "user": { "type": "str", "required": false },
             "group": { "type": "str", "required": false },
             "debug": { "type": "bool", "required": false},
+            "local_disks": { "type": "bool", "required": false },
             "frontend": { "type": "str", "required": true },
             "use_slog": { "type": "bool", "required": false},
             "slog_account": { "type": "str", "required": false},
