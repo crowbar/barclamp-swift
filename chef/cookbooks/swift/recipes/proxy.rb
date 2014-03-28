@@ -334,20 +334,22 @@ if node[:swift][:frontend]=='native'
       virtualenv venv_path
     end
   end
+
   service "swift-proxy" do
-    case node[:platform]
-    when "suse", "centos", "redhat"
-      service_name "openstack-swift-proxy"
+    service_name node[:swift][:proxy][:service_name]
+    if %w(redhat centos suse).include?(node.platform)
       supports :status => true, :restart => true
     else
       restart_command "stop swift-proxy ; start swift-proxy"
     end
     action [:enable, :start]
+    subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
+    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 elsif node[:swift][:frontend]=='uwsgi'
 
   service "swift-proxy" do
-    service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
+    service_name node[:swift][:proxy][:service_name]
     supports :status => true, :restart => true
     action [ :disable, :stop ]
   end
@@ -408,18 +410,7 @@ elsif node[:swift][:frontend]=='uwsgi'
 
 end
 
-case node[:platform]
-when "suse", "redhat", "centos"
-  service "swift-proxy" do
-    service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
-    if node[:swift][:frontend]=='native'
-      action [:enable, :start]
-      subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
-    else
-      action [:disable, :stop]
-    end
-  end
-else
+unless %w(redhat centos suse).include?(node.platform)
   bash "restart swift proxy things" do
     code <<-EOH
 EOH
