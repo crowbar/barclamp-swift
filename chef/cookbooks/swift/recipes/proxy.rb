@@ -150,6 +150,8 @@ case proxy_config[:auth_method]
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
      proxy_config[:keystone_delay_auth_decision] = node["swift"]["keystone_delay_auth_decision"]
 
+     crowbar_pacemaker_sync_mark "wait-swift_register"
+
      # ResellerAdmin is used by swift (see reseller_admin_role option)
      role = "ResellerAdmin"
      keystone_register "add #{role} role for swift" do
@@ -208,6 +210,8 @@ case proxy_config[:auth_method]
          #  endpoint_enabled true
         action :add_endpoint_template
      end
+
+     crowbar_pacemaker_sync_mark "create-swift_register"
 
    when "tempauth"
      ## uses defaults...
