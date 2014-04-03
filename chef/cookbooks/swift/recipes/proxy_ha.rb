@@ -21,6 +21,14 @@ haproxy_loadbalancer "swift-proxy" do
   action :nothing
 end.run_action(:create)
 
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-swift_before_ha"
+
+# Avoid races when creating pacemaker resources
+crowbar_pacemaker_sync_mark "wait-swift_ha_resources"
+
 service_name = "swift-proxy-service"
 
 pacemaker_primitive service_name do
@@ -33,3 +41,5 @@ pacemaker_clone "clone-#{service_name}" do
   rsc service_name
   action [ :create, :start ]
 end
+
+crowbar_pacemaker_sync_mark "create-swift_ha_resources"
