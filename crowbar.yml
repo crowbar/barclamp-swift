@@ -99,6 +99,7 @@ locale_additions:
           auth_method: Authentication method
           keystone_instance: Keystone instance
           keystone_delay_auth_decision: Allow Public Containers (performance penalty)
+          allow_versions: Enable Object Versioning
           install_slog: Install sLogging support
           slog_account: sLogging swift account
           slog_user: sLogging swift user
