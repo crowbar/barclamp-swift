@@ -29,7 +29,7 @@ crowbar_pacemaker_sync_mark "sync-swift_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-swift_ha_resources"
 
-service_name = "swift-proxy-service"
+service_name = "swift-proxy"
 
 pacemaker_primitive service_name do
   agent node[:swift][:ha]["proxy"][:agent]
@@ -37,7 +37,7 @@ pacemaker_primitive service_name do
   action :create
 end
 
-pacemaker_clone "clone-#{service_name}" do
+pacemaker_clone "cl-#{service_name}" do
   rsc service_name
   action [ :create, :start ]
 end
