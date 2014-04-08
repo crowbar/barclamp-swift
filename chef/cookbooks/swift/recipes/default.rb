@@ -59,3 +59,24 @@ template "/etc/swift/swift.conf" do
  })
 end
 
+if node[:platform] = %w{centos redhat} 
+  wraplist=%w{ swift swift-account-server swift-form-signature 
+    swift-orphans swift-temp-url swift-account-audit swift-config 
+    swift-get-nodes swift-proxy-server swift-account-auditor
+    swift-dispersion-populate swift-init swift-recon 
+    swift-account-reaper swift-dispersion-report swift-object-expirer 
+    swift-recon-cron swift-account-replicator swift-drive-audit 
+    swift-oldies swift-ring-builder }
+  wraplist.each {|w|
+    template "/usr/local/bin/#{w}" do
+      source "ssl_wrap.erb"
+      owner "root"
+      group "root"
+      mode "0755"
+      variables ({
+        :ssl_wrapper => w
+      })
+    end
+  }
+end
+
