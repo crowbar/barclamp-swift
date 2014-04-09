@@ -41,50 +41,54 @@ swift-ring-builder object.builder add z$ZONE-$STORAGE_LOCAL_NET_IP:6000/$DEVICE 
 
 
 ## collect the nodes that need to be notified when ring files are updated
-target_nodes=[]
+target_nodes = []
 
 ####
 # collect the current contents of the ring files.
 nodes = search(:node, "roles:swift-storage#{env_filter}")
 
-disks_a= []
-disks_c= []
-disks_o= []
+disks_a = []
+disks_c = []
+disks_o = []
 
 disk_assign_expr = node[:swift][:disk_zone_assign_expr]
 
 nodes.each { |node|
   storage_ip = Swift::Evaluator.get_ip_by_type(node, :storage_ip_expr)
   log ("Looking at node: #{storage_ip}") {level :debug}
+
   target_nodes << storage_ip
+
   disks=node[:swift][:devs]
   next if disks.nil?
+
   disks.each {|uuid,disk|
     Chef::Log.info("Swift - considering #{node[:fqdn]}:#{disk[:name]}")
     next unless disk[:state] == "Operational"
-    #we need at least node for which we trying to predict zone to avoid odd searching across chef by disk uuid
-    z_o, w_o = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "object", :disk=>disk, :target_node=>node)
-    z_c,w_c = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "container", :disk=>disk, :target_node=>node)
-    z_a,w_a = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring=> "account", :disk=>disk, :target_node=>node)
+
+    # we need at least node for which we trying to predict zone to avoid odd searching across chef by disk uuid
+    z_o, w_o = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring => "object",    :disk => disk, :target_node => node)
+    z_c, w_c = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring => "container", :disk => disk, :target_node => node)
+    z_a, w_a = Swift::Evaluator.eval_with_params(disk_assign_expr, node(), :ring => "account",   :disk => disk, :target_node => node)
 
     log("obj: #{z_o}/#{w_o} container: #{z_c}/#{w_c} account: #{z_a}/#{w_a}. count: #{$DISK_CNT}") {level :info}
+
     d = {:ip => storage_ip, :dev_name=> disk[:name], :port => 6000}
+
     if z_o
-      d[:port] = 6000; d[:zone]=z_o ; d[:weight]=w_o
+      d[:port] = 6000; d[:zone] = z_o ; d[:weight] = w_o
       disks_o << d
     end
-    d = d.dup
     if z_c
-      d[:port] = 6001; d[:zone]=z_c ; d[:weight]=w_c
-    disks_c << d
+      d = d.dup
+      d[:port] = 6001; d[:zone] = z_c ; d[:weight] = w_c
+      disks_c << d
     end
-    d = d.dup
     if z_a
-       d[:port] = 6002; d[:zone]=z_a ; d[:weight]=w_a
+      d = d.dup
+      d[:port] = 6002; d[:zone] = z_a ; d[:weight] = w_a
       disks_a << d
     end
-
-
   }
 }
 
@@ -100,7 +104,6 @@ swift_ringfile "account.builder" do
   disks disks_a
   replicas replicas
   min_part_hours min_move
-
   partitions parts
   virtualenv venv_prefix
   action [:apply, :rebalance]
