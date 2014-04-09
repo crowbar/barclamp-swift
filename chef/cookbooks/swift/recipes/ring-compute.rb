@@ -17,14 +17,12 @@
 
 include_recipe 'swift::rsync'
 
+env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
+
 ##
 # Assumptions:
 #  - The partitions to be used on each node are in node[:swift][:devs]
 #  - only nodes which have the swift-storage role assigned are used.
-
-
-env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-nodes = search(:node, "roles:swift-storage#{env_filter}")
 
 if node[:swift][:use_gitrepo]
   venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
@@ -42,25 +40,23 @@ swift-ring-builder object.builder add z$ZONE-$STORAGE_LOCAL_NET_IP:6000/$DEVICE 
 =end
 
 
+## collect the nodes that need to be notified when ring files are updated
+target_nodes=[]
+
 ####
 # collect the current contents of the ring files.
+nodes = search(:node, "roles:swift-storage#{env_filter}")
+
 disks_a= []
 disks_c= []
 disks_o= []
-## collect the nodes that need to be notified when ring files are updated
-target_nodes=[]
-zone_round_robin =1
-replicas = node[:swift][:replicas]
-zones = node[:swift][:zones]
-disk_assign_expr = node[:swift][:disk_zone_assign_expr]
-hash = node[:swift][:cluster_hash]
-builder_ip = Swift::Evaluator.get_ip_by_type(node, :storage_ip_expr)
 
-log ("cluster config: replicas:#{replicas} zones:#{zones} hash:#{hash}")
+disk_assign_expr = node[:swift][:disk_zone_assign_expr]
+
 nodes.each { |node|
   storage_ip = Swift::Evaluator.get_ip_by_type(node, :storage_ip_expr)
-  target_nodes << storage_ip
   log ("Looking at node: #{storage_ip}") {level :debug}
+  target_nodes << storage_ip
   disks=node[:swift][:devs]
   next if disks.nil?
   disks.each {|uuid,disk|
@@ -92,9 +88,13 @@ nodes.each { |node|
   }
 }
 
-replicas = node[:swift][:replicas]
+hash = node[:swift][:cluster_hash]
 min_move = node[:swift][:min_part_hours]
 parts = node[:swift][:partitions]
+replicas = node[:swift][:replicas]
+zones = node[:swift][:zones]
+
+log ("cluster config: replicas:#{replicas} zones:#{zones} hash:#{hash}")
 
 swift_ringfile "account.builder" do
   disks disks_a
@@ -130,6 +130,8 @@ end
 
 target_nodes.uniq!
 Chef::Log.debug("nodes to notify: #{target_nodes.join ' '}")
+
+builder_ip = Swift::Evaluator.get_ip_by_type(node, :storage_ip_expr)
 
 target_nodes.each {|t|
   # No point in pushing it to ourselves
