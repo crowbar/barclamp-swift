@@ -27,7 +27,9 @@ end.run_action(:create)
 crowbar_pacemaker_sync_mark "sync-swift_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-swift_ha_resources"
+crowbar_pacemaker_sync_mark "wait-swift_ha_resources" do
+  only_if { ::File.exists? "/etc/swift/object.ring.gz" }
+end
 
 service_name = "swift-proxy"
 
@@ -35,11 +37,17 @@ pacemaker_primitive service_name do
   agent node[:swift][:ha]["proxy"][:agent]
   op    node[:swift][:ha]["proxy"][:op]
   action :create
+  # Do not even try to start the daemon if we don't have the ring yet
+  only_if { ::File.exists? "/etc/swift/object.ring.gz" }
 end
 
 pacemaker_clone "cl-#{service_name}" do
   rsc service_name
   action [ :create, :start ]
+  # Do not even try to start the daemon if we don't have the ring yet
+  only_if { ::File.exists? "/etc/swift/object.ring.gz" }
 end
 
-crowbar_pacemaker_sync_mark "create-swift_ha_resources"
+crowbar_pacemaker_sync_mark "create-swift_ha_resources" do
+  only_if { ::File.exists? "/etc/swift/object.ring.gz" }
+end

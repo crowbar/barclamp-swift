@@ -337,6 +337,13 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 and node[:fqdn]!=compute_no
   }
 end
 
+ruby_block "Check if ring is present" do
+  block do
+    Chef::Log.info("Not setting up swift-proxy daemon; ring-compute node hasn't pushed the rings yet.")
+  end
+  not_if { ::File.exists? "/etc/swift/object.ring.gz" }
+end
+
 if node[:swift][:frontend]=='native'
   if node[:swift][:use_gitrepo]
     swift_service "swift-proxy" do
@@ -354,6 +361,8 @@ if node[:swift][:frontend]=='native'
     action [:enable, :start]
     subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+    # Do not even try to start the daemon if we don't have the ring yet
+    only_if { ::File.exists? "/etc/swift/object.ring.gz" }
   end
 elsif node[:swift][:frontend]=='uwsgi'
 
@@ -415,6 +424,8 @@ elsif node[:swift][:frontend]=='uwsgi'
     supports :status => true, :restart => true, :start => true
     action :start
     subscribes :restart, "template[/usr/lib/cgi-bin/swift/proxy.py]"
+    # Do not even try to start the daemon if we don't have the ring yet
+    only_if { ::File.exists? "/etc/swift/object.ring.gz" }
   end
 
 end
