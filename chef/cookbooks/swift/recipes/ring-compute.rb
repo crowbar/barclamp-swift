@@ -15,6 +15,15 @@
 # Author: andi abes
 #
 
+if node.roles.include?("swift-storage") && node[:swift][:devs].nil?
+  # We can safely return here because if we're a storage node and have no
+  # device yet, then it simply means that we haven't looked for devices yet. It
+  # cannot mean that we just have no devices because we raise an exception in
+  # that case (see disks recipe).
+  Chef::Log.info("Not proceeding with ring compute yet; this chef run is only used to find disks on storage nodes.")
+  return
+end
+
 include_recipe 'swift::rsync'
 
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"

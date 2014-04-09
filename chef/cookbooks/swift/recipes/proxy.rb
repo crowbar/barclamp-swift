@@ -18,8 +18,33 @@
 
 include_recipe 'utils'
 include_recipe 'swift::auth'
+# Note: we always want to setup rsync, even if we do not do anything else; this
+# will allow the ring-compute node to push the rings.
 include_recipe 'swift::rsync'
 
+if node.roles.include?("swift-storage") && node[:swift][:devs].nil?
+  # If we're a storage node and have no device yet, then it simply means that we
+  # haven't looked for devices yet, which also means that we won't have rings at
+  # this point in time, so swift-proxy will fail.
+  Chef::Log.info("Not setting up swift-proxy daemon; this chef run is only used to find disks on storage nodes.")
+  return
+end
+
+if node.roles.include?("swift-ring-compute") && !(::File.exists? "/etc/swift/object.ring.gz")
+  # Similarly to above; the difference is that we will have the rings in the
+  # execute phase, but we do not want to be the only proxy node with the rings
+  # (which would be the case, since we're in the ring-compute pass of swift
+  # orchestration): we want all nodes to start swift-proxy at the same time.
+  Chef::Log.info("Not setting up swift-proxy daemon; this chef run is only used to compute the rings.")
+  return
+end
+
+if node.roles.include?("swift-storage") && !node["swift"]["storage_init_done"]
+  # We're a storage node, and we have devices. But have we setup the storage
+  # daemons? If not, then we're not in the chef run for swift-proxy yet.
+  Chef::Log.info("Not setting up swift-proxy daemon; this chef run is only used to setup swift-{account,container,object}.")
+  return
+end
 
 local_ip = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
 public_ip = Swift::Evaluator.get_ip_by_type(node, :public_ip_expr)
