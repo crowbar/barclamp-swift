@@ -152,6 +152,14 @@ case proxy_config[:auth_method]
 
      crowbar_pacemaker_sync_mark "wait-swift_register"
 
+     keystone_register "swift proxy wakeup keystone" do
+       protocol keystone_settings['protocol']
+       host keystone_settings['internal_url_host']
+       port keystone_settings['admin_port']
+       token keystone_settings['admin_token']
+       action :wakeup
+     end
+
      # ResellerAdmin is used by swift (see reseller_admin_role option)
      role = "ResellerAdmin"
      keystone_register "add #{role} role for swift" do
