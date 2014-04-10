@@ -286,6 +286,7 @@ if !result.nil? and (result.length > 0)
     s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)     
     s += ":11211 "   
   }
+  memcached_servers.sort!
   log("memcached servers" + memcached_servers.join(",")) {level :debug}
   servers = memcached_servers.join(",")
 else 
