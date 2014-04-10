@@ -20,3 +20,26 @@ haproxy_loadbalancer "swift-proxy" do
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "swift", "swift-proxy", "proxy")
   action :nothing
 end.run_action(:create)
+
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-swift_before_ha"
+
+# Avoid races when creating pacemaker resources
+crowbar_pacemaker_sync_mark "wait-swift_ha_resources"
+
+service_name = "swift-proxy"
+
+pacemaker_primitive service_name do
+  agent node[:swift][:ha]["proxy"][:agent]
+  op    node[:swift][:ha]["proxy"][:op]
+  action :create
+end
+
+pacemaker_clone "cl-#{service_name}" do
+  rsc service_name
+  action [ :create, :start ]
+end
+
+crowbar_pacemaker_sync_mark "create-swift_ha_resources"

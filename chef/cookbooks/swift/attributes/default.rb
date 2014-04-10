@@ -84,8 +84,16 @@ default[:swift][:ssl][:keyfile] = "/etc/swift/cert.key"
 default[:swift][:ssl][:generate_certs] = true
 default[:swift][:ssl][:insecure] = false
 
+default[:swift][:proxy][:service_name]  = "swift-proxy"
+if %w(redhat centos suse).include?(node[:platform])
+  default[:swift][:proxy][:service_name] = "openstack-swift-proxy"
+end
+
 default[:swift][:ports][:proxy] = 8080
 
 default[:swift][:ha][:enabled] = false
 # Ports to bind to when haproxy is used for the real ports
 default[:swift][:ha][:ports][:proxy] = 5540
+# pacemaker part
+default[:swift][:ha][:proxy][:agent] = "lsb:#{default[:swift][:proxy][:service_name]}"
+default[:swift][:ha][:proxy][:op][:monitor][:interval] = "10s"
