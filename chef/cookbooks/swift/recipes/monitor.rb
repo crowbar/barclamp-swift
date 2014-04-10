@@ -19,6 +19,8 @@
 ####
 # if monitored by nagios, install the nrpe commands
 
+return if node[:swift][:monitor].nil?
+
 swift_svcs = node[:swift][:monitor][:svcs]
 swift_ports = node[:swift][:monitor][:ports]
 storage_net_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
