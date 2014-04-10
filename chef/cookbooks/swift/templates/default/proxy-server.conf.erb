@@ -285,6 +285,9 @@ auth_uri = <%= @keystone_settings['internal_auth_url'] %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
+<% if @keystone_settings['insecure'] -%>
+insecure = <%= @keystone_settings['insecure'] %>
+<% end -%>
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
 # cache = swift.cache
 signing_dir = /var/cache/swift/keystone-signing

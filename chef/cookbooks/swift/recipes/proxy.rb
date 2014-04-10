@@ -150,6 +150,16 @@ case proxy_config[:auth_method]
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
      proxy_config[:keystone_delay_auth_decision] = node["swift"]["keystone_delay_auth_decision"]
 
+     crowbar_pacemaker_sync_mark "wait-swift_register"
+
+     keystone_register "swift proxy wakeup keystone" do
+       protocol keystone_settings['protocol']
+       host keystone_settings['internal_url_host']
+       port keystone_settings['admin_port']
+       token keystone_settings['admin_token']
+       action :wakeup
+     end
+
      # ResellerAdmin is used by swift (see reseller_admin_role option)
      role = "ResellerAdmin"
      keystone_register "add #{role} role for swift" do
@@ -208,6 +218,8 @@ case proxy_config[:auth_method]
          #  endpoint_enabled true
         action :add_endpoint_template
      end
+
+     crowbar_pacemaker_sync_mark "create-swift_register"
 
    when "tempauth"
      ## uses defaults...
@@ -282,6 +294,7 @@ if !result.nil? and (result.length > 0)
     s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)     
     s += ":11211 "   
   }
+  memcached_servers.sort!
   log("memcached servers" + memcached_servers.join(",")) {level :debug}
   servers = memcached_servers.join(",")
 else 
@@ -330,20 +343,22 @@ if node[:swift][:frontend]=='native'
       virtualenv venv_path
     end
   end
+
   service "swift-proxy" do
-    case node[:platform]
-    when "suse", "centos", "redhat"
-      service_name "openstack-swift-proxy"
+    service_name node[:swift][:proxy][:service_name]
+    if %w(redhat centos suse).include?(node.platform)
       supports :status => true, :restart => true
     else
       restart_command "stop swift-proxy ; start swift-proxy"
     end
     action [:enable, :start]
+    subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
+    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 elsif node[:swift][:frontend]=='uwsgi'
 
   service "swift-proxy" do
-    service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
+    service_name node[:swift][:proxy][:service_name]
     supports :status => true, :restart => true
     action [ :disable, :stop ]
   end
@@ -404,18 +419,7 @@ elsif node[:swift][:frontend]=='uwsgi'
 
 end
 
-case node[:platform]
-when "suse", "redhat", "centos"
-  service "swift-proxy" do
-    service_name "openstack-swift-proxy" if %w(redhat centos suse).include?(node.platform)
-    if node[:swift][:frontend]=='native'
-      action [:enable, :start]
-      subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
-    else
-      action [:disable, :stop]
-    end
-  end
-else
+unless %w(redhat centos suse).include?(node.platform)
   bash "restart swift proxy things" do
     code <<-EOH
 EOH
