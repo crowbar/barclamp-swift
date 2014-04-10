@@ -113,7 +113,7 @@ class SwiftService < PacemakerServiceObject
     vip_networks = ["admin", "public"]
 
     dirty = false
-    dirty = prepare_role_for_ha_with_haproxy(role, ["swift", "ha", "enabled"], ha_enabled, vip_networks)
+    dirty = prepare_role_for_ha_with_haproxy(role, ["swift", "ha", "enabled"], ha_enabled, proxy_elements, vip_networks)
     role.save if dirty
 
     # All nodes must have a public IP, even if part of a cluster; otherwise
