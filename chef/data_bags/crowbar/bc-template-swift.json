@@ -125,9 +125,9 @@
       "element_order": [
         [ "swift-storage" ],  
         [ "swift-ring-compute" ], 
+        [ "swift-storage" ],
         [ "swift-proxy" ],
-        [ "swift-dispersion" ],
-        [ "swift-storage" ]
+        [ "swift-dispersion" ]
       ],
       "element_run_list_order": {
         "swift-ring-compute": 80,

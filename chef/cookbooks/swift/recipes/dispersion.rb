@@ -14,6 +14,25 @@
 # limitations under the License.
 #
 
+# Note: if we're swift-ring-compute/swift-storage/swift-proxy, we're supposed
+# to have the rings before we run dispersion. If we don't, then it simply means
+# we're not at the point where we can do dispersion, and the last chef-client
+# run for dispersion will be used instead.
+if (node.roles.include?("swift-ring-compute") || node.roles.include?("swift-storage") || node.roles.include?("swift-proxy")) && !(::File.exists? "/etc/swift/object.ring.gz")
+  Chef::Log.info("Not proceeding with dispersion yet; waiting for the rings.")
+  return
+end
+
+if node.roles.include?("swift-storage") && !node["swift"]["storage_init_done"]
+  Chef::Log.info("Not proceeding with dispersion yet; swift-{account,container,object} have not been setup yet.")
+  return
+end
+
+if node.roles.include?("swift-proxy") && !node["swift"]["proxy_init_done"]
+  Chef::Log.info("Not proceeding with dispersion yet; swift-proxy has not been setup yet.")
+  return
+end
+
 keystone_settings = SwiftHelper.keystone_settings(node)
 
 service_tenant = node[:swift][:dispersion][:service_tenant]
