@@ -9,6 +9,9 @@
       %label{ :for => :keystone_delay_auth_decision }= t('.keystone_delay_auth_decision')
       = select_tag :keystone_delay_auth_decision, options_for_select([['true', 'true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_delay_auth_decision"].to_s), :onchange => "update_value('keystone_delay_auth_decision', 'keystone_delay_auth_decision', 'boolean')"
     %p
+      %label{ :for => :allow_versions }= t('.allow_versions')
+      = select_tag :allow_versions, options_for_select([['true', 'true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["allow_versions"].to_s), :onchange => "update_value('allow_versions', 'allow_versions', 'boolean')"
+    %p
       %label{ :for => :frontend }= t('.frontend')
       = select_tag :frontend, options_for_select([['uwsgi+nginx','uwsgi+nginx'], ['native', 'native']], @proposal.raw_data['attributes'][@proposal.barclamp]["frontend"]), :onchange => "update_value('frontend', 'frontend', 'string')"
     %p
