@@ -40,12 +40,6 @@ claimed_disks.each do |k|
   to_use_disks << k
 end
 
-if to_use_disks.empty?
-  message = "No disk available for swift"
-  Chef::Log.fatal(message)
-  raise message
-end
-
 node[:swift] ||= Mash.new
 node[:swift][:devs] ||= Mash.new
 found_disks=[]
@@ -94,6 +88,12 @@ to_use_disks.each do |d|
   else
     Chef::Log.info("Swift - #{target_dev_part} already known and used by Swift.")
   end
+end
+
+if found_disks.empty? && claimed_disks.empty?
+  message = "No disk available for swift"
+  Chef::Log.fatal(message)
+  raise message
 end
 
 if wait_for_format
