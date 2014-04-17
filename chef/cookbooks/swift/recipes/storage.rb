@@ -16,9 +16,26 @@
 # Author: andi abes
 #
 
+skip_setup = node[:swift][:devs].nil?
+
 include_recipe 'swift::disks'
 #include_recipe 'swift::auth' 
+# Note: we always want to setup rsync, even if we do not do anything else; this
+# will allow the ring-compute node to push the rings.
 include_recipe 'swift::rsync'
+
+if skip_setup
+  # If we have no device yet, then it simply means that we haven't looked for
+  # devices yet, which also means that we won't have rings at this point in
+  # time; we just need to discover the disks (with the recipes above).
+  Chef::Log.info("Not setting up swift-{account,container,object} daemons; this chef run is only used to find disks.")
+  return
+end
+
+if node.roles.include?("swift-ring-compute") && !(::File.exists? "/etc/swift/object.ring.gz")
+  Chef::Log.info("Not setting up swift-{account,container,object} daemons; this chef run is only used to compute the rings.")
+  return
+end
 
 unless node[:swift][:use_gitrepo]
   case node[:platform]
@@ -106,8 +123,9 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
     end
   }
 end
-  
-  
+
+node["swift"]["storage_init_done"] = true
+
 ### 
 # let the monitoring tools know what services should be running on this node.
 node[:swift][:monitor] = {}
