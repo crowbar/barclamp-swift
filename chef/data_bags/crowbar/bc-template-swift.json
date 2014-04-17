@@ -68,7 +68,7 @@
       "replication_interval": 60,
       "gitrepo": "http://github.com/openstack/swift.git",
       "git_instance": "",
-      "git_refspec": "stable/havana",
+      "git_refspec": "stable/icehouse",
       "use_gitrepo": false,
       "use_gitbarclamp": true,
       "use_pip_cache": true,
