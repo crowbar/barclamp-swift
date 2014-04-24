@@ -285,7 +285,6 @@ class SwiftService < PacemakerServiceObject
   end
 
   def validate_proposal_after_save proposal
-    validate_one_for_role proposal, "swift-dispersion"
     validate_one_for_role proposal, "swift-proxy"
     validate_one_for_role proposal, "swift-ring-compute"
     validate_at_least_n_for_role proposal, "swift-storage", 1
