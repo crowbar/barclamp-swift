@@ -59,3 +59,18 @@ template "/etc/swift/swift.conf" do
  })
 end
 
+if node[:platform] = %w{centos redhat} 
+  wraplist=%w{ swift swift-dispersion-populate swift-dispersion-report }
+  wraplist.each {|w|
+    template "/usr/local/bin/#{w}" do
+      source "ssl_wrap.erb"
+      owner "root"
+      group "root"
+      mode "0755"
+      variables ({
+        :ssl_wrapper => w
+      })
+    end
+  }
+end
+
