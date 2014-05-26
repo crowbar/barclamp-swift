@@ -184,6 +184,8 @@ action :apply do
   
   @to_add.each do |d|
     execute "add disk #{d[:ip]}:#{d[:port]}/#{d[:dev_name]} to #{name}" do
+      user node[:swift][:user]
+      group node[:swift][:group]
       command "#{virtualenv} swift-ring-builder #{name} add z#{d[:zone]}-#{d[:ip]}:#{d[:port]}/#{d[:dev_name]} #{d[:weight]}"
       cwd "/etc/swift"
     end
@@ -191,6 +193,8 @@ action :apply do
   
   @to_rem.each do |d|
     execute "remove disk #{d.id} from #{name}" do
+      user node[:swift][:user]
+      group node[:swift][:group]
       command "#{virtualenv} swift-ring-builder #{name} remove d#{d.id} "
       cwd "/etc/swift"
     end   
@@ -213,6 +217,8 @@ action :rebalance do
   Chef::Log.info("current status for: #{name} is #{dirty ? "dirty" : "not-dirty"} #{ring_name} #{ring_data_mtime.to_i}/#{ring_file_mtime.to_i}")
  
   execute "rebalance ring for #{name}" do    
+    user node[:swift][:user]
+    group node[:swift][:group]
     command "#{virtualenv} swift-ring-builder #{name} rebalance"
     cwd "/etc/swift"
     returns [0,1]  # returns 1 if it didn't do anything, 2 on 
@@ -222,6 +228,8 @@ action :rebalance do
   if !::File.exist?(ring_name) then 
     dirty = true
     execute "writeout ring for #{name}" do
+      user node[:swift][:user]
+      group node[:swift][:group]
       command "#{virtualenv} swift-ring-builder #{name} write_ring"
       cwd "/etc/swift"
       returns [0,1]  ## returns 1 if it didn't do anything, 2 on error.
@@ -241,6 +249,8 @@ def create_ring
   replicas = @new_resource.replicas ? @new_resource.replicas : 3
   
   execute "create #{name} ring" do
+    user node[:swift][:user]
+    group node[:swift][:group]
     command "#{virtualenv} swift-ring-builder #{name} create #{parts}  #{replicas} #{mh}"
     creates "/etc/swift/#{name}"
     cwd "/etc/swift"
