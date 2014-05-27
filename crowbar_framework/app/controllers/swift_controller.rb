@@ -19,10 +19,6 @@ class SwiftController < BarclampController
   helper_method :available_nodes
   helper_method :ready_nodes
 
-  def initialize
-    @service_object = SwiftService.new logger
-  end
-
   def dashboard
     @reports = reports_list
     render :template => "barclamp/#{@bc_name}/dashboard"
@@ -122,5 +118,9 @@ class SwiftController < BarclampController
 
   def raise_not_found
     raise ActionController::RoutingError.new("Not found")
+  end
+
+  def initialize_service
+    @service_object = SwiftService.new logger
   end
 end
