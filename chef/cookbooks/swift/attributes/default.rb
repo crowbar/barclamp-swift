@@ -70,8 +70,8 @@ default[:swift][:disk_zone_assign_expr] = '$DISK_CNT||=0; $DISK_CNT= $DISK_CNT+1
 default[:swift][:auth_method] = "keystone"
 default[:swift][:keystone_instance] = "proposal"
 default[:swift][:reseller_prefix] = "AUTH_"
-default[:swift][:keystone_service_user] = "swift"
-default[:swift][:keystone_service_password] = "swift"
+default[:swift][:service_user] = "swift"
+default[:swift][:service_password] = "swift"
 default[:swift][:keystone_delay_auth_decision] = false
 
 default[:swift][:install_slog_from_dev] = false

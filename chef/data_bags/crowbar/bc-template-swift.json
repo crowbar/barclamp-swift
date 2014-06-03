@@ -95,7 +95,8 @@
       "min_part_hours": 24,
       "auth_method": "keystone",
       "keystone_instance": "proposal",
-      "keystone_service_user": "swift",
+      "service_user": "swift",
+      "service_password": "",
       "keystone_delay_auth_decision": false,
       "allow_versions": false,
       "reseller_prefix" : "AUTH_",
@@ -114,7 +115,7 @@
   "deployment": {
     "swift": {
       "crowbar-revision": 0,
-      "schema-revision": 7,
+      "schema-revision": 10,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
