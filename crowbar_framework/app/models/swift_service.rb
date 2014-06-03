@@ -79,7 +79,7 @@ class SwiftService < PacemakerServiceObject
       base["attributes"]["swift"]["auth_method"] = "keystone"
     end
 
-    base["attributes"]["swift"]["keystone_service_password"] = '%012d' % rand(1e12)
+    base["attributes"]["swift"]["service_password"] = '%012d' % rand(1e12)
 
 
     base["deployment"]["swift"]["elements"] = {
