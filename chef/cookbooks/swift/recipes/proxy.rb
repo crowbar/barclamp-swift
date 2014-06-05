@@ -150,8 +150,8 @@ case proxy_config[:auth_method]
      package "python-swauth"
      proxy_config[:admin_key] =node[:swift][:cluster_admin_pw]
 
-   when "keystone" 
-     keystone_settings = SwiftHelper.keystone_settings(node)
+   when "keystone"
+     keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
      if node[:swift][:use_gitrepo]
        if node[:swift][:use_virtualenv]
