@@ -4,9 +4,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,7 +63,7 @@ admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 public_host = CrowbarHelper.get_host_for_public_url(node, node[:swift][:ssl][:enabled], ha_enabled)
 swift_protocol = node[:swift][:ssl][:enabled] ? 'https' : 'http'
 
-### 
+###
 # bucket to collect all the config items that end up in the proxy config template
 proxy_config = {}
 proxy_config[:bind_host] = bind_host
@@ -106,7 +106,7 @@ end
 pkg_list.each do |pkg|
   package pkg do
     action :install
-  end 
+  end
 end
 
 unless node[:swift][:use_gitrepo]
@@ -150,8 +150,8 @@ case proxy_config[:auth_method]
      package "python-swauth"
      proxy_config[:admin_key] =node[:swift][:cluster_admin_pw]
 
-   when "keystone" 
-     keystone_settings = SwiftHelper.keystone_settings(node)
+   when "keystone"
+     keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
      if node[:swift][:use_gitrepo]
        if node[:swift][:use_virtualenv]
@@ -170,7 +170,7 @@ case proxy_config[:auth_method]
      else
        package "python-keystoneclient"
      end
-     
+
      proxy_config[:keystone_settings] = keystone_settings
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
      proxy_config[:keystone_delay_auth_decision] = node["swift"]["keystone_delay_auth_decision"]
@@ -227,7 +227,7 @@ case proxy_config[:auth_method]
        service_type "object-store"
        service_description "Openstack Swift Object Store Service"
        action :add_service
-     end                                                 
+     end
 
      keystone_register "register swift-proxy endpoint" do
          protocol keystone_settings['protocol']
@@ -249,7 +249,7 @@ case proxy_config[:auth_method]
    when "tempauth"
      ## uses defaults...
 end
-                  
+
 if node[:swift][:ssl][:enabled]
   if node[:swift][:ssl][:generate_certs]
     package "openssl"
@@ -309,20 +309,20 @@ if node[:swift][:ssl][:enabled]
   end # if generate_certs
 end
 
-## Find other nodes that are swift-auth nodes, and make sure 
+## Find other nodes that are swift-auth nodes, and make sure
 ## we use their memcached!
 servers =""
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
 result= search(:node, "roles:swift-proxy #{env_filter}")
-if !result.nil? and (result.length > 0)  
+if !result.nil? and (result.length > 0)
   memcached_servers = result.map {|x|
-    s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)     
-    s += ":11211 "   
+    s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)
+    s += ":11211 "
   }
   memcached_servers.sort!
   log("memcached servers" + memcached_servers.join(",")) {level :debug}
   servers = memcached_servers.join(",")
-else 
+else
   log("found no swift-proxy nodes") {level :warn}
 end
 proxy_config[:memcached_ips] = servers
@@ -339,7 +339,7 @@ template "/etc/swift/proxy-server.conf" do
 end
 
 ## install a default memcached instsance.
-## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user] 
+## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user]
 node[:memcached][:listen] = local_ip
 node[:memcached][:name] = "swift-proxy"
 memcached_instance "swift-proxy" do
@@ -477,7 +477,7 @@ else
   log "HA support for swift is disabled"
 end
 
-### 
+###
 # let the monitoring tools know what services should be running on this node.
 node[:swift][:monitor] = {}
 node[:swift][:monitor][:svcs] = ["swift-proxy", "memcached" ]
