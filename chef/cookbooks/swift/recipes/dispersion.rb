@@ -33,7 +33,7 @@ if node.roles.include?("swift-proxy") && !node["swift"]["proxy_init_done"]
   return
 end
 
-keystone_settings = KeystoneSettings.keystone_settings(node, @cookbook_name)
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 service_tenant = node[:swift][:dispersion][:service_tenant]
 service_user = node[:swift][:dispersion][:service_user]
