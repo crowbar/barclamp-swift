@@ -1,0 +1,38 @@
+# Log swift components into separate log files (and nowhere else)
+
+# proxy-server logs
+if      ($programname == 'swift-p') \
+then    -/var/log/swift/proxy-server.log
+<% if @rsyslog_version < "7" %>
+&       ~
+<% else %>
+&       stop
+<% end %>
+
+# container-server logs
+if      ($programname == 'swift-c') \
+then    -/var/log/swift/container-server.log
+<% if @rsyslog_version < "7" %>
+&       ~
+<% else %>
+&       stop
+<% end %>
+
+# object server logs
+if      ($programname == 'swift-o') \
+then    -/var/log/swift/object-server.log
+<% if @rsyslog_version < "7" %>
+&       ~
+<% else %>
+&       stop
+<% end %>
+
+# account server logs
+if      ($programname == 'swift-a') \
+then    -/var/log/swift/account-server.log
+<% if @rsyslog_version < "7" %>
+&       ~
+<% else %>
+&       stop
+<% end %>
+
