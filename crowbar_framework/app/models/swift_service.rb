@@ -157,7 +157,7 @@ class SwiftService < PacemakerServiceObject
     if db.nil?
       begin
         lock = acquire_lock @bc_name
-      
+
         db_item = Chef::DataBagItem.new
         db_item.data_bag "crowbar"
         db_item["id"] = "swift"
@@ -231,9 +231,9 @@ class SwiftService < PacemakerServiceObject
 
   def run_report(node)
     raise "unable to look up a #{@bc_name} proposal applied to #{node.inspect}" if (proposal = _get_proposal_by_node node).nil?
-    
+
     report_run_uuid = `uuidgen`.strip
-    report_run = { 
+    report_run = {
       "uuid" => report_run_uuid, "started" => Time.now.utc.to_i, "ended" => nil, "pid" => nil,
       "status" => "running", "node" => node, "results.json" => "log/#{report_run_uuid}.json",
       "results.html" => "log/#{report_run_uuid}.html"}
@@ -259,7 +259,7 @@ class SwiftService < PacemakerServiceObject
 
       report_run["ended"] = Time.now.utc.to_i
       report_run["status"] = $?.exitstatus.equal?(0) ? "passed" : "failed"
-      report_run["pid"] = nil 
+      report_run["pid"] = nil
 
       lock = acquire_lock(@bc_name)
       swift_db.save
@@ -269,7 +269,7 @@ class SwiftService < PacemakerServiceObject
     end
     Process.detach pid
 
-    # saving the PID to prevent 
+    # saving the PID to prevent
     report_run['pid'] = pid
     lock = acquire_lock(@bc_name)
     swift_db.save
