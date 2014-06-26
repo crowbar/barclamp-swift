@@ -56,6 +56,10 @@
           "max_deletes_per_request": 10000,
           "max_failed_deletes": 1000,
           "yield_frequency": 10
+        },
+        "crossdomain": {
+          "enabled": false,
+          "cross_domain_policy": "<allow-access-from domain=\"*\" secure=\"false\" />"
         }
       },
       "ssl": {

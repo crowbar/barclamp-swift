@@ -97,6 +97,10 @@ en:
           formpost:
             header: 'FormPOST'
             enabled: 'Enabled'
+          crossdomain:
+            header: 'Cross-domain'
+            enabled: 'Enabled'
+            cross_domain_policy: 'Cross-domain policies'
           bulk:
             header: 'Bulk'
             enabled: 'Enabled'

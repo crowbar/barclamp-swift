@@ -66,6 +66,15 @@
 
     %fieldset
       %legend
+        = t(".middlewares.crossdomain.header")
+
+      = boolean_field %w(middlewares crossdomain enabled), "data-showit" => "true", "data-showit-target" => "#crossdomain_container", "data-showit-direct" => "true"
+
+      #crossdomain_container
+        = text_field %w(middlewares crossdomain cross_domain_policy)
+
+    %fieldset
+      %legend
         = t(".middlewares.domain_remap.header")
 
       = boolean_field %w(middlewares domain_remap enabled), "data-showit" => "true", "data-showit-target" => "#domain_remap_container", "data-showit-direct" => "true"
