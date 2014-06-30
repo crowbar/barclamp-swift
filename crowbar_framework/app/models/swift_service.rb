@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require "rexml/document"
+include ERB::Util # for html_escape
 
 class SwiftService < PacemakerServiceObject
   class ServiceError < StandardError
@@ -311,6 +313,14 @@ class SwiftService < PacemakerServiceObject
     if (middlewares["tempurl"]["enabled"] || middlewares["staticweb"]["enabled"] || middlewares["formpost"]["enabled"])
       unless proposal["attributes"]["swift"]["keystone_delay_auth_decision"]
         validation_error("Public containers must be allowed (keystone_delay_auth_decision attribute) when one of the FormPOST, StaticWeb and TempURL middlewares is enabled.")
+      end
+    end
+
+    middlewares["crossdomain"]["cross_domain_policy"].split("\n").each do |line|
+      begin
+        REXML::Document.new(line)
+      rescue REXML::ParseException
+        validation_error("Cross-domain policy line #{html_escape(line)} does not look like valid XML.")
       end
     end
 
