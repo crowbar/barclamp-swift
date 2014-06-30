@@ -32,7 +32,7 @@ crowbar:
   order: 80
   run_order: 80
   chef_order: 80
-  proposal_schema_version: 2
+  proposal_schema_version: 3
 
 nav:
   utils:
