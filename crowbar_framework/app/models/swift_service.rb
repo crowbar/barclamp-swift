@@ -72,6 +72,16 @@ class SwiftService < PacemakerServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
+    ProposalObject.find_proposals("ceph").each {|p|
+      next unless p.status == "ready" || p.status == 'pending'
+
+      elements = (p.status == "ready") ? p.role.elements : p.elements
+      if elements.keys.include?("ceph-radosgw") && !elements['ceph-radosgw'].empty?
+        @logger.warn("node #{elements['ceph-radosgw']} has ceph-radosgw role")
+        raise "Ceph with RadosGW support is already deployed. Swift deployment is not supported in this scenario."
+      end
+    }
+
     base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone", true)
 
