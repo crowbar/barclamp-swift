@@ -96,6 +96,15 @@ proxy_config[:max_deletes_per_request] = node[:swift][:middlewares][:bulk][:max_
 proxy_config[:max_failed_deletes] = node[:swift][:middlewares][:bulk][:max_failed_deletes]
 proxy_config[:yield_frequency] = node[:swift][:middlewares][:bulk][:yield_frequency]
 
+cross_domain_policy     = node[:swift][:middlewares][:crossdomain][:cross_domain_policy]
+# make sure that cross_domain_policy value fits the required format
+# see http://docs.openstack.org/developer/swift/crossdomain.html
+cross_domain_policy_l = cross_domain_policy.split("\n").map.with_index do |line,index|
+  line = "\t" + line unless index == 0
+  line
+end
+cross_domain_policy     = cross_domain_policy_l.join("\n")
+
 case node[:platform]
   when "centos", "redhat"
     pkg_list=%w{curl memcached python-dns}

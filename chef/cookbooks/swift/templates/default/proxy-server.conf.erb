@@ -80,9 +80,10 @@ log_level = <%= @debug? "DEBUG": "INFO" %>
   ratelimit = middlewares.delete("ratelimit")
   bulk = middlewares.delete("bulk")
   ceilometer = middlewares.delete("ceilometer")
+  crossdomain = middlewares.delete("crossdomain")
 %>
 [pipeline:main]
-pipeline = catch_errors healthcheck proxy-logging cache <%= bulk %> slo <%= ratelimit %> <%= cname_lookup %> <%= domain_remap %> <%= tempurl %> <%= formpost %> <%= auth %> <%= staticweb %> container-quotas account-quotas proxy-logging <%= middlewares.join(' ') %> <%= ceilometer %> proxy-server
+pipeline = catch_errors healthcheck proxy-logging cache <%= bulk %> slo <%= ratelimit %> <%= cname_lookup %> <%= domain_remap %> <%= tempurl %> <%= formpost %> <%= crossdomain %> <%= auth %> <%= staticweb %> container-quotas account-quotas proxy-logging <%= middlewares.join(' ') %> <%= ceilometer %> proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
@@ -556,3 +557,10 @@ super_admin_key = <%= @admin_key %>
 
 [filter:ceilometer]
 use = egg:ceilometer#swift
+
+<% if !@cross_domain_policy.empty? %>
+[filter:crossdomain]
+use = egg:swift#crossdomain
+cross_domain_policy = <%= @cross_domain_policy %>
+
+<% end %>

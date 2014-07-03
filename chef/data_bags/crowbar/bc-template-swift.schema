@@ -104,6 +104,14 @@
                     "max_failed_deletes": { "type": "int", "required": true },
                     "yield_frequency": { "type": "int", "required": true }
                   }
+                },
+                "crossdomain": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "enabled": { "type": "bool", "required": true },
+                    "cross_domain_policy": { "type": "str", "required": true }
+                  }
                 }
               }
             },
