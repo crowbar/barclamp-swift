@@ -289,6 +289,16 @@ class SwiftService < PacemakerServiceObject
   end
 
   def validate_proposal_after_save proposal
+    # first, check for conflict with ceph
+    ProposalObject.find_proposals("ceph").each {|p|
+      next unless (p.status == "ready") || (p.status == "pending")
+      elements = (p.status == "ready") ? p.role.elements : p.elements
+      if elements.keys.include?("ceph-radosgw") && !elements['ceph-radosgw'].empty?
+        @logger.warn("node #{elements['ceph-radosgw']} has ceph-radosgw role")
+        validation_error("Ceph with RadosGW support is already deployed. Only one of Ceph with RadosGW and Swift can be deployed at any time.")
+      end
+    }
+
     validate_one_for_role proposal, "swift-proxy"
     validate_one_for_role proposal, "swift-ring-compute"
     validate_at_least_n_for_role proposal, "swift-storage", 1
