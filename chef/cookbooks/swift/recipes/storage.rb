@@ -121,6 +121,8 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       end
       supports :status => true, :restart => true
       action [:enable, :start]
+      subscribes :restart, resources(:template => "/etc/swift/swift.conf")
+      subscribes :restart, resources(:template => "/etc/swift/#{ring}-server.conf")
       only_if { ::File.exists? "/etc/swift/#{ring}.ring.gz" }
     end
   }
