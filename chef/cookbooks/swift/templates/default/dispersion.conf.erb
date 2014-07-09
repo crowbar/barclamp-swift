@@ -13,6 +13,8 @@ keystone_api_insecure = <%= @keystone_settings['insecure'] ? "yes" : "no" %>
 dispersion_coverage = <%= node["swift"]["dispersion"]["dispersion_coverage"] %>
 retries = <%= node["swift"]["dispersion"]["retries"] %>
 concurrency = <%= node["swift"]["dispersion"]["concurrency"] %>
+# container_populate = yes
+# object_populate = yes
 container_report = no
 # object_report = yes
 # dump_json = no
