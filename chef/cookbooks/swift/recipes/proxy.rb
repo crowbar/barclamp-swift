@@ -99,11 +99,11 @@ proxy_config[:yield_frequency] = node[:swift][:middlewares][:bulk][:yield_freque
 cross_domain_policy     = node[:swift][:middlewares][:crossdomain][:cross_domain_policy]
 # make sure that cross_domain_policy value fits the required format
 # see http://docs.openstack.org/developer/swift/crossdomain.html
-cross_domain_policy_l = cross_domain_policy.split("\n").map.with_index do |line,index|
+cross_domain_policy_l = cross_domain_policy.split("\n").each_with_index.map do |line,index|
   line = "\t" + line unless index == 0
   line
 end
-cross_domain_policy     = cross_domain_policy_l.join("\n")
+proxy_config[:cross_domain_policy] = cross_domain_policy_l.join("\n")
 
 case node[:platform]
   when "centos", "redhat"
