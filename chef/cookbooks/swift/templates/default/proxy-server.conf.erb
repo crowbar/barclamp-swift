@@ -5,7 +5,20 @@ bind_port = <%= @bind_port %>
 # backlog = 4096
 # swift_dir = /etc/swift
 user = <%= @user %>
+
+# Enables exposing configuration settings via HTTP GET /info.
+# expose_info = true
+
+# Key to use for admin calls that are HMAC signed.  Default is empty,
+# which will disable admin calls to /info.
+# admin_key = secret_admin_key
 #
+# Allows the ability to withhold sections from showing up in the public
+# calls to /info.  The following would cause the sections 'container_quotas'
+# and 'tempurl' to not be listed.  Default is empty, allowing all registered
+# fetures to be listed via HTTP GET /info.
+# disallowed_sections = container_quotas, tempurl
+
 # Use an integer to override the number of pre-forked processes that will
 # accept connections.  Should default to the number of effective cpu
 # cores in the system.  It's worth noting that individual workers will
@@ -23,6 +36,7 @@ key_file = <%= @ssl_keyfile %>
 <% end -%>
 #
 # expiring_objects_container_divisor = 86400
+# expiring_objects_account_name = expiring_objects
 #
 # You can specify default log routing here if you want:
 log_name = swift-p
@@ -83,7 +97,7 @@ log_level = <%= @debug? "DEBUG": "INFO" %>
   crossdomain = middlewares.delete("crossdomain")
 %>
 [pipeline:main]
-pipeline = catch_errors healthcheck proxy-logging cache <%= bulk %> slo <%= ratelimit %> <%= cname_lookup %> <%= domain_remap %> <%= tempurl %> <%= formpost %> <%= crossdomain %> <%= auth %> <%= staticweb %> container-quotas account-quotas proxy-logging <%= middlewares.join(' ') %> <%= ceilometer %> proxy-server
+pipeline = catch_errors gatekeeper healthcheck proxy-logging cache container_sync <%= bulk %> <%= tempurl %> slo dlo <%= ratelimit %> <%= cname_lookup %> <%= domain_remap %> <%= formpost %> <%= crossdomain %> <%= auth %> <%= staticweb %> container-quotas account-quotas proxy-logging <%= middlewares.join(' ') %> <%= ceilometer %> proxy-server
 
 [app:proxy-server]
 use = egg:swift#proxy
@@ -105,8 +119,24 @@ log_requests = true
 # recheck_container_existence = 60
 # object_chunk_size = 8192
 # client_chunk_size = 8192
+#
+# How long the proxy server will wait on responses from the a/c/o servers.
 # node_timeout = 10
+#
+# How long the proxy server will wait for an initial response and to read a
+# chunk of data from the object servers while serving GET / HEAD requests.
+# Timeouts from these requests can be recovered from so setting this to
+# something lower than node_timeout would provide quicker error recovery
+# while allowing for a longer timeout for non-recoverable requests (PUTs).
+# Defaults to node_timeout, should be overriden if node_timeout is set to a
+# high number to prevent client timeouts from firing before the proxy server
+# has a chance to retry.
+# recoverable_node_timeout = node_timeout
+#
 # conn_timeout = 0.5
+#
+# How long to wait for requests to finish after a quorum has been established.
+# post_quorum_timeout = 0.5
 #
 # How long without an error before a node's error count is reset. This will
 # also be how long before a node is reenabled after suppression is triggered.
@@ -148,14 +178,6 @@ account_autocreate = <%= @auth_method == "keystone" ? "true" : "false" %>
 # Depth of the proxy put queue.
 # put_queue_depth = 10
 #
-# Start rate-limiting object segment serving after the Nth segment of a
-# segmented object.
-# rate_limit_after_segment = 10
-#
-# Once segment rate-limiting kicks in for an object, limit segments served
-# to N per second.
-# rate_limit_segments_per_sec = 1
-#
 # Storage nodes can be chosen at random (shuffle), by using timing
 # measurements (timing), or by using an explicit match (affinity).
 # Using timing measurements may allow for lower overall latency, while
@@ -168,11 +190,6 @@ account_autocreate = <%= @auth_method == "keystone" ? "true" : "false" %>
 # If the "timing" sorting_method is used, the timings will only be valid for
 # the number of seconds configured by timing_expiry.
 # timing_expiry = 300
-#
-# If set to false will treat objects with X-Static-Large-Object header set
-# as a regular object on GETs, i.e. will return that object's contents. Should
-# be set to false if slo is not used in pipeline.
-# allow_static_large_object = true
 #
 # The maximum time (seconds) that a large object connection is allowed to last.
 # max_large_object_get_time = 86400
@@ -214,7 +231,8 @@ account_autocreate = <%= @auth_method == "keystone" ? "true" : "false" %>
 # These are the headers whose values will only be shown to swift_owners. The
 # exact definition of a swift_owner is up to the auth system in use, but
 # usually indicates administrative responsibilities.
-# swift_owner_headers = x-container-read, x-container-write, x-container-sync-key, x-container-sync-to, x-account-meta-temp-url-key, x-account-meta-temp-url-key-2
+# swift_owner_headers = x-container-read, x-container-write, x-container-sync-key, x-container-sync-to, x-account-meta-temp-url-key, x-account-meta-temp-url-key-2, x-account-access-control
+
 
 [filter:tempauth]
 use = egg:swift#tempauth
@@ -291,6 +309,7 @@ insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
 # cache = swift.cache
+# include_service_catalog = False
 signing_dir = /var/cache/swift/keystone-signing
 
 [filter:keystoneauth]
@@ -339,6 +358,9 @@ memcache_servers = <%= @memcached_ips %>
 # set to 2 and reload.
 # In the future, the ability to use pickle serialization will be removed.
 # memcache_serialization_support = 2
+#
+# Sets the maximum number of connections to each memcached server per worker
+# memcache_max_connections = 2
 
 [filter:ratelimit]
 use = egg:swift#ratelimit
@@ -419,13 +441,17 @@ use = egg:swift#cname_lookup
 # set log_headers = false
 # set log_address = /dev/log
 #
+# Specify the storage_domain that match your cloud, multiple domains
+# can be specified separated by a comma
 storage_domain = <%= @storage_domain %>
+#
 lookup_depth = <%= @lookup_depth %>
 
 # Note: Put staticweb just after your auth filter(s) in the pipeline
 [filter:staticweb]
 use = egg:swift#staticweb
 
+# Note: Put tempurl before dlo, slo and your auth filter(s) in the pipeline
 [filter:tempurl]
 use = egg:swift#tempurl
 # The methods allowed with Temp URLs.
@@ -488,6 +514,11 @@ use = egg:swift#proxy_logging
 # access_log_statsd_metric_prefix =
 # access_log_headers = false
 #
+# If access_log_headers is True and access_log_headers_only is set only
+# these headers are logged. Multiple headers can be defined as comma separated
+# list like this: access_log_headers_only = Host, X-Object-Meta-Mtime
+# access_log_headers_only =
+#
 # By default, the X-Auth-Token is logged. To obscure the value,
 # set reveal_sensitive_prefix to the number of characters to log.
 # For example, if set to 12, only the first 12 characters of the
@@ -517,7 +548,19 @@ max_containers_per_extraction = <%= @max_containers_per_extraction %>
 max_failed_extractions = <%= @max_failed_extractions %>
 max_deletes_per_request = <%= @max_deletes_per_request %>
 max_failed_deletes = <%= @max_failed_deletes %>
+
+# In order to keep a connection active during a potentially long bulk request,
+# Swift may return whitespace prepended to the actual response body. This
+# whitespace will be yielded no more than every yield_frequency seconds.
 yield_frequency = <%= @yield_frequency %>
+
+# Note: The following parameter is used during a bulk delete of objects and
+# their container. This would frequently fail because it is very likely
+# that all replicated objects have not been deleted by the time the middleware got a
+# successful response. It can be configured the number of retries. And the
+# number of seconds to wait between each retry will be 1.5**retry
+
+# delete_container_retry_count = 0
 
 # Note: Put after auth in the pipeline.
 [filter:container-quotas]
@@ -529,9 +572,53 @@ use = egg:swift#slo
 # max_manifest_segments = 1000
 # max_manifest_size = 2097152
 # min_segment_size = 1048576
+# Start rate-limiting SLO segment serving after the Nth segment of a
+# segmented object.
+# rate_limit_after_segment = 10
+#
+# Once segment rate-limiting kicks in for an object, limit segments served
+# to N per second. 0 means no rate-limiting.
+# rate_limit_segments_per_sec = 0
+#
+# Time limit on GET requests (seconds)
+# max_get_time = 86400
+
+# Note: Put before both ratelimit and auth in the pipeline, but after
+# gatekeeper, catch_errors, and proxy_logging (the first instance).
+# If you don't put it in the pipeline, it will be inserted for you.
+[filter:dlo]
+use = egg:swift#dlo
+# Start rate-limiting DLO segment serving after the Nth segment of a
+# segmented object.
+# rate_limit_after_segment = 10
+#
+# Once segment rate-limiting kicks in for an object, limit segments served
+# to N per second. 0 means no rate-limiting.
+# rate_limit_segments_per_sec = 1
+#
+# Time limit on GET requests (seconds)
+# max_get_time = 86400
 
 [filter:account-quotas]
 use = egg:swift#account_quotas
+
+[filter:gatekeeper]
+use = egg:swift#gatekeeper
+# You can override the default log routing for this filter here:
+# set log_name = gatekeeper
+# set log_facility = LOG_LOCAL0
+# set log_level = INFO
+# set log_headers = false
+# set log_address = /dev/log
+
+[filter:container_sync]
+use = egg:swift#container_sync
+# Set this to false if you want to disallow any full url values to be set for
+# any new X-Container-Sync-To headers. This will keep any new full urls from
+# coming in, but won't change any existing values already in the cluster.
+# Updating those will have to be done manually, as knowing what the true realm
+# endpoint should be cannot always be guessed.
+# allow_full_urls = true
 
 ### External filters
 
