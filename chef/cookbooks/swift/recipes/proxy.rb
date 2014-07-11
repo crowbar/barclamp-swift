@@ -395,6 +395,7 @@ if node[:swift][:frontend]=='native'
       restart_command "stop swift-proxy ; start swift-proxy"
     end
     action [:enable, :start]
+    subscribes :restart, resources(:template => "/etc/swift/swift.conf"), :immediately
     subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
     # Do not even try to start the daemon if we don't have the ring yet
