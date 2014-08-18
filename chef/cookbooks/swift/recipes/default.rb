@@ -72,5 +72,6 @@ template "/etc/rsyslog.d/11-swift.conf" do
   source     "11-swift.conf.erb"
   mode       "0644"
   variables(:rsyslog_version => rsyslog_version)
-  only_if     { node[:platform] == "suse" } # other distros might not have /var/log/swift
+  notifies   :restart, "service[rsyslog]"
+  only_if    { node[:platform] == "suse" } # other distros might not have /var/log/swift
 end
