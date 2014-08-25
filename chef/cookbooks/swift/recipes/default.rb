@@ -58,7 +58,7 @@ else
 end
 
 template "/etc/swift/swift.conf" do
-  owner node[:swift][:user]
+  owner "root"
   group node[:swift][:group]
   source "swift.conf.erb"
  variables( {

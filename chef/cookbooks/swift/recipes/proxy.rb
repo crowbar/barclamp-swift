@@ -341,9 +341,9 @@ proxy_config[:memcached_ips] = servers
 ## Create the proxy server configuraiton file
 template "/etc/swift/proxy-server.conf" do
   source     "proxy-server.conf.erb"
-  mode       "0644"
+  mode       "0640"
+  owner       "root"
   group       node[:swift][:group]
-  owner       node[:swift][:user]
   variables   proxy_config
 end
 
@@ -410,7 +410,8 @@ elsif node[:swift][:frontend]=='uwsgi'
   end
 
   directory "/usr/lib/cgi-bin/swift/" do
-    owner node[:swift][:user]
+    owner "root"
+    group "root"
     mode 0755
     action :create
     recursive true
