@@ -36,7 +36,7 @@ end
 
 unless %w(redhat centos).include?(node.platform)
   service "rsync" do
-    action :start
+    action [:enable, :start]
     service_name "rsyncd" if %w(suse).include?(node.platform)
   end
 else
