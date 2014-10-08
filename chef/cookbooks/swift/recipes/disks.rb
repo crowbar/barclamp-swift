@@ -105,28 +105,32 @@ end
 found_disks.each do |disk|
   # Disk was freshly created.  Grab its UUID and create a mount point.
   disk[:uuid] = get_uuid(disk[:device])
-  # notify udev that there is a new UUID
-  ::Kernel.system("echo change > /sys/block/#{disk[:device_disk_name]}/#{disk[:device_disk_partition]}/uevent")
-  ::Kernel.system("/sbin/udevadm settle")
 
-  disk[:state] = "Operational"
-  disk[:name] = disk[:uuid].delete('-')
-  Chef::Log.info("Adding new disk #{disk[:device]} with UUID #{disk[:uuid]} to the Swift config")
-  node[:swift][:devs][disk[:uuid]] = disk.dup
+  unless disk[:uuid].nil?
+    # notify udev that there is a new UUID
+    ::Kernel.system("echo change > /sys/block/#{disk[:device_disk_name]}/#{disk[:device_disk_partition]}/uevent")
+    ::Kernel.system("/sbin/udevadm settle")
+
+    disk[:state] = "Operational"
+    disk[:name] = disk[:uuid].delete('-')
+    Chef::Log.info("Adding new disk #{disk[:device]} with UUID #{disk[:uuid]} to the Swift config")
+    node[:swift][:devs][disk[:uuid]] = disk.dup
+  end
 end
 
 # Now clean up list of claimed disks and remove those that do not
 # exist anymore.
 node[:swift][:devs].each do |uuid,disk|
-
-  Chef::Log.info("Checking disk #{disk[:device]}")
-  # Verify that UUID still matches
-  current_uuid = get_uuid(disk[:device])
-  if current_uuid != disk[:uuid]
-    Chef::Log.warn("Disk #{disk[:device]} with UUID #{current_uuid} not matching expected UUID #{disk[:uuid]}")
-    Chef::Log.info("Setting disk #{disk[:device]} to Stale")
-    disk[:state] = "UUID_Stale"
-    node[:swift][:devs][disk[:uuid]] = disk.dup
+  if disk[:state] == "Operational"
+    Chef::Log.info("Checking disk #{disk[:device]}")
+    # Verify that UUID still matches
+    current_uuid = get_uuid(disk[:device])
+    if current_uuid != disk[:uuid]
+      Chef::Log.warn("Disk #{disk[:device]} with UUID #{current_uuid} not matching expected UUID #{disk[:uuid]}")
+      Chef::Log.info("Setting disk #{disk[:device]} to Stale")
+      disk[:state] = "UUID_Stale"
+      node[:swift][:devs][disk[:uuid]] = disk.dup
+    end
   end
 end
 
