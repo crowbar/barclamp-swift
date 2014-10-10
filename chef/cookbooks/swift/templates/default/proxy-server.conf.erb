@@ -644,6 +644,7 @@ super_admin_key = <%= @admin_key %>
 
 [filter:ceilometer]
 use = egg:ceilometer#swift
+set log_level = WARN
 
 <% if !@cross_domain_policy.empty? %>
 [filter:crossdomain]
