@@ -244,7 +244,7 @@ case proxy_config[:auth_method]
          token keystone_settings['admin_token']
          port keystone_settings['admin_port']
          endpoint_service "swift"
-         endpoint_region "RegionOne"
+         endpoint_region keystone_settings['endpoint_region']
          endpoint_publicURL "#{swift_protocol}://#{public_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
          endpoint_adminURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/"
          endpoint_internalURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
