@@ -16,16 +16,17 @@
 #
 
 barclamp:
-  name: swift
-  display: Swift
+  name: 'swift'
+  display: 'Swift'
   description: 'OpenStack Object Storage: Scale-out object store'
   version: 0
+  user_managed: true
   requires:
     - '@crowbar'
-    - pacemaker
-    - keystone
+    - 'pacemaker'
+    - 'keystone'
   member:
-    - openstack
+    - 'openstack'
 
 crowbar:
   layout: 1
@@ -36,71 +37,9 @@ crowbar:
 
 nav:
   utils:
-    swift: swift_dashboard_path
-
-pips:
-  - uwsgi
-
-debs:
-  ubuntu-12.04:
-    repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/icehouse main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/icehouse main
-      - deb http://ppa.launchpad.net/nginx/stable/ubuntu precise main
-  pkgs:
-    - curl
-    - swift
-    - libffi6
-    - libffi-dev
-    - swift-container
-    - swift-object
-    - sqlite
-    - swift-account
-    - memcached
-    - swift-proxy
-    - xfsprogs
-    - libmemcache-dev
-    - python-swift
-    - python-swauth
-    - python-keystone
-    - python-configobj
-    - python-coverage
-    - python-dnspython
-    - python-eventlet
-    - python-greenlet
-    - python-netifaces
-    - python-nose
-    - python-pastedeploy
-    - python-setuptools
-    - python-simplejson
-    - python-webob
-    - python-xattr
-    - sqlite3
-    - swift-plugin-s3
-    - nginx-extras
-    - uwsgi
-    - uwsgi-plugin-python
-
-rpms:
-  centos-6.4:
-    repos:
-      - bare openstack icehouse http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
-  redhat-6.4:
-    repos:
-      - bare openstack icehouse http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
-  pkgs:
-    - openstack-swift
-    - python-swiftclient
-    - python-keystoneclient
-    - nginx
-    - openstack-swift-account
-    - openstack-swift-proxy
-    - openstack-swift-container
-    - openstack-swift-object
-    - uwsgi
-    - memcached
-    - xfsprogs
-    - python-dns
+    swift:
+      order: 20
+      route: 'swift_dashboard_path'
 
 git_repo:
-  - swift https://github.com/openstack/swift.git stable/icehouse
+  - 'swift https://github.com/openstack/swift.git stable/juno'
