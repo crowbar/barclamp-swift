@@ -31,18 +31,18 @@ unless node[:swift][:use_gitrepo]
 
 else
 
-  ["/etc/swift", "/var/run/swift"].each do |d|
+  directory "/etc/swift" do
+    owner node[:swift][:user]
+    group node[:swift][:group]
+    mode "0755"
+  end
+
+  ["/var/cache/swift", "/var/run/swift"].each do |d|
     directory d do
       owner node[:swift][:user]
       group node[:swift][:group]
-      mode "0755"
+      mode "0700"
     end
-  end
-
-  directory "/var/cache/swift" do
-    owner node[:swift][:user]
-    group node[:swift][:group]
-    mode "0700"
   end
 
   pfs_and_install_deps @cookbook_name do
@@ -58,7 +58,7 @@ else
 end
 
 template "/etc/swift/swift.conf" do
-  owner node[:swift][:user]
+  owner "root"
   group node[:swift][:group]
   source "swift.conf.erb"
  variables( {

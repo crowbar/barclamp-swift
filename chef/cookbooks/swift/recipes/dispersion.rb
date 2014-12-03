@@ -87,9 +87,9 @@ end
 
 template "/etc/swift/dispersion.conf" do
   source     "dispersion.conf.erb"
-  mode       "0600"
+  mode       "0640"
+  owner       "root"
   group       node[:swift][:group]
-  owner       node[:swift][:user]
   variables(
     :keystone_settings => keystone_settings
   )

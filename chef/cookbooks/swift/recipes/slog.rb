@@ -139,7 +139,6 @@ directory "/var/log/swift/hourly" do
 end
 directory "/var/log/swift/stats" do 
   group       node[:swift][:group]
-  group       node[:swift][:group]
   owner       node[:swift][:user]
   mode        "0755"
  recursive  true
@@ -164,9 +163,9 @@ end
 ## (the uploader needs it)
 template "/etc/swift/proxy-server.conf" do
   source     "proxy-server.conf.erb"
-  mode       "0644"
+  mode       "0640"
+  owner       "root"
   group       node[:swift][:group]
-  owner       node[:swift][:user]
   variables   config
 end unless config["proxy"]
 
