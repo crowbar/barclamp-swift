@@ -15,19 +15,7 @@
 # limitations under the License.
 #
 
-map.swift_dashboard "swift/dashboard",
-  :controller => "swift",
-  :action => "dashboard"
-
-map.swift_clear_report "swift/clear",
-  :controller => "swift",
-  :action => "clear"
-
-map.swift_create_report "swift/create",
-  :controller => "swift",
-  :action => "create",
-  :condition => { :method => :post }
-
-map.swift_show_report "swift/results/:id.:format",
-  :controller => "swift",
-  :action => "results"
+post 'swift/create' => 'swift#create', as: 'swift_create_report'
+get 'swift/dashboard' => 'swift#dashboard', as: 'swift_dashboard'
+get 'swift/clear' => 'swift#clear', as: 'swift_clear_report'
+get 'swift/results/:id.:format' => 'swift#results', as: 'swift_show_report'

@@ -17,7 +17,8 @@
 
 en:
   nav:
-    swift: 'Swift Dispersion'
+    utils:
+      swift: 'Swift Dashboard'
   barclamp:
     swift:
       run:
