@@ -61,7 +61,7 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
 %w{account-server object-server container-server}.each do |service|
   template "/etc/swift/#{service}.conf" do
-    source "#{service}-conf.erb"
+    source "#{service}.conf.erb"
     owner "root"
     group node[:swift][:group]
     variables({ 
