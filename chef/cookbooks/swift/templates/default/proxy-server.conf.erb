@@ -357,6 +357,7 @@ reseller_prefix=<%= @reseller_prefix %>
 # move between domains, you should disable backwards compatible name matching
 # in ACLs by setting allow_names_in_acls to false:
 # allow_names_in_acls = true
+allow_names_in_acls = false
 log_facility = LOG_LOCAL0
 log_level = <%= @debug? "DEBUG": "INFO" %>
 
