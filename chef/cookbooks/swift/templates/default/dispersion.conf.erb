@@ -1,20 +1,36 @@
 [dispersion]
-auth_url = <%= @keystone_settings['admin_auth_url'] %>
-auth_user = <%= node["swift"]["dispersion"]["service_tenant"] %>:<%= node["swift"]["dispersion"]["service_user"] %>
-auth_key = <%= node["swift"]["dispersion"]["service_password"] %>
-# auth_url = http://saio:5000/v2.0/
+# Please create a new account solely for using dispersion tools, which is
+# helpful for keep your own data clean.
+# auth_url = http://localhost:8080/auth/v1.0
 # auth_user = test:tester
 # auth_key = testing
+# auth_version = 1.0
+#
+# NOTE: If you want to use keystone (auth version 2.0), then its configuration
+# would look something like:
+# auth_url = http://localhost:5000/v2.0/
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
+# auth_user = tenant:user
+auth_user = <%= node["swift"]["dispersion"]["service_tenant"] %>:<%= node["swift"]["dispersion"]["service_user"] %>
+# auth_key = password
+auth_key = <%= node["swift"]["dispersion"]["service_password"] %>
+# auth_version = 2.0
 auth_version = 2.0
+#
 # endpoint_type = publicURL
+# keystone_api_insecure = no
 keystone_api_insecure = <%= @keystone_settings['insecure'] ? "yes" : "no" %>
 #
 # swift_dir = /etc/swift
+# dispersion_coverage = 1.0
 dispersion_coverage = <%= node["swift"]["dispersion"]["dispersion_coverage"] %>
+# retries = 5
 retries = <%= node["swift"]["dispersion"]["retries"] %>
+# concurrency = 25
 concurrency = <%= node["swift"]["dispersion"]["concurrency"] %>
 # container_populate = yes
 # object_populate = yes
+# container_report = yes
 container_report = no
 # object_report = yes
 # dump_json = no
