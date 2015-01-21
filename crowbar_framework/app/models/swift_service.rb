@@ -36,20 +36,32 @@ class SwiftService < PacemakerServiceObject
       {
         "swift-storage" => {
           "unique" => false,
-          "count" => -1
+          "count" => -1,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          }
         },
         "swift-proxy" => {
           "unique" => false,
           "count" => 1,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          },
           "cluster" => true
         },
         "swift-dispersion" => {
           "unique" => false,
-          "count" => 1
+          "count" => 1,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          }
         },
         "swift-ring-compute" => {
           "unique" => false,
-          "count" => 1
+          "count" => 1,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          }
         }
       }
     end
