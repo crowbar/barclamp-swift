@@ -38,14 +38,16 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "12.0"
+            "suse" => "12.0",
+            "windows" => "/.*/"
           }
         },
         "swift-proxy" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "12.0"
+            "suse" => "12.0",
+            "windows" => "/.*/"
           },
           "cluster" => true
         },
@@ -53,14 +55,16 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "12.0"
+            "suse" => "12.0",
+            "windows" => "/.*/"
           }
         },
         "swift-ring-compute" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "12.0"
+            "suse" => "12.0",
+            "windows" => "/.*/"
           }
         }
       }
