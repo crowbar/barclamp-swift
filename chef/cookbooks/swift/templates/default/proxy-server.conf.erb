@@ -29,7 +29,7 @@ user = <%= @user %>
 # cores in the system.  It's worth noting that individual workers will
 # use many eventlet co-routines to service multiple concurrent requests.
 # workers = auto
-workers = 1
+workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 #
 # Maximum concurrent requests per worker
 # max_clients = 1024
