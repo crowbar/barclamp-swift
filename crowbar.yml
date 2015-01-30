@@ -19,7 +19,7 @@ barclamp:
   name: 'swift'
   display: 'Swift'
   description: 'OpenStack Object Storage: Scale-out object store'
-  version: 0
+  version: 1
   user_managed: true
   requires:
     - '@crowbar'
