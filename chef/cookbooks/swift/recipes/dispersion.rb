@@ -41,6 +41,7 @@ service_password = node[:swift][:dispersion][:service_password]
 
 keystone_register "swift dispersion wakeup keystone" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -49,6 +50,7 @@ end
 
 keystone_register "create tenant #{service_tenant} for dispersion" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -58,6 +60,7 @@ end
 
 keystone_register "add #{service_user}:#{service_tenant} user" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -69,6 +72,7 @@ end
 
 keystone_register "add #{service_user}:#{service_tenant} user admin role" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']

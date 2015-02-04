@@ -188,6 +188,7 @@ case proxy_config[:auth_method]
 
      keystone_register "swift proxy wakeup keystone" do
        protocol keystone_settings['protocol']
+       insecure keystone_settings['insecure']
        host keystone_settings['internal_url_host']
        port keystone_settings['admin_port']
        token keystone_settings['admin_token']
@@ -198,6 +199,7 @@ case proxy_config[:auth_method]
      role = "ResellerAdmin"
      keystone_register "add #{role} role for swift" do
        protocol keystone_settings['protocol']
+       insecure keystone_settings['insecure']
        host keystone_settings['internal_url_host']
        port keystone_settings['admin_port']
        token keystone_settings['admin_token']
@@ -207,6 +209,7 @@ case proxy_config[:auth_method]
 
      keystone_register "register swift user" do
        protocol keystone_settings['protocol']
+       insecure keystone_settings['insecure']
        host keystone_settings['internal_url_host']
        port keystone_settings['admin_port']
        token keystone_settings['admin_token']
@@ -218,6 +221,7 @@ case proxy_config[:auth_method]
 
      keystone_register "give swift user access" do
        protocol keystone_settings['protocol']
+       insecure keystone_settings['insecure']
        host keystone_settings['internal_url_host']
        port keystone_settings['admin_port']
        token keystone_settings['admin_token']
@@ -229,6 +233,7 @@ case proxy_config[:auth_method]
 
      keystone_register "register swift service" do
        protocol keystone_settings['protocol']
+       insecure keystone_settings['insecure']
        host keystone_settings['internal_url_host']
        token keystone_settings['admin_token']
        port keystone_settings['admin_port']
@@ -240,6 +245,7 @@ case proxy_config[:auth_method]
 
      keystone_register "register swift-proxy endpoint" do
          protocol keystone_settings['protocol']
+         insecure keystone_settings['insecure']
          host keystone_settings['internal_url_host']
          token keystone_settings['admin_token']
          port keystone_settings['admin_port']
