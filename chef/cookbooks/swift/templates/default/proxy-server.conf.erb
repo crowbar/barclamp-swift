@@ -321,7 +321,7 @@ auth_port = <%= @keystone_settings['admin_port'] %>
 # auth_protocol = http
 auth_protocol = <%= @keystone_settings['protocol'] %>
 # auth_uri = http://keystonehost:5000/
-auth_uri = <%= @keystone_settings['internal_auth_url'] %>
+auth_uri = <%= @keystone_settings['public_auth_url'] %>
 # admin_tenant_name = service
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 # admin_user = swift
