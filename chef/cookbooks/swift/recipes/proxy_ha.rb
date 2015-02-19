@@ -48,6 +48,13 @@ pacemaker_clone "cl-#{service_name}" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exists?("/etc/swift/object.ring.gz") }
 end
 
+crowbar_pacemaker_order_only_existing "o-cl-#{service_name}" do
+  ordering [ "cl-keystone", "cl-#{service_name}" ]
+  score "Optional"
+  action :create
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exists?("/etc/swift/object.ring.gz") }
+end
+
 crowbar_pacemaker_sync_mark "create-swift_ha_resources" do
   only_if { ::File.exists? "/etc/swift/object.ring.gz" }
 end
