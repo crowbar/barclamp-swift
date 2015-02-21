@@ -734,7 +734,7 @@ set default_swift_cluster = local#<%= @swift_protocol %>://<%= @admin_host %>:<%
 super_admin_key = <%= @admin_key %>
 
 [filter:ceilometer]
-use = egg:ceilometer#swift
+paste.filter_factory = ceilometer.objectstore.swift_middleware:filter_factory
 set log_level = WARN
 
 <% if !@cross_domain_policy.empty? %>
