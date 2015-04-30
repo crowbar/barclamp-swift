@@ -71,10 +71,6 @@
                   "type": "map",
                   "required": true,
                   "mapping": {
-                    "gitrepo": { "type": "str", "required": true },
-                    "git_refspec": { "type": "str", "required": true },
-                    "use_gitrepo": { "type": "bool", "required": true },
-                    "use_gitbarclamp": { "type": "bool", "required": true },
                     "enabled": { "type": "bool", "required": true }
                   }
                 },
@@ -122,14 +118,6 @@
               "generate_certs": { "type" : "bool", "required" : true },
               "insecure": { "type" : "bool", "required" : true }
             }},
-            "gitrepo": { "type": "str", "required": true },
-            "git_instance": { "type": "str", "required": true },
-            "git_refspec": { "type": "str", "required": true },
-            "use_gitrepo": { "type": "bool", "required": true },
-            "use_gitbarclamp": { "type": "bool", "required": true },
-            "use_pip_cache": { "type": "bool", "required": true },
-            "use_virtualenv": { "type": "bool", "required": true },
-            "pfs_deps": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ]},
             "cluster_hash": { "type": "str", "required": true },
             "cluster_admin_pw": { "type": "str", "required": true },
             "replicas": { "type": "int", "required": true },

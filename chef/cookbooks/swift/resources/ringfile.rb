@@ -47,4 +47,3 @@ attribute :disks
 attribute :partitions, :kind_of => Integer
 attribute :replicas, :kind_of => Integer
 attribute :min_part_hours, :kind_of => Integer
-attribute :virtualenv, :kind_of => String

@@ -40,6 +40,3 @@ nav:
     swift:
       order: 20
       route: 'swift_dashboard_path'
-
-git_repo:
-  - 'swift https://github.com/openstack/swift.git stable/juno'

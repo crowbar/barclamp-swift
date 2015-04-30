@@ -76,9 +76,6 @@ class SwiftService < PacemakerServiceObject
     if role.default_attributes["swift"]["auth_method"] == "keystone"
       answer << { "barclamp" => "keystone", "inst" => role.default_attributes["swift"]["keystone_instance"] }
     end
-    if role.default_attributes[@bc_name]["use_gitrepo"]
-      answer << { "barclamp" => "git", "inst" => role.default_attributes[@bc_name]["git_instance"] }
-    end
     answer
   end
 
@@ -90,7 +87,6 @@ class SwiftService < PacemakerServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
-    base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone", true)
 
     unless base["attributes"][@bc_name]["keystone_instance"].blank?
@@ -318,10 +314,6 @@ class SwiftService < PacemakerServiceObject
     validate_one_for_role proposal, "swift-proxy"
     validate_one_for_role proposal, "swift-ring-compute"
     validate_at_least_n_for_role proposal, "swift-storage", 1
-
-    if proposal["attributes"][@bc_name]["use_gitrepo"]
-      validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
-    end
 
     if proposal["attributes"]["swift"]["replicas"] <= 0
       validation_error("Need at least 1 replica")

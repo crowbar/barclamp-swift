@@ -32,13 +32,7 @@
       %legend
         = t(".middlewares.s3.header")
 
-      = boolean_field %w(middlewares s3 enabled), "data-showit" => "true", "data-showit-target" => "#s3_container", "data-showit-direct" => "true"
-
-      #s3_container
-        = string_field %w(middlewares s3 gitrepo)
-        = string_field %w(middlewares s3 git_refspec)
-        = boolean_field %w(middlewares s3 use_gitrepo)
-        = boolean_field %w(middlewares s3 use_gitbarclamp)
+      = boolean_field %w(middlewares s3 enabled)
 
     %fieldset
       %legend
@@ -98,5 +92,3 @@
         = string_field %w(middlewares ratelimit account_whitelist)
         = string_field %w(middlewares ratelimit account_blacklist)
         = string_field %w(middlewares ratelimit container_ratelimit_size)
-
-    = render "barclamp/git/pfsdeps"

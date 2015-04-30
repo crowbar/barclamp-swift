@@ -118,34 +118,18 @@ pkg_list.each do |pkg|
   end
 end
 
-unless node[:swift][:use_gitrepo]
-  case node[:platform]
-  when "suse", "centos", "redhat"
-    package "openstack-swift-proxy"
-  else
-    package "swift-proxy"
-  end
+case node[:platform]
+when "suse", "centos", "redhat"
+  package "openstack-swift-proxy"
+else
+  package "swift-proxy"
 end
 
 if node[:swift][:middlewares][:s3][:enabled]
-  if node[:swift][:middlewares][:s3][:use_gitrepo]
-    s3_path = "/opt/swift3"
-    pfs_and_install_deps("swift3") do
-      path s3_path
-      reference node[:swift][:middlewares][:s3][:git_refspec]
-      without_setup true
-    end
-    execute "setup_swift3" do
-      cwd s3_path
-      command "python setup.py develop"
-      creates "#{s3_path}/swift3.egg-info"
-    end
+  if %w(redhat centos suse).include?(node.platform)
+    package "python-swift3"
   else
-    if %w(redhat centos suse).include?(node.platform)
-      package "python-swift3"
-    else
-      package "swift-plugin-s3"
-    end
+    package "swift-plugin-s3"
   end
 end
 
@@ -162,23 +146,7 @@ case proxy_config[:auth_method]
    when "keystone"
      keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-     if node[:swift][:use_gitrepo]
-       if node[:swift][:use_virtualenv]
-         pfs_and_install_deps "keystone" do
-           cookbook "keystone"
-           cnode keystone
-           path "/opt/swift/keystone"
-           virtualenv "/opt/swift/.venv"
-         end
-       else
-         pfs_and_install_deps "keystone" do
-           cookbook "keystone"
-           cnode keystone
-         end
-       end
-     else
-       package "python-keystoneclient"
-     end
+     package "python-keystoneclient"
 
      proxy_config[:keystone_settings] = keystone_settings
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
@@ -360,8 +328,6 @@ node[:memcached][:name] = "swift-proxy"
 memcached_instance "swift-proxy" do
 end
 
-venv_path = node[:swift][:use_virtualenv] && node[:swift][:use_gitrepo] ? "/opt/swift/.venv" : nil
-
 ## make sure to fetch ring files from the ring compute node
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
 compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
@@ -387,12 +353,6 @@ ruby_block "Check if ring is present" do
 end
 
 if node[:swift][:frontend]=='native'
-  if node[:swift][:use_gitrepo]
-    swift_service "swift-proxy" do
-      virtualenv venv_path
-    end
-  end
-
   service "swift-proxy" do
     service_name node[:swift][:proxy][:service_name]
     if %w(redhat centos suse).include?(node.platform)

@@ -32,10 +32,6 @@
           "enabled": false
         },
         "s3": {
-          "gitrepo": "http://github.com/fujita/swift3",
-          "git_refspec": "195e6c76ff46a8f00621a56d4e13b500becc2c9a",
-          "use_gitrepo": false,
-          "use_gitbarclamp": true,
           "enabled": false
         },
         "ratelimit": {
@@ -70,27 +66,7 @@
           "insecure": false
       },
       "replication_interval": 60,
-      "gitrepo": "http://github.com/openstack/swift.git",
-      "git_instance": "",
-      "git_refspec": "stable/icehouse",
-      "use_gitrepo": false,
-      "use_gitbarclamp": true,
-      "use_pip_cache": true,
-      "use_virtualenv": true,
       "frontend": "uwsgi",
-      "pfs_deps": [
-          "curl",
-          "memcached",
-          "sqlite3",
-          "xfsprogs",
-          "libffi-dev",
-          "libffi6",
-          "pip://setuptools-git",
-          "pip://distribute>=0.6.28",
-          "pip://MySQL-python",
-          "pip://python-swiftclient>1.2.0",
-          "pip://python-keystoneclient"
-      ],
       "cluster_hash": "",
       "cluster_admin_pw": "swauth",
       "replicas": 3,
@@ -120,7 +96,7 @@
     "swift": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 10,
+      "schema-revision": 20,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],

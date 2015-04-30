@@ -85,10 +85,6 @@ en:
           s3:
             header: 'S3 Middleware'
             enabled: 'Enabled'
-            gitrepo: 'Git repo url'
-            git_refspec: 'Git ref_spec'
-            use_gitrepo: 'Use pull from source'
-            use_gitbarclamp: 'Use barclamp-git to checkout'
           staticweb:
             header: 'StaticWeb'
             enabled: 'Enabled'
