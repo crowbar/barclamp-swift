@@ -169,20 +169,19 @@ class SwiftService < PacemakerServiceObject
   end
 
   def get_ready_proposals
-    ProposalObject.find_proposals(@bc_name).select {|p| p.status == 'ready'}.compact
+    Proposal.where(barclamp: @bc_name).all.select {|p| p.status == 'ready'}.compact
   end
 
   def _get_or_create_db
-    db = ProposalObject.find_data_bag_item "crowbar/swift"
+    db = Chef::DataBag.load "crowbar/swift"
     if db.nil?
       begin
         lock = acquire_lock @bc_name
 
-        db_item = Chef::DataBagItem.new
-        db_item.data_bag "crowbar"
-        db_item["id"] = "swift"
-        db_item["dispersion_reports"] = []
-        db = ProposalObject.new db_item
+        db = Chef::DataBagItem.new
+        db.data_bag "crowbar"
+        db["id"] = "swift"
+        db["dispersion_reports"] = []
         db.save
       ensure
         release_lock lock
@@ -306,7 +305,7 @@ class SwiftService < PacemakerServiceObject
 
   def validate_proposal_after_save proposal
     # first, check for conflict with ceph
-    ProposalObject.find_proposals("ceph").each {|p|
+    Proposal.where(barclamp: "ceph").all.each {|p|
       next unless (p.status == "ready") || (p.status == "pending")
       elements = (p.status == "ready") ? p.role.elements : p.elements
       if elements.keys.include?("ceph-radosgw") && !elements['ceph-radosgw'].empty?
