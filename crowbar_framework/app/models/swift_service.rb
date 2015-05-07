@@ -173,7 +173,7 @@ class SwiftService < PacemakerServiceObject
   end
 
   def _get_or_create_db
-    db = Chef::DataBag.load "crowbar/swift"
+    db = Chef::DataBag.load("crowbar/swift") rescue nil
     if db.nil?
       begin
         lock = acquire_lock @bc_name
