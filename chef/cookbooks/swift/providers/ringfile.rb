@@ -67,12 +67,11 @@ end
 
 def load_current_resource
   name = @new_resource.name
-  virtualenv = @new_resource.virtualenv || nil
   name = "/etc/swift/#{name}"
   @current_resource = Chef::Resource::SwiftRingfile.new(name)
   @ring_test = nil  
   Chef::Log.info("parsing ring-file for #{name}")
-  IO.popen("#{virtualenv} swift-ring-builder #{name}") { |pipe|
+  IO.popen("swift-ring-builder #{name}") { |pipe|
     ring_txt=pipe.readlines
     Chef::Log.debug("raw ring info:#{ring_txt}")
     @ring_test = scan_ring_desc ring_txt
@@ -170,7 +169,6 @@ end
 
 action :apply do
   name = @new_resource.name
-  virtualenv = @new_resource.virtualenv || nil
   cur=@ring_test
   Chef::Log.info("current content of: #{name} #{(cur.nil? ? "-not there" : cur.to_s)}")
   
@@ -186,7 +184,7 @@ action :apply do
     execute "add disk #{d[:ip]}:#{d[:port]}/#{d[:dev_name]} to #{name}" do
       user node[:swift][:user]
       group node[:swift][:group]
-      command "#{virtualenv} swift-ring-builder #{name} add z#{d[:zone]}-#{d[:ip]}:#{d[:port]}/#{d[:dev_name]} #{d[:weight]}"
+      command "swift-ring-builder #{name} add z#{d[:zone]}-#{d[:ip]}:#{d[:port]}/#{d[:dev_name]} #{d[:weight]}"
       cwd "/etc/swift"
     end
   end
@@ -195,7 +193,7 @@ action :apply do
     execute "remove disk #{d.id} from #{name}" do
       user node[:swift][:user]
       group node[:swift][:group]
-      command "#{virtualenv} swift-ring-builder #{name} remove d#{d.id} "
+      command "swift-ring-builder #{name} remove d#{d.id} "
       cwd "/etc/swift"
     end   
   end
@@ -204,7 +202,6 @@ end
 
 action :rebalance do
   name = @current_resource.name
-  virtualenv = @new_resource.virtualenv || nil
   dirty = false
   
   ring_data_mtime= ::File.new(name).mtime   if ::File.exist?(name)
@@ -219,7 +216,7 @@ action :rebalance do
   execute "rebalance ring for #{name}" do    
     user node[:swift][:user]
     group node[:swift][:group]
-    command "#{virtualenv} swift-ring-builder #{name} rebalance"
+    command "swift-ring-builder #{name} rebalance"
     cwd "/etc/swift"
     returns [0,1]  # returns 1 if it didn't do anything, 2 on 
   end if dirty
@@ -230,7 +227,7 @@ action :rebalance do
     execute "writeout ring for #{name}" do
       user node[:swift][:user]
       group node[:swift][:group]
-      command "#{virtualenv} swift-ring-builder #{name} write_ring"
+      command "swift-ring-builder #{name} write_ring"
       cwd "/etc/swift"
       returns [0,1]  ## returns 1 if it didn't do anything, 2 on error.
     end
@@ -243,7 +240,6 @@ end
 
 def create_ring
   name = @new_resource.name
-  virtualenv = @new_resource.virtualenv || nil
   mh = @new_resource.min_part_hours ? @new_resource.min_part_hours : 1
   parts = @new_resource.partitions ? @new_resource.partitions : 18
   replicas = @new_resource.replicas ? @new_resource.replicas : 3
@@ -251,7 +247,7 @@ def create_ring
   execute "create #{name} ring" do
     user node[:swift][:user]
     group node[:swift][:group]
-    command "#{virtualenv} swift-ring-builder #{name} create #{parts}  #{replicas} #{mh}"
+    command "swift-ring-builder #{name} create #{parts}  #{replicas} #{mh}"
     creates "/etc/swift/#{name}"
     cwd "/etc/swift"
   end

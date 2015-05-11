@@ -16,45 +16,13 @@
 # Author: andi abes
 #
 
-swift_path = "/opt/swift"
-venv_path = node[:swift][:use_virtualenv] ? "#{swift_path}/.venv" : nil
+package "curl"
 
-unless node[:swift][:use_gitrepo]
-  package "curl"
-
-  case node[:platform]
-  when "suse", "centos", "redhat"
-    package "openstack-swift"
-  else
-    package "swift"
-  end
-
+case node[:platform]
+when "suse", "centos", "redhat"
+  package "openstack-swift"
 else
-
-  directory "/etc/swift" do
-    owner node[:swift][:user]
-    group node[:swift][:group]
-    mode "0755"
-  end
-
-  ["/var/cache/swift", "/var/run/swift"].each do |d|
-    directory d do
-      owner node[:swift][:user]
-      group node[:swift][:group]
-      mode "0700"
-    end
-  end
-
-  pfs_and_install_deps @cookbook_name do
-    path swift_path
-    virtualenv venv_path
-    wrap_bins [ "swift", "swift-dispersion-report", "swift-dispersion-populate" ]
-  end
-
-  create_user_and_dirs(@cookbook_name) do
-    user_name node[:swift][:user]
-    dir_group node[:swift][:group]
-  end
+  package "swift"
 end
 
 template "/etc/swift/swift.conf" do

@@ -37,22 +37,20 @@ if node.roles.include?("swift-ring-compute") && !(::File.exists? "/etc/swift/obj
   return
 end
 
-unless node[:swift][:use_gitrepo]
-  case node[:platform]
-  when "suse", "centos", "redhat"
-    %w{openstack-swift-container
-       openstack-swift-object
-       openstack-swift-account}.each do |pkg|
-      package pkg do
-        action :install
-      end
+case node[:platform]
+when "suse", "centos", "redhat"
+  %w{openstack-swift-container
+     openstack-swift-object
+     openstack-swift-account}.each do |pkg|
+    package pkg do
+      action :install
     end
-  else
-    %w{swift-container swift-object swift-account}.each do |pkg|
-      pkg = "openstack-#{pkg}" if %w(redhat centos suse).include?(node.platform)
-      package pkg do
-        action :install
-      end
+  end
+else
+  %w{swift-container swift-object swift-account}.each do |pkg|
+    pkg = "openstack-#{pkg}" if %w(redhat centos suse).include?(node.platform)
+    package pkg do
+      action :install
     end
   end
 end
@@ -79,8 +77,6 @@ svcs = %w{swift-object swift-object-auditor swift-object-replicator swift-object
 svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-updater}
 svcs = svcs + %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
 
-venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
-
 ## make sure to fetch ring files from the ring compute node
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
 compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
@@ -106,11 +102,6 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       raise message
     end
 
-    if node[:swift][:use_gitrepo]
-      swift_service x do
-        virtualenv venv_path
-      end
-    end
     x = "openstack-#{x}" if %w(redhat centos suse).include?(node.platform)
     service x do
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)

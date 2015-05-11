@@ -33,11 +33,6 @@ env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment
 #  - The partitions to be used on each node are in node[:swift][:devs]
 #  - only nodes which have the swift-storage role assigned are used.
 
-if node[:swift][:use_gitrepo]
-  venv_path = node[:swift][:use_virtualenv] ? "/opt/swift/.venv" : nil
-  venv_prefix = node[:swift][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
-end
-
 =begin
   http://swift.openstack.org/howto_installmultinode.html
 
@@ -114,7 +109,6 @@ swift_ringfile "account.builder" do
   replicas replicas
   min_part_hours min_move
   partitions parts
-  virtualenv venv_prefix
   action [:apply, :rebalance]
 end
 swift_ringfile "container.builder" do
@@ -122,7 +116,6 @@ swift_ringfile "container.builder" do
   replicas replicas
   min_part_hours min_move
   partitions parts
-  virtualenv venv_prefix
   action [:apply, :rebalance]
 end
 swift_ringfile "object.builder" do
@@ -130,7 +123,6 @@ swift_ringfile "object.builder" do
   replicas replicas
   min_part_hours min_move
   partitions parts
-  virtualenv venv_prefix
   action [:apply, :rebalance]
 end
 
