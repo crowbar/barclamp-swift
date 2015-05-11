@@ -169,7 +169,7 @@ class SwiftService < PacemakerServiceObject
   end
 
   def get_ready_proposals
-    Proposal.where(barclamp: @bc_name).all.select {|p| p.status == 'ready'}.compact
+    Proposal.where(barclamp: @bc_name).select {|p| p.status == 'ready'}.compact
   end
 
   def _get_or_create_db
@@ -305,7 +305,7 @@ class SwiftService < PacemakerServiceObject
 
   def validate_proposal_after_save proposal
     # first, check for conflict with ceph
-    Proposal.where(barclamp: "ceph").all.each {|p|
+    Proposal.where(barclamp: "ceph").each {|p|
       next unless (p.status == "ready") || (p.status == "pending")
       elements = (p.status == "ready") ? p.role.elements : p.elements
       if elements.keys.include?("ceph-radosgw") && !elements['ceph-radosgw'].empty?
