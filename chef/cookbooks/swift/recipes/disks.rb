@@ -61,7 +61,7 @@ to_use_disks.each do |d|
 
   # Test to see if there is a partition table on the disk.
   # If not, create a shiny new GPT partition table for the disk.
-  if ::Kernel.system("parted -s -m #{target_dev} print 1 |grep -q '^Error:'")
+  if ::Kernel.system("parted -s -m #{target_dev} print 1 2>&1 | grep -q '^Error:'")
     Chef::Log.info("Swift - Creating partition table on #{target_dev}")
     ::Kernel.system("parted -s #{target_dev} -- unit s mklabel gpt mkpart primary ext2 2048s -1M")
     ::Kernel.system("partprobe #{target_dev}")
