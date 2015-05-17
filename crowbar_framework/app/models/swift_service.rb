@@ -38,7 +38,6 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "12.0",
             "windows" => "/.*/"
           }
         },
@@ -46,7 +45,6 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "12.0",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -55,7 +53,6 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "12.0",
             "windows" => "/.*/"
           }
         },
@@ -63,7 +60,6 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "12.0",
             "windows" => "/.*/"
           }
         }
