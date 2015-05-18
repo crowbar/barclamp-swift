@@ -47,6 +47,7 @@ template "/etc/memcached.conf" do
   group "root"
   mode "0644"
   variables(
+    :daemonize => node[:memcached][:daemonize],
     :listen => node[:memcached][:listen],
     :user => node[:memcached][:user],
     :port => node[:memcached][:port],
