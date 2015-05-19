@@ -94,6 +94,7 @@ class SwiftService < PacemakerServiceObject
     end
 
     base["attributes"]["swift"]["service_password"] = random_password
+    base["attributes"]["swift"]["dispersion"]["service_password"] = random_password
 
     base["deployment"]["swift"]["elements"] = {
         "swift-proxy" => [  ],
