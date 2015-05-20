@@ -9,7 +9,7 @@
 # NOTE: If you want to use keystone (auth version 2.0), then its configuration
 # would look something like:
 # auth_url = http://localhost:5000/v2.0/
-auth_url = <%= @keystone_settings['admin_auth_url'] %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 # auth_user = tenant:user
 auth_user = <%= node["swift"]["dispersion"]["service_tenant"] %>:<%= node["swift"]["dispersion"]["service_user"] %>
 # auth_key = password
