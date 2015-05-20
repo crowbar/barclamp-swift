@@ -16,6 +16,15 @@
 # Author: andi abes
 #
 
+# This is referenced by rsyncd.conf and not part of the packages (since
+# /var/run is volatile)
+directory "/var/run/swift" do
+  owner node[:swift][:user]
+  group node[:swift][:group]
+  mode 0755
+  action :create
+end
+
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 template "/etc/rsyncd.conf" do
   source "rsyncd.conf.erb"
