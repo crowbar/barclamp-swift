@@ -719,7 +719,7 @@ use = egg:swift3#swift3
 # NOTE(chmou): s3token middleware is not updated yet to use only
 # username and password.
 [filter:s3token]
-paste.filter_factory = keystone.middleware.s3_token:filter_factory
+paste.filter_factory = keystonemiddleware.s3_token:filter_factory
 service_port = <%= @keystone_settings['service_port'] %>
 service_host = <%= @keystone_settings['internal_url_host'] %>
 auth_port = <%= @keystone_settings['admin_port'] %>
