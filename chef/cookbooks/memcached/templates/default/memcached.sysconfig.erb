@@ -10,7 +10,7 @@
 #
 # see man 1 memcached for more
 #
-MEMCACHED_PARAMS="-d -m <%= @memory %> -l <%= @listen %> -p <%= @port %>"
+MEMCACHED_PARAMS="<%= @daemonize ? "-d" : "" %> -m <%= @memory %> -l <%= @listen %> -p <%= @port %>"
 
 ## Path:        Network/WWW/Memcached
 ## Description: username memcached should run as
@@ -19,7 +19,6 @@ MEMCACHED_PARAMS="-d -m <%= @memory %> -l <%= @listen %> -p <%= @port %>"
 ## Config:      memcached
 #
 # username memcached should run as
-# 
 #
 MEMCACHED_USER="<%= @user %>"
 
