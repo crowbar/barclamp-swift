@@ -331,6 +331,7 @@ admin_password = <%= @keystone_settings['service_password'] %>
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
+auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 # delay_auth_decision = 1
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
 # cache = swift.cache
