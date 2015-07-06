@@ -1,5 +1,5 @@
 def upgrade ta, td, a, d
-  a['max_header_size'] = 16384
+  a['max_header_size'] = ta['max_header_size']
   return a, d
 end
 
