@@ -144,7 +144,7 @@
             "storage_ip_expr": { "type": "str", "required": true},
             "public_ip_expr": { "type": "str", "required": true},
             "disk_zone_assign_expr": { "type": "str", "required": false},
-            "max_header_size": { "type": "int", "required": true },
+            "max_header_size": { "type": "int", "required": true }
            }
         }
       }
