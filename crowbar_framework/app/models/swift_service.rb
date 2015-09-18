@@ -175,17 +175,13 @@ class SwiftService < PacemakerServiceObject
   def _get_or_create_db
     db = ProposalObject.find_data_bag_item "crowbar/swift"
     if db.nil?
-      begin
-        lock = acquire_lock @bc_name
-
+      with_lock @bc_name do
         db_item = Chef::DataBagItem.new
         db_item.data_bag "crowbar"
         db_item["id"] = "swift"
         db_item["dispersion_reports"] = []
         db = ProposalObject.new db_item
         db.save
-      ensure
-        release_lock lock
       end
     end
     db
@@ -244,9 +240,9 @@ class SwiftService < PacemakerServiceObject
       true
     end
 
-    lock = acquire_lock(@bc_name)
-    swift_db.save
-    release_lock(lock)
+    with_lock @bc_name do
+      swift_db.save
+    end
   end
 
   def run_report(node)
@@ -264,10 +260,10 @@ class SwiftService < PacemakerServiceObject
       raise ServiceError, I18n.t("barclamp.#{@bc_name}.run.duplicate") if dr['node'] == node and dr['status'] == 'running'
     end
 
-    lock = acquire_lock(@bc_name)
-    swift_db["dispersion_reports"] << report_run
-    swift_db.save
-    release_lock(lock)
+    with_lock @bc_name do
+      swift_db["dispersion_reports"] << report_run
+      swift_db.save
+    end
 
     nobj = NodeObject.find_node_by_name(node)
     swift_user = nobj[@bc_name]["user"]
@@ -281,9 +277,9 @@ class SwiftService < PacemakerServiceObject
       report_run["status"] = $?.exitstatus.equal?(0) ? "passed" : "failed"
       report_run["pid"] = nil
 
-      lock = acquire_lock(@bc_name)
-      swift_db.save
-      release_lock(lock)
+      with_lock @bc_name do
+        swift_db.save
+      end
 
       @logger.info("report run #{report_run['uuid']} complete, status '#{report_run['status']}'")
     end
@@ -291,9 +287,9 @@ class SwiftService < PacemakerServiceObject
 
     # saving the PID to prevent
     report_run['pid'] = pid
-    lock = acquire_lock(@bc_name)
-    swift_db.save
-    release_lock(lock)
+    with_lock @bc_name do
+      swift_db.save
+    end
     report_run
   end
 
