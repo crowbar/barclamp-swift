@@ -73,6 +73,7 @@ default[:swift][:reseller_prefix] = "AUTH_"
 default[:swift][:service_user] = "swift"
 default[:swift][:service_password] = "swift"
 default[:swift][:keystone_delay_auth_decision] = false
+default[:swift][:max_header_size] = 16384
 
 default[:swift][:install_slog_from_dev] = false
 
