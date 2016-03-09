@@ -44,6 +44,9 @@ end
 pacemaker_clone "cl-#{service_name}" do
   rsc service_name
   action [ :create, :start ]
+  meta ({
+    "interleave" => "true",
+  })
   # Do not even try to start the daemon if we don't have the ring yet
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exists?("/etc/swift/object.ring.gz") }
 end
